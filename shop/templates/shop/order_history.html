@@ -1,0 +1,70 @@
+{% extends "shop/base.html" %}
+
+{% block title %}Order History | LMG Luxury{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-20 min-h-screen">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl font-serif mb-2 text-center text-gray-800">Your Orders</h1>
+        <p class="text-center text-gray-400 text-[10px] uppercase tracking-[0.3em] mb-16">Transaction Archives</p>
+
+        {% if orders %}
+            <div class="space-y-6">
+                {% for order in orders %}
+                <div class="bg-white border border-gray-100 p-8 rounded-sm shadow-sm hover:shadow-md transition-shadow">
+                    <div class="flex flex-col md:flex-row justify-between mb-8 pb-6 border-b border-gray-50 gap-4">
+                        <div class="space-y-1">
+                            <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Order ID</p>
+                            <p class="text-lg font-serif">#LMG-{{ order.id }}</p>
+                        </div>
+                        <div class="space-y-1 md:text-center">
+                            <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Date</p>
+                            <p class="text-sm">{{ order.created|date:"d M Y" }}</p>
+                        </div>
+                        <div class="space-y-1 md:text-right">
+                            <p class="text-[10px] text-gray-400 uppercase tracking-widest font-bold">Status</p>
+                            {% if order.paid %}
+                                <span class="bg-green-50 text-green-600 text-[9px] font-bold px-3 py-1 uppercase tracking-tighter rounded-full">Paid</span>
+                            {% else %}
+                                <span class="bg-amber-50 text-amber-600 text-[9px] font-bold px-3 py-1 uppercase tracking-tighter rounded-full">Waiting Payment</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        {% for item in order.items.all %}
+                        <div class="flex justify-between items-center text-sm">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-16 bg-gray-50 flex-shrink-0">
+                                    {% if item.product.image %}
+                                        <img src="{{ item.product.image.url }}" class="w-full h-full object-cover">
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <p class="font-medium text-gray-800">{{ item.product.name }}</p>
+                                    <p class="text-[10px] text-gray-400">{{ item.quantity }} x IDR {{ item.price }}</p>
+                                </div>
+                            </div>
+                            <p class="font-bold text-gray-700 text-xs">IDR {{ item.get_cost }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mt-8 pt-6 border-t border-gray-50 flex justify-between items-center">
+                        <p class="text-[10px] uppercase tracking-widest font-bold text-gray-400">Total Investment</p>
+                        <p class="text-xl font-serif text-gold">IDR {{ order.get_total_cost }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-20">
+                <p class="text-gray-400 font-serif italic mb-8 text-lg">You haven't made any transactions yet.</p>
+                <a href="{% url 'shop:product_list' %}" class="btn-gold px-12 py-4 rounded-full text-[10px] uppercase tracking-widest inline-block transition-all shadow-lg">
+                    Start Exploring
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,192 @@
+{% extends "shop/base.html" %}
+{% load static %}
+
+{% block title %}
+    {% if current_category %}{{ current_category.name }}{% else %}Shop Collection{% endif %} | LMG Luxury
+{% endblock %}
+
+{% block content %}
+<style>
+    /* Gold Theme Core */
+    :root { --gold-primary: #C5A059; --luxury-black: #111827; }
+    .text-gold { color: var(--gold-primary) !important; }
+    .bg-gold { background-color: var(--gold-primary) !important; }
+    .btn-gold { background-color: var(--gold-primary); color: white; transition: all 0.3s; }
+    .btn-gold:hover { background-color: #b38f4d; transform: translateY(-2px); }
+    
+    /* Navigation System */
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .category-tab { 
+        position: relative; 
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); 
+        color: #9ca3af;
+    }
+    .category-tab.active { 
+        color: var(--luxury-black); 
+        font-weight: 700; 
+    }
+    .category-tab.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0; left: 0;
+        width: 100%; height: 2px;
+        background-color: var(--gold-primary);
+        animation: tabIn 0.3s ease-out;
+    }
+
+    @keyframes tabIn { from { width: 0; opacity: 0; } to { width: 100%; opacity: 1; } }
+
+    /* Luxury Effects */
+    .banner-gradient { background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.5)); }
+    .product-card-img { transition: transform 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+</style>
+
+<!-- Banner Section -->
+<section class="relative h-[45vh] md:h-[55vh] min-h-[350px] flex items-center justify-center overflow-hidden bg-gray-900">
+    <div class="absolute inset-0 z-0">
+        {% if current_category and current_category.image %}
+            <img src="{{ current_category.image.url }}" class="w-full h-full object-cover scale-105" alt="{{ current_category.name }}">
+        {% else %}
+            <img src="https://images.unsplash.com/photo-1606760227091-3dd870d97f1d?q=80&w=2000" class="w-full h-full object-cover" alt="LMG Collection">
+        {% endif %}
+        <div class="absolute inset-0 banner-gradient"></div>
+    </div>
+
+    <div class="relative z-10 text-center px-6 max-w-4xl">
+        <span class="text-gold font-bold tracking-[0.6em] text-[10px] md:text-[12px] uppercase mb-5 block drop-shadow-md">
+            LMG Exclusive
+        </span>
+        <h1 class="text-4xl md:text-7xl mb-6 leading-tight font-serif italic text-white drop-shadow-2xl">
+            {% if current_category %}{{ current_category.name }}{% else %}Our Collection{% endif %}
+        </h1>
+        <div class="w-20 h-[1px] bg-gold mx-auto opacity-70"></div>
+    </div>
+</section>
+
+<!-- Category Navigation -->
+<nav class="sticky top-0 z-40 bg-white/95 backdrop-blur-xl border-b border-gray-100 shadow-sm">
+    <div class="container mx-auto px-4">
+        <div class="flex items-center justify-center overflow-x-auto hide-scrollbar gap-8 md:gap-14">
+            <a href="{% url 'shop:product_list' %}" 
+               class="category-tab py-5 text-[11px] uppercase tracking-[0.25em] whitespace-nowrap {% if not current_category %}active{% endif %}">
+               Halaman Utama
+            </a>
+            {% for cat in categories %}
+            <a href="{% url 'shop:product_list_by_category' cat.slug %}" 
+               class="category-tab py-5 text-[11px] uppercase tracking-[0.25em] whitespace-nowrap {% if current_category.slug == cat.slug %}active{% endif %}">
+               {{ cat.name }}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</nav>
+
+<!-- Product Grid -->
+<main id="products" class="container mx-auto px-4 py-16">
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-6 gap-y-12">
+        {% for product in products %}
+        <article class="group" 
+            x-data="{ 
+                isLiked: {% if product.id in user_like_ids %}true{% else %}false{% endif %},
+                isWishlisted: {% if product.id in user_wishlist_ids %}true{% else %}false{% endif %},
+                
+                init() {
+                    setTimeout(() => { this.applyVisuals(); }, 50);
+                },
+
+                applyVisuals() {
+                    if (this.$refs.wishIcon) {
+                        this.$refs.wishIcon.style.fill = this.isWishlisted ? '#C5A059' : 'none';
+                        this.$refs.wishIcon.style.stroke = this.isWishlisted ? '#C5A059' : 'currentColor';
+                        if(this.isWishlisted) this.$refs.wishIcon.classList.replace('text-gray-400', 'text-[#C5A059]');
+                    }
+                    if (this.$refs.likeIcon) {
+                        this.$refs.likeIcon.style.fill = this.isLiked ? '#ef4444' : 'none';
+                        this.$refs.likeIcon.style.stroke = this.isLiked ? '#ef4444' : 'currentColor';
+                        if(this.isLiked) this.$refs.likeIcon.classList.replace('text-gray-400', 'text-red-500');
+                    }
+                },
+
+                toggleWishlist() {
+                    {% if not user.is_authenticated %} 
+                        // Langsung buka modal login milik Bos
+                        loginModal = true; 
+                        authTab = 'login';
+                        return; 
+                    {% endif %}
+
+                    this.isWishlisted = !this.isWishlisted;
+                    this.applyVisuals();
+                    fetch('/wishlist/toggle/' + {{ product.id }} + '/')
+                        .then(res => res.json())
+                        .then(data => { 
+                            this.isWishlisted = (data.status === 'added'); 
+                            this.applyVisuals();
+                        });
+                },
+
+                toggleLike() {
+                    {% if not user.is_authenticated %} 
+                        loginModal = true; 
+                        authTab = 'login';
+                        return; 
+                    {% endif %}
+
+                    this.isLiked = !this.isLiked;
+                    this.applyVisuals();
+                    
+                    // Ganti URL ini sesuai dengan path backend Like Bos
+                    fetch('/like/toggle/' + {{ product.id }} + '/')
+                        .then(res => res.json())
+                        .then(data => { 
+                            this.isLiked = (data.status === 'liked'); 
+                            this.applyVisuals();
+                        });
+                }
+            }">
+            
+            <div class="aspect-[4/5] bg-gray-50 relative overflow-hidden mb-5 rounded-sm shadow-sm">
+                <!-- Action Buttons -->
+                <div class="absolute top-4 right-4 z-20 flex flex-col gap-3 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-y-[-10px] group-hover:translate-y-0">
+                    <button @click.stop="toggleLike()" class="w-9 h-9 rounded-full bg-white shadow-lg flex items-center justify-center hover:scale-110 active:scale-125 transition-transform">
+                        <i x-ref="likeIcon" data-lucide="heart" class="w-4 h-4 text-gray-400 transition-all duration-500"></i>
+                    </button>
+
+                    <button @click.stop="toggleWishlist()" class="w-9 h-9 rounded-full bg-white shadow-lg flex items-center justify-center hover:scale-110 active:scale-125 transition-transform">
+                        <i x-ref="wishIcon" data-lucide="bookmark" class="w-4 h-4 text-gray-400 transition-all duration-500"></i>
+                    </button>
+                </div>
+
+                <a href="{{ product.get_absolute_url }}" class="block w-full h-full">
+                    {% if product.image %}
+                        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="w-full h-full object-cover product-card-img group-hover:scale-110">
+                    {% else %}
+                        <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                            <i data-lucide="image" class="w-10 h-10 text-gray-200"></i>
+                        </div>
+                    {% endif %}
+                </a>
+            </div>
+
+            <div class="text-center">
+                <span class="text-[9px] text-gold font-bold uppercase tracking-widest block mb-1">{{ product.category.name }}</span>
+                <h3 class="text-[12px] uppercase tracking-wider font-bold text-gray-900 mb-2 line-clamp-1">
+                    <a href="{{ product.get_absolute_url }}" class="hover:opacity-70 italic">{{ product.name }}</a>
+                </h3>
+                <p class="text-[13px] text-gray-900 font-medium">IDR {{ product.price }}</p>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+</main>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
+        }
+    });
+</script>
+{% endblock %}

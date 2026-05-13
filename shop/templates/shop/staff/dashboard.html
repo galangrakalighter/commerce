@@ -1,0 +1,101 @@
+{% extends "shop/base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-6 py-20" x-data="{ deleteModal: false, deleteUrl: '', productName: '' }">
+    
+    <div class="flex justify-between items-end mb-12">
+        <div>
+            <h1 class="text-4xl font-serif tracking-tight">Inventory</h1>
+            <p class="text-[10px] uppercase tracking-[0.3em] text-gray-400 font-medium">LMG Dermatology Collection</p>
+        </div>
+        <a href="{% url 'shop:product_create' %}" class="bg-[#1a1a1a] text-white px-10 py-4 text-[10px] font-bold uppercase tracking-widest hover:bg-gold transition-all duration-500 shadow-xl shadow-black/5">
+            + Curate New
+        </a>
+    </div>
+
+    <div class="bg-white border border-gray-100 overflow-hidden shadow-sm">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="border-b border-gray-50 text-[10px] uppercase tracking-[0.2em] text-gray-400 bg-[#fafafa]">
+                    <th class="p-8 font-bold">Product Essence</th>
+                    <th class="p-8 font-bold">Price</th>
+                    <th class="p-8 font-bold text-center">Stock</th>
+                    <th class="p-8 text-right font-bold">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="text-sm">
+                {% for p in products %}
+                <tr class="border-b border-gray-50 hover:bg-luxury/30 transition-all duration-300 group">
+                    <td class="p-8">
+                        <div class="flex items-center gap-6">
+                            <div class="w-16 h-16 overflow-hidden border border-gray-100 p-1 bg-white">
+                                <img src="{{ p.image.url }}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700">
+                            </div>
+                            <div>
+                                <p class="font-bold uppercase tracking-widest text-gray-800 text-[11px]">{{ p.name }}</p>
+                                <p class="text-[9px] text-gray-400 mt-1 uppercase">{{ p.category.name }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-8">
+                        <span class="text-gray-500 font-light">IDR {{ p.price }}</span>
+                    </td>
+                    <td class="p-8 text-center">
+                        <span class="{% if p.stock < 5 %}text-red-400 font-bold bg-red-50 px-3 py-1 rounded-full text-[10px]{% else %}text-gray-400{% endif %}">
+                            {{ p.stock }}
+                        </span>
+                    </td>
+                    <td class="p-8 text-right space-x-6">
+                        <a href="{% url 'shop:product_edit' p.id %}" class="text-gray-300 hover:text-gold uppercase text-[10px] font-bold tracking-widest transition-colors">Edit</a>
+                        
+                        <button @click="deleteModal = true; deleteUrl = '{% url 'shop:product_delete' p.id %}'; productName = '{{ p.name }}'" 
+                                class="text-red-200 hover:text-red-600 uppercase text-[10px] font-bold tracking-widest transition-colors">
+                            Delete
+                        </button>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="p-20 text-center text-gray-300 uppercase tracking-[0.3em] text-[10px]">No products in collection</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div x-show="deleteModal" 
+         x-cloak 
+         class="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#1a1a1a]/90 backdrop-blur-sm"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100">
+        
+        <div @click.away="deleteModal = false" 
+             class="bg-white max-w-md w-full p-12 text-center relative overflow-hidden shadow-2xl">
+            <div class="absolute top-0 left-0 w-full h-1 bg-red-500"></div>
+            
+            <i data-lucide="alert-triangle" class="w-12 h-12 text-red-100 mx-auto mb-6"></i>
+            
+            <h2 class="text-2xl font-serif mb-2 uppercase tracking-tight">Remove Essence?</h2>
+            <p class="text-gray-400 text-xs mb-10 leading-relaxed uppercase tracking-widest">
+                Are you sure you want to delete <br>
+                <span class="text-black font-bold" x-text="productName"></span>? <br>
+                This action is irreversible.
+            </p>
+
+            <div class="flex flex-col gap-3">
+                <form :action="deleteUrl" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="w-full bg-red-500 text-white py-4 text-[10px] font-bold uppercase tracking-[0.3em] hover:bg-red-600 transition-all">
+                        Confirm Delete
+                    </button>
+                </form>
+                
+                <button @click="deleteModal = false" class="w-full bg-white border border-gray-100 py-4 text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 hover:text-black transition-all">
+                    Keep Product
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
