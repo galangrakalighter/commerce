@@ -1,0 +1,119 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8">
+    
+    <div class="mb-6 flex items-center gap-2 text-xs text-stone-400">
+        <a href="{% url 'home' %}" class="hover:text-[#8C7454] transition-colors">Dashboard Utama</a>
+        <span>&rarr;</span>
+        <span class="text-stone-600 font-medium">Manajemen Staff</span>
+    </div>
+
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#EAE3D2] pb-6 mb-8">
+        <div>
+            <h1 class="text-2xl font-normal serif-font text-[#2C2A29] tracking-wide">Otorisasi Anggota Staff</h1>
+            <p class="text-xs text-stone-500 mt-1">Total staf operasional aktif: <span class="font-semibold text-stone-700">{{ daftar_staff|length }} orang</span></p>
+        </div>
+        <div>
+            <button onclick="openStaffModal()" class="bg-[#2C2A29] text-white px-5 py-2.5 rounded-full text-xs font-medium hover:bg-stone-800 transition-colors shadow-sm cursor-pointer flex items-center gap-1.5">
+                👤 Daftarkan Staff Baru
+            </button>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="mb-6 p-4 text-xs rounded-xl {% if message.tags == 'error' %}bg-red-50 text-red-700 border border-red-100{% else %}bg-green-50 text-green-700 border border-green-200{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="bg-white rounded-3xl border border-[#EAE3D2] overflow-hidden shadow-sm max-w-4xl mx-auto">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm">
+                <thead>
+                    <tr class="bg-[#FAF8F5] text-stone-500 border-b border-[#EAE3D2] uppercase text-[10px] tracking-wider font-mono">
+                        <th class="p-4 font-semibold">Username Akun</th>
+                        <th class="p-4 font-semibold">Alamat Email</th>
+                        <th class="p-4 font-semibold">Tanggal Bergabung</th>
+                        <th class="p-4 font-semibold text-center">Tindakan</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-[#FAF8F5]">
+                    {% for staff in daftar_staff %}
+                    <tr class="hover:bg-stone-50/40 transition-colors">
+                        <td class="p-4 flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-full bg-stone-100 text-stone-600 flex items-center justify-center font-bold text-xs">
+                                {{ staff.username|slice:":1"|upper }}
+                            </div>
+                            <span class="font-medium text-[#2C2A29]">{{ staff.username }}</span>
+                            {% if staff.is_superuser %}
+                                <span class="bg-blue-50 text-blue-700 text-[9px] px-1.5 py-0.5 rounded border border-blue-200 font-bold uppercase">Owner</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4 text-stone-500 text-xs">{{ staff.email|default:"- (Tidak ada)" }}</td>
+                        <td class="p-4 text-stone-400 text-xs">{{ staff.date_joined|date:"d M Y, H:i" }}</td>
+                        <td class="p-4 text-center">
+                            {% if staff.is_superuser %}
+                                <span class="text-stone-300 text-xs italic">Akses Permanen</span>
+                            {% else %}
+                                <a href="{% url 'pecat_staff' staff.id %}" onclick="return confirm('Apakah Anda yakin ingin menghapus staff &quot;{{ staff.username }}&quot;?')" class="text-red-600 hover:text-red-800 font-medium text-xs hover:underline bg-red-50/50 hover:bg-red-50 px-3 py-1.5 rounded-full transition-all">
+                                    Cabut Akses
+                                </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="p-16 text-center text-stone-400 italic">
+                            Belum ada anggota staff yang terdaftar.<br>
+                            <span class="text-[11px] not-italic text-stone-400 block mt-1">Gunakan tombol di kanan atas untuk memberikan otorisasi hak akses staff baru.</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="staffModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-8 border border-[#EAE3D2] shadow-2xl relative">
+        <button onclick="closeStaffModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-700 text-xl cursor-pointer">&times;</button>
+        <div class="mb-6">
+            <h2 class="serif-font text-2xl text-[#2C2A29] tracking-wide">Pendaftaran Staff</h2>
+            <p class="text-xs text-stone-500 mt-1">Buat kredensial login baru untuk tim manajemen toko</p>
+        </div>
+        
+        <form action="{% url 'tambah_staff' %}" method="POST" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-xs font-medium text-stone-700 mb-1">Username Unik</label>
+                <input type="text" name="username" required placeholder="Contoh: staff_laura01" class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-stone-800 rounded-xl py-2 px-4 text-sm outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-stone-700 mb-1">Alamat Email Kerja</label>
+                <input type="email" name="email" required placeholder="Contoh: admin@lauraderma.com" class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-stone-800 rounded-xl py-2 px-4 text-sm outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-stone-700 mb-1">Kata Sandi Definisikan</label>
+                <input type="password" name="password" required placeholder="••••••••" class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-stone-800 rounded-xl py-2 px-4 text-sm outline-none">
+            </div>
+
+            <button type="submit" class="w-full bg-[#2C2A29] text-white py-2.5 rounded-full text-sm font-medium hover:bg-stone-800 transition-colors shadow-md mt-2 cursor-pointer">
+                Otorisasikan Akun Staff
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openStaffModal() { document.getElementById('staffModal').classList.remove('hidden'); }
+    function closeStaffModal() { document.getElementById('staffModal').classList.add('hidden'); }
+    window.onclick = function(event) {
+        let modal = document.getElementById('staffModal');
+        if (event.target == modal) { closeStaffModal(); }
+    }
+</script>
+{% endblock %}

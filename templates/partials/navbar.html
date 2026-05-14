@@ -1,0 +1,150 @@
+<nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-[#EAE3D2] shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-6">
+        <a href="{% url 'home' %}" class="text-2xl font-semibold tracking-widest serif-font text-[#8C7454] block">
+            LAURA<span class="text-xs block tracking-normal text-center text-[#A69076]">DERMA</span>
+        </a>
+
+        <div class="flex-1 max-w-2xl relative">
+            <input type="text" placeholder="Cari perawatan atau produk skincare di sini..." class="w-full bg-[#F4F1EA] border border-transparent focus:border-[#8C7454] focus:bg-white rounded-full py-2 px-5 text-sm outline-none transition-all">
+            <button class="absolute right-4 top-2.5 text-[#8C7454]">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.603 10.603Z" /></svg>
+            </button>
+        </div>
+
+        <div class="flex items-center gap-6 text-[#2C2A29]">
+            {% if not user.is_staff %}
+            <a href="#" class="relative hover:text-[#8C7454] transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg>
+                <span class="absolute -top-1 -right-2 bg-[#8C7454] text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">3</span>
+            </a>
+            <div class="h-5 w-px bg-[#EAE3D2]"></div>
+            {% endif %}
+
+            {% if user.is_authenticated %}
+                <div class="flex items-center gap-4 text-sm">
+                    
+                    {% if user.is_superuser %}
+                        <a href="{% url 'kelola_staff' %}" class="bg-blue-600 text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-blue-700 transition-colors flex items-center gap-1 shadow-sm">
+                            👤 Kelola Tim Staff
+                        </a>
+                    
+                        <a href="{% url 'kelola_produk' %}" class="bg-amber-700 text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-amber-800 transition-colors flex items-center gap-1 shadow-sm">
+                            💼 Kelola Produk
+                        </a>
+                    {% elif user.is_staff %}
+                        <a href="{% url 'kelola_produk' %}" class="bg-amber-700 text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-amber-800 transition-colors flex items-center gap-1 shadow-sm">
+                            💼 Kelola Produk
+                        </a>
+                    {% endif %}
+
+                    <div class="text-sm font-medium text-[#2C2A29] ml-2">
+                        Halo, <span class="font-semibold text-[#8C7454]">{{ user.username }}</span>
+                        {% if user.is_superuser %}
+                            <span class="ml-1 text-[10px] bg-red-100 text-red-700 border border-red-300 px-2 py-0.5 rounded-full font-bold">SUPERADMIN</span>
+                        {% elif user.is_staff %}
+                            <span class="ml-1 text-[10px] bg-amber-100 text-amber-700 border border-amber-300 px-2 py-0.5 rounded-full font-bold">STAFF</span>
+                        {% else %}
+                            <span class="ml-1 text-[10px] bg-stone-100 text-stone-600 border border-stone-300 px-2 py-0.5 rounded-full font-bold">MEMBER</span>
+                        {% endif %}
+                    </div>
+
+                    <div class="h-4 w-px bg-[#EAE3D2]"></div>
+                    <a href="{% url 'logout' %}" class="text-sm text-red-600 hover:underline">Keluar</a>
+                </div>
+
+            {% else %}
+                <button onclick="openLoginModal()" class="text-sm font-medium hover:text-[#8C7454] transition-colors cursor-pointer">Masuk</button>
+                <button onclick="openRegisterModal()" class="text-sm bg-[#8C7454] text-white px-5 py-2 rounded-full hover:bg-[#735F43] transition-colors shadow-sm cursor-pointer">Daftar</button>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<div id="loginModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-8 border border-[#EAE3D2] shadow-2xl relative">
+        <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-700 text-xl cursor-pointer">&times;</button>
+        <div class="text-center mb-6">
+            <h2 class="serif-font text-2xl text-[#8C7454] tracking-wide">Selamat Datang Kembali</h2>
+            <p class="text-xs text-stone-500 mt-1">Silakan masuk menggunakan akun LauraDerma Anda</p>
+        </div>
+        <form action="{% url 'login' %}" method="POST" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-xs font-medium text-stone-700 mb-1">Username</label>
+                <input type="text" name="username" required class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-stone-700 mb-1">Password</label>
+                <input type="password" name="password" required class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none">
+            </div>
+            <button type="submit" class="w-full bg-[#8C7454] text-white py-2.5 rounded-full text-sm font-medium hover:bg-[#735F43] transition-colors shadow-md mt-2 cursor-pointer">
+                Masuk Ke Akun
+            </button>
+        </form>
+        <div class="text-center mt-6 text-xs text-stone-500">
+            Belum punya akun? <button onclick="switchToRegister()" class="text-[#8C7454] font-semibold hover:underline cursor-pointer">Daftar Sekarang</button>
+        </div>
+    </div>
+</div>
+
+<div id="registerModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-8 border border-[#EAE3D2] shadow-2xl relative">
+        <button onclick="closeRegisterModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-700 text-xl cursor-pointer">&times;</button>
+        <div class="text-center mb-6">
+            <h2 class="serif-font text-2xl text-[#8C7454] tracking-wide">Bergabung Bersama Kami</h2>
+            <p class="text-xs text-stone-500 mt-1">Buat akun untuk menikmati pengalaman belanja produk premium</p>
+        </div>
+        <form action="{% url 'register' %}" method="POST" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-xs font-medium text-stone-700 mb-1">Username</label>
+                <input type="text" name="username" required class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-stone-700 mb-1">Email</label>
+                <input type="email" name="email" required class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-stone-700 mb-1">Password</label>
+                <input type="password" name="password" required class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none">
+            </div>
+            <div>
+                <label class="block text-xs font-medium text-stone-700 mb-1">Konfirmasi Password</label>
+                <input type="password" name="konfirmasi_password" required class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none">
+            </div>
+            <button type="submit" class="w-full bg-[#8C7454] text-white py-2.5 rounded-full text-sm font-medium hover:bg-[#735F43] transition-colors shadow-md mt-2 cursor-pointer">
+                Daftar Akun Baru
+            </button>
+        </form>
+        <div class="text-center mt-6 text-xs text-stone-500">
+            Sudah punya akun? <button onclick="switchToLogin()" class="text-[#8C7454] font-semibold hover:underline cursor-pointer">Masuk di sini</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openLoginModal() { closeRegisterModal(); document.getElementById('loginModal').classList.remove('hidden'); }
+    function closeLoginModal() { document.getElementById('loginModal').classList.add('hidden'); }
+
+    function openRegisterModal() { closeLoginModal(); document.getElementById('registerModal').classList.remove('hidden'); }
+    function closeRegisterModal() { document.getElementById('registerModal').classList.add('hidden'); }
+
+    function switchToRegister() { openRegisterModal(); }
+    function switchToLogin() { openLoginModal(); }
+
+    // Fungsi buka-tutup modal Staff khusus Superuser
+    function closeStaffModal() {
+        const modal = document.getElementById('staffModal');
+        if(modal) modal.classList.add('hidden');
+    }
+
+    // Penutup klik area luar hitam
+    window.onclick = function(event) {
+        let loginModal = document.getElementById('loginModal');
+        let registerModal = document.getElementById('registerModal');
+        let staffModal = document.getElementById('staffModal');
+        if (event.target == loginModal) { closeLoginModal(); }
+        if (event.target == registerModal) { closeRegisterModal(); }
+        if (event.target == staffModal) { closeStaffModal(); }
+    }
+</script>

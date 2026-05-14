@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+
+{% block title %}LauraDerma - Toko Skincare & Estetika Premium{% endblock %}
+
+{% block content %}
+    <header class="max-w-7xl mx-auto px-4 mt-6">
+        <div class="relative bg-gradient-to-r from-[#EAE3D2] to-[#F4F1EA] rounded-3xl h-[320px] md:h-[400px] overflow-hidden flex items-center shadow-sm">
+            <div class="p-8 md:p-16 max-w-xl z-10">
+                <span class="text-xs uppercase tracking-widest text-[#8C7454] font-semibold">Eksklusif Rilisan Baru</span>
+                <h1 class="text-4xl md:text-5xl font-normal serif-font mt-2 mb-4 leading-tight">Sains di Balik Kulit yang Bercahaya.</h1>
+                <p class="text-sm text-stone-600 mb-6">Dapatkan penawaran terbatas untuk bundle skincare premium yang dirancang khusus oleh dermatolog profesional.</p>
+                <a href="#" class="inline-block bg-[#2C2A29] text-white text-sm px-6 py-3 rounded-full hover:bg-[#8C7454] transition-all transform hover:-translate-y-0.5">Jelajahi Sekarang</a>
+            </div>
+            <div class="absolute right-0 bottom-0 top-0 w-1/2 bg-[#D1C7BD] hidden md:flex items-center justify-center text-white italic serif-font text-xl opacity-80">
+                [ Tempat Foto Produk Minimalis ]
+            </div>
+        </div>
+    </header>
+
+    <section class="max-w-7xl mx-auto px-4 mt-12">
+        <h2 class="text-xl font-normal serif-font mb-6 text-[#8C7454] tracking-wide">Belanja Berdasarkan Kategori</h2>
+        <div class="grid grid-cols-3 md:grid-cols-7 gap-4"> <div onclick="filterProduk('semua', this)" class="category-btn bg-[#8C7454] text-white p-4 rounded-2xl border border-[#8C7454] text-center hover:shadow-sm transition-all cursor-pointer group">
+                <div class="w-12 h-12 bg-white/20 rounded-full mx-auto mb-3 flex items-center justify-center">
+                    ✨
+                </div>
+                <p class="text-xs font-medium">Semua Produk</p>
+            </div>
+
+            {% for kategori in daftar_kategori %}
+            <div onclick="filterProduk('{{ kategori.slug }}', this)" class="category-btn bg-white p-4 rounded-2xl border border-[#EAE3D2] text-center hover:border-[#8C7454] transition-all cursor-pointer group">
+                <div class="w-12 h-12 bg-[#FAF8F5] rounded-full mx-auto mb-3 flex items-center justify-center text-[#8C7454] group-hover:bg-[#8C7454] group-hover:text-white transition-colors item-icon">
+                    ✨
+                </div>
+                <p class="text-xs font-medium category-name">{{ kategori.nama }}</p>
+            </div>
+            {% empty %}
+            <p class="text-xs text-stone-400 col-span-full italic">Belum ada kategori produk yang tersedia.</p>
+            {% endfor %}
+
+        </div>
+    </section>
+
+    <section class="max-w-7xl mx-auto px-4 mt-12 mb-10">
+        <div class="flex items-center gap-4 mb-6">
+            <h2 class="text-xl font-normal serif-font text-[#8C7454] tracking-wide">Penawaran Spesial Bulan Ini</h2>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            
+            {% for produk in produk_spesial %}
+            <div class="bg-white product-card-flash rounded-2xl overflow-hidden border border-[#EAE3D2] hover:shadow-md transition-shadow group cursor-pointer flex flex-col justify-between" data-category="{{ produk.kategori.slug }}">
+                <div>
+                    <div class="h-48 bg-[#F4F1EA] flex items-center justify-center relative overflow-hidden">
+                        {% if produk.gambar %}
+                            <img src="{{ produk.gambar.url }}" alt="{{ produk.nama }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        {% else %}
+                            <span class="text-stone-400 italic text-xs font-medium text-center">[ {{ produk.nama }} ]</span>
+                        {% endif %}
+                        
+                        <span class="absolute top-3 left-3 bg-amber-500 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded shadow-sm animate-pulse">
+                            ⚡ Flash Sale
+                        </span>
+                    </div>
+                    
+                    <div class="p-4">
+                        <span class="text-[10px] text-stone-400 uppercase tracking-wider block">
+                            {% if produk.kategori %}
+                                {{ produk.kategori.nama }}
+                            {% else %}
+                                Tanpa Kategori
+                            {% endif %}
+                        </span>
+                        
+                        <h3 class="text-sm font-medium mt-1 text-[#2C2A29] truncate group-hover:text-[#8C7454] transition-colors" title="{{ produk.nama }}">
+                            {{ produk.nama }}
+                        </h3>
+                    </div>
+                </div>
+
+                <div class="p-4 pt-0">
+                    <div class="flex items-center justify-between gap-2 pt-2 border-t border-stone-100">
+                        <span class="text-sm font-semibold text-[#2C2A29]">Rp {{ produk.harga }}</span>
+                        <span class="text-[10px] bg-stone-100 text-stone-600 px-2 py-0.5 rounded font-mono">Stok: {{ produk.stok }}</span>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-12 bg-[#FAF8F5] rounded-2xl border border-dashed border-[#EAE3D2]">
+                <p class="text-sm text-stone-400 italic">Nantikan penawaran spesial flash sale kosmetik LauraDerma berikutnya!</p>
+            </div>
+            {% endfor %}
+            <div id="empty-flash-message" class="hidden col-span-full text-center py-12 bg-[#FAF8F5] rounded-2xl border border-dashed border-[#EAE3D2]">
+                <p class="text-sm text-stone-400 italic">Tidak ada produk Flash Sale untuk kategori ini.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="max-w-7xl mx-auto px-4 mt-12 mb-20">
+        <div class="border-b border-[#EAE3D2] pb-4 mb-6">
+            <h2 class="text-xl font-normal serif-font text-[#2C2A29] tracking-wide">Koleksi Perawatan Reguler</h2>
+            <p class="text-xs text-stone-500 mt-1">Rangkaian produk esensial harian untuk menjaga kesehatan kulit Anda</p>
+        </div>
+        
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+            
+            {% for produk in produk_biasa %}
+            <div class="bg-white product-card-reguler rounded-2xl overflow-hidden border border-[#EAE3D2] hover:shadow-md transition-shadow group cursor-pointer flex flex-col justify-between" data-category="{{ produk.kategori.slug }}">
+                <div>
+                    <div class="h-48 bg-[#F4F1EA] flex items-center justify-center relative p-4">
+                        <span class="text-stone-400 italic text-xs font-medium text-center">[ {{ produk.nama }} ]</span>
+                    </div>
+                    
+                    <div class="p-4">
+                        <span class="text-[10px] text-stone-400 uppercase tracking-wider block">{{ produk.kategori.nama }}</span>
+                        <h3 class="text-sm font-medium mt-1 text-[#2C2A29] truncate group-hover:text-[#8C7454] transition-colors" title="{{ produk.nama }}">
+                            {{ produk.nama }}
+                        </h3>
+                    </div>
+                </div>
+
+                <div class="p-4 pt-0">
+                    <div class="flex items-center justify-between gap-2 pt-2 border-t border-stone-100">
+                        <span class="text-sm font-semibold text-[#2C2A29]">Rp {{ produk.harga }}</span>
+                        <span class="text-[10px] bg-stone-100 text-stone-600 px-2 py-0.5 rounded font-mono">Stok: {{ produk.stok }}</span>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full text-center py-12 bg-white rounded-2xl border border-[#EAE3D2]">
+                <p class="text-sm text-stone-400 italic">Belum ada koleksi produk reguler saat ini.</p>
+            </div>
+            {% endfor %}
+            <div id="empty-reguler-message" class="hidden col-span-full text-center py-12 bg-white rounded-2xl border border-[#EAE3D2]">
+                <p class="text-sm text-stone-400 italic">Tidak ada produk reguler untuk kategori ini.</p>
+            </div>
+        </div>
+    </section>
+    <script>
+        function filterProduk(slugKategori, elemenDiklik) {
+            // 1. ATUR EMAS/WARNA TOMBOL KATEGORI YANG AKTIF
+            const semuaTombol = document.querySelectorAll('.category-btn');
+            semuaTombol.forEach(tombol => {
+                // Kembalikan semua tombol ke gaya putih semula
+                tombol.classList.remove('bg-[#8C7454]', 'text-white', 'border-[#8C7454]');
+                tombol.classList.add('bg-white', 'border-[#EAE3D2]');
+                
+                const ikon = tombol.querySelector('.item-icon');
+                if(ikon) {
+                    ikon.classList.add('bg-[#FAF8F5]', 'text-[#8C7454]');
+                    ikon.classList.remove('bg-white/20', 'text-white');
+                }
+            });
+
+            // Berikan gaya aktif (cokelat) ke kategori yang sedang diklik
+            elemenDiklik.classList.remove('bg-white', 'border-[#EAE3D2]');
+            elemenDiklik.classList.add('bg-[#8C7454]', 'text-white', 'border-[#8C7454]');
+            const ikonAktif = elemenDiklik.querySelector('.item-icon');
+            if(ikonAktif) {
+                ikonAktif.classList.remove('bg-[#FAF8F5]', 'text-[#8C7454]');
+                ikonAktif.classList.add('bg-white/20', 'text-white');
+            }
+
+            // 2. PROSES PENYARINGAN KARTU PRODUK
+            const produkFlash = document.querySelectorAll('.product-card-flash');
+            const produkReguler = document.querySelectorAll('.product-card-reguler');
+
+            let countFlashTampil = 0;
+            let countRegulerTampil = 0;
+
+            // Filter untuk Produk Flash Sale
+            produkFlash.forEach(card => {
+                if (slugKategori === 'semua' || card.getAttribute('data-category') === slugKategori) {
+                    card.style.display = 'flex'; // Munculkan
+                    countFlashTampil++;
+                } else {
+                    card.style.display = 'none'; // Sembunyikan
+                }
+            });
+
+            // Filter untuk Produk Reguler
+            produkReguler.forEach(card => {
+                if (slugKategori === 'semua' || card.getAttribute('data-category') === slugKategori) {
+                    card.style.display = 'flex'; // Munculkan
+                    countRegulerTampil++;
+                } else {
+                    card.style.display = 'none'; // Sembunyikan
+                }
+            });
+
+            const msgFlash = document.getElementById('empty-flash-message');
+            const msgReguler = document.getElementById('empty-reguler-message');
+
+            // Cek section flash sale (hanya jalankan jika database memiliki produk flash sale)
+            if (msgFlash) {
+                if (countFlashTampil === 0) {
+                    msgFlash.classList.remove('hidden');
+                } else {
+                    msgFlash.classList.add('hidden');
+                }
+            }
+
+            // Cek section reguler (hanya jalankan jika database memiliki produk reguler)
+            if (msgReguler) {
+                if (countRegulerTampil === 0) {
+                    msgReguler.classList.remove('hidden');
+                } else {
+                    msgReguler.classList.add('hidden');
+                }
+            }
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-16">
+    
+    <div class="text-center max-w-2xl mx-auto mb-16">
+        <span class="text-[10px] bg-[#8C7454]/10 text-[#8C7454] font-bold px-3 py-1 rounded-full uppercase tracking-wider font-mono">Pusat Kendali</span>
+        <h1 class="text-3xl md:text-4xl font-normal serif-font text-[#2C2A29] tracking-wide mt-3">Dashboard Manajemen Toko</h1>
+        <p class="text-xs md:text-sm text-stone-500 mt-2 leading-relaxed">Selamat datang di ruang internal LauraDerma. Silakan pilih bagian data yang ingin Anda kelola di bawah ini.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+        
+        <a href="{% url 'kelola_kategori' %}" class="bg-white rounded-3xl border border-[#EAE3D2] p-10 text-center hover:border-[#8C7454] hover:shadow-md transition-all group flex flex-col items-center justify-center min-h-[300px]">
+            <div class="w-16 h-16 bg-[#FAF8F5] rounded-2xl flex items-center justify-center text-3xl mb-6 border border-[#EAE3D2]/50 group-hover:bg-[#8C7454] group-hover:text-white transition-colors">
+                🏷️
+            </div>
+            <h2 class="serif-font text-2xl text-[#2C2A29] tracking-wide mb-2 group-hover:text-[#8C7454] transition-colors">Kelola Kategori</h2>
+            <p class="text-xs text-stone-400 max-w-xs leading-relaxed mb-4">
+                Tambah, perbarui, atau hapus struktur rumpun kategori kosmetik dan skincare.
+            </p>
+            <span class="text-xs font-semibold text-[#8C7454] flex items-center gap-1 mt-2">
+                Buka Pengaturan &rarr;
+            </span>
+        </a>
+
+        <a href="{% url 'daftar_produk_internal' %}" class="bg-white rounded-3xl border border-[#EAE3D2] p-10 text-center hover:border-[#8C7454] hover:shadow-md transition-all group flex flex-col items-center justify-center min-h-[300px]">
+            <div class="w-16 h-16 bg-[#FAF8F5] rounded-2xl flex items-center justify-center text-3xl mb-6 border border-[#EAE3D2]/50 group-hover:bg-[#8C7454] group-hover:text-white transition-colors">
+                📦
+            </div>
+            <h2 class="serif-font text-2xl text-[#2C2A29] tracking-wide mb-2 group-hover:text-[#8C7454] transition-colors">Kelola Produk</h2>
+            <p class="text-xs text-stone-400 max-w-xs leading-relaxed mb-4">
+                Pasok produk baru, atur variasi harga, edit jumlah stok harian, dan setel produk Flash Sale.
+            </p>
+            <span class="text-xs font-semibold text-[#8C7454] flex items-center gap-1 mt-2">
+                Buka Pengaturan &rarr;
+            </span>
+        </a>
+
+    </div>
+</div>
+{% endblock %}
