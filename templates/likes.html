@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<section class="py-12 bg-[#FAF8F5] min-h-screen">
+    <div class="container mx-auto px-4">
+        <div class="text-center mb-12">
+            <h1 class="text-3xl font-serif text-stone-800 mb-2">Produk Favorit</h1>
+            <p class="text-stone-500 text-sm">Daftar produk yang Anda sukai.</p>
+        </div>
+
+        <div id="likes-content-wrapper">
+            {% if like_items %}
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="likes-grid">
+                    {% for item in like_items %}
+                    <div class="product-card group bg-white rounded-2xl overflow-hidden shadow-sm border border-stone-100 transition-all duration-300 hover:shadow-md" 
+                         data-product-id="{{ item.produk.id }}">
+                        
+                        <div class="h-56 bg-[#F4F1EA] relative overflow-hidden">
+                            {% if item.produk.gambar %}
+                                <img src="{{ item.produk.gambar.url }}" alt="{{ item.produk.nama }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            {% endif %}
+                            
+                            <div class="absolute top-3 right-3 z-20">
+                                <button onclick="toggleLike(this, '{{ item.produk.id }}')" 
+                                        class="like-btn p-2 bg-white/90 backdrop-blur-sm rounded-full active shadow-sm">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="p-4">
+                            <span class="text-[10px] uppercase tracking-widest text-stone-400 font-semibold">{{ item.produk.kategori.nama }}</span>
+                            <h3 class="text-sm font-medium text-stone-800 mt-1 mb-2">{{ item.produk.nama }}</h3>
+                            <p class="text-[#8C7454] font-bold text-sm">Rp {{ item.produk.harga }}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-20">
+                    <p class="text-stone-500 mb-6">Belum ada produk favorit.</p>
+                    <a href="{% url 'home' %}" class="bg-[#2C2A29] text-white px-8 py-3 rounded-full text-sm hover:bg-red-500 transition-colors">
+                        Cari Produk
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

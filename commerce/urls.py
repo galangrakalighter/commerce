@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from toko.views import halaman_utama, dashboard_utama_view, kelola_kategori_view, daftar_produk_internal_view, tambah_produk_proses, hapus_produk_proses, tambah_kategori_proses, hapus_kategori_proses
+from toko.views import halaman_utama, dashboard_utama_view, kelola_kategori_view, daftar_produk_internal_view, tambah_produk_proses, hapus_produk_proses, tambah_kategori_proses, hapus_kategori_proses, toggle_like_view, toggle_wishlist_view, halaman_wishlist, halaman_like, detail_produk, kirim_review
 from akun.views import register_view, login_view, logout_view, kelola_staff_view, tambah_staff_proses, pecat_staff_proses
 
 urlpatterns = [
@@ -37,6 +37,12 @@ urlpatterns = [
     path('dashboard/staff/', kelola_staff_view, name='kelola_staff'),
     path('dashboard/staff/tambah/', tambah_staff_proses, name='tambah_staff'),
     path('dashboard/staff/pecat/<int:staff_id>/', pecat_staff_proses, name='pecat_staff'),
+    path('produk/like/<int:produk_id>/', toggle_like_view, name='toggle_like'),
+    path('produk/wishlist/<int:produk_id>/', toggle_wishlist_view, name='toggle_wishlist'),
+    path('wishlist/', halaman_wishlist, name='halaman_wishlist'),
+    path('favorit/', halaman_like, name='halaman_like'),
+    path('produk/<int:id>/', detail_produk, name='detail_produk'),
+    path('produk/<int:produk_id>/review/', kirim_review, name='kirim_review'),
 ]
 
 if settings.DEBUG:

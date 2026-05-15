@@ -13,9 +13,23 @@
 
         <div class="flex items-center gap-6 text-[#2C2A29]">
             {% if not user.is_staff %}
-            <a href="#" class="relative hover:text-[#8C7454] transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" /></svg>
-                <span class="absolute -top-1 -right-2 bg-[#8C7454] text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center">3</span>
+            <a href="{% url 'halaman_like' %}" class="text-stone-600 hover:text-red-500 transition-colors relative p-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+            </a>
+
+            <!-- Ikon Wishlist (Dengan Badge Hitungan) -->
+            <a href="{% url 'halaman_wishlist' %}" class="text-stone-600 hover:text-[#8C7454] transition-colors relative p-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                </svg>
+                
+                <!-- Badge Angka Wishlist -->
+                <span id="wishlist-badge" 
+                    class="{% if wish_count == 0 %}hidden{% endif %} absolute -top-1 -right-1 bg-[#8C7454] text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-white">
+                    {{ wish_count }}
+                </span>
             </a>
             <div class="h-5 w-px bg-[#EAE3D2]"></div>
             {% endif %}

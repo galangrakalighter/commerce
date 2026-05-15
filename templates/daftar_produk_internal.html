@@ -110,75 +110,87 @@
 </div>
 
 <div id="produkModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-lg w-full p-8 border border-[#EAE3D2] shadow-2xl relative">
-        <button onclick="closeProdukModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-700 text-xl cursor-pointer">&times;</button>
+    <div class="bg-white rounded-3xl max-w-lg w-full p-8 border border-[#EAE3D2] shadow-2xl relative max-h-[90vh] overflow-y-auto scrollbar-hide">
+        <button onclick="closeProdukModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-700 text-xl cursor-pointer p-2">&times;</button>
+        
         <div class="mb-6">
             <h2 class="serif-font text-2xl text-[#8C7454] tracking-wide">Form Pasok Produk Baru</h2>
-            <p class="text-xs text-stone-500 mt-1">Isi rincian data spesifikasi produk kecantikan baru ke dalam sistem</p>
+            <p class="text-xs text-stone-500 mt-1">Isi rincian data spesifikasi produk kecantikan LauraDerma</p>
         </div>
         
         <form action="{% url 'tambah_produk' %}" method="POST" enctype="multipart/form-data" class="space-y-4">
             {% csrf_token %}
+            
             <div>
                 <label class="block text-xs font-medium text-stone-700 mb-1">Nama Resmi Produk</label>
-                <input type="text" name="nama" required placeholder="Contoh: Brightening Essence Night Cream 50g" class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none">
+                <input type="text" name="nama" required placeholder="Contoh: Brightening Essence Night Cream 50g" class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none transition-all">
             </div>
             
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-medium text-stone-700 mb-1">Rumpun Kategori</label>
-                    <select name="kategori" required class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-3 text-sm outline-none">
+                    <select name="kategori" required class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-3 text-sm outline-none appearance-none">
                         <option value="" disabled selected>Pilih Kategori</option>
                         {% for kategori in daftar_kategori %}
                             <option value="{{ kategori.id }}">{{ kategori.nama }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                <div>
-                    <label class="block text-xs font-medium text-stone-700 mb-1">Promosi Khusus</label>
-                    <div class="flex items-center h-10 mt-1">
-                        <label class="inline-flex items-center cursor-pointer select-none text-xs text-stone-700">
-                            <input type="checkbox" name="is_flash_sale" class="rounded border-[#EAE3D2] text-[#8C7454] focus:ring-[#8C7454] mr-2">
-                            Ikutkan Flash Sale ⚡
-                        </label>
-                    </div>
+                <div class="flex flex-col justify-end">
+                    <label class="inline-flex items-center cursor-pointer select-none text-xs text-stone-700 mb-2">
+                        <input type="checkbox" name="is_flash_sale" class="rounded border-[#EAE3D2] text-[#8C7454] focus:ring-[#8C7454] mr-2">
+                        Ikutkan Flash Sale ⚡
+                    </label>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <label class="block text-xs font-medium text-stone-700 mb-1">Harga Satuan (Rp)</label>
-                    <input type="number" name="harga" required placeholder="Misal: 189000" class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none font-mono">
+                    <input type="number" name="harga" required placeholder="189000" class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none font-mono">
                 </div>
                 <div>
-                    <label class="block text-xs font-medium text-stone-700 mb-1">Jumlah Pasokan Stok</label>
-                    <input type="number" name="stok" required placeholder="Misal: 100" class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none font-mono">
+                    <label class="block text-xs font-medium text-stone-700 mb-1">Jumlah Stok</label>
+                    <input type="number" name="stok" required placeholder="100" class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none font-mono">
                 </div>
             </div>
 
             <div>
-                <label class="block text-xs font-medium text-stone-700 mb-1.5">Foto / Gambar Produk</label>
-                
-                <div class="flex items-center gap-4">
-                    <div id="imagePreviewContainer" class="w-20 h-20 rounded-xl bg-[#F4F1EA] border-2 border-dashed border-[#EAE3D2] flex items-center justify-center overflow-hidden shrink-0 group">
-                        <span id="previewPlaceholder" class="text-stone-400 text-[10px] italic group-hover:text-[#8C7454] transition-colors">No Pic</span>
+                <label class="block text-xs font-medium text-stone-700 mb-2">Gambar Sampul Utama</label>
+                <div class="flex items-center gap-4 p-3 border border-[#EAE3D2] rounded-xl bg-[#FAF8F5]">
+                    <div id="imagePreviewContainer" class="w-16 h-16 rounded-lg bg-white border border-[#EAE3D2] flex items-center justify-center overflow-hidden shrink-0">
                         <img id="imagePreview" src="" alt="Preview" class="w-full h-full object-cover hidden">
+                        <span id="previewPlaceholder" class="text-stone-300 text-[10px]">No Pic</span>
                     </div>
-                    
                     <div class="flex-1">
-                        <input type="file" name="gambar" id="product_image" accept="image/*" onchange="previewImage(this)" class="w-full text-sm text-stone-500 file:mr-3 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#8C7454]/10 file:text-[#8C7454] hover:file:bg-[#8C7454]/20 cursor-pointer">
-                        <p class="text-[10px] text-stone-400 mt-1">Format: JPG, PNG, WEBP (Maks. 2MB). Pastikan rasio gambar 1:1.</p>
+                        <input type="file" name="gambar" id="product_image" accept="image/*" required onchange="previewImage(this)" 
+                            class="w-full text-xs text-stone-500 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:bg-[#8C7454]/10 file:text-[#8C7454] cursor-pointer">
                     </div>
                 </div>
             </div>
 
             <div>
-                <label class="block text-xs font-medium text-stone-700 mb-1">Deskripsi Informasi Produk (Opsional)</label>
-                <textarea name="deskripsi" rows="3" placeholder="Tuliskan kandungan utama atau cara pakai produk..." class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none resize-none"></textarea>
+                <label class="block text-xs font-medium text-stone-700 mb-2">Galeri Foto Tambahan (Opsional)</label>
+                <div class="relative group border-2 border-dashed border-[#EAE3D2] rounded-xl p-4 text-center hover:bg-[#FAF8F5] transition-all">
+                    <input type="file" name="galeri_produk" id="galeri_input" multiple accept="image/*" 
+                        class="absolute inset-0 opacity-0 cursor-pointer z-10">
+                    <div class="space-y-1">
+                        <svg class="mx-auto h-6 w-6 text-stone-400 group-hover:text-[#8C7454]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <p class="text-[10px] text-stone-500">Klik untuk upload banyak foto sekaligus</p>
+                    </div>
+                    <div id="galeri-preview-container" class="flex flex-wrap gap-2 mt-3 empty:hidden"></div>
+                </div>
             </div>
 
-            <button type="submit" class="w-full bg-[#8C7454] text-white py-2.5 rounded-full text-sm font-medium hover:bg-[#735F43] transition-colors shadow-md mt-2 cursor-pointer">
-                Simpan & Daftarkan Barang
+            <div>
+                <label class="block text-xs font-medium text-stone-700 mb-1">Deskripsi Produk</label>
+                <textarea name="deskripsi" rows="3" placeholder="Kandungan utama, manfaat, dan cara pakai..." class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none resize-none transition-all"></textarea>
+            </div>
+
+            <button type="submit" class="w-full bg-[#8C7454] text-white py-3 rounded-full text-sm font-semibold hover:bg-[#735F43] transition-all shadow-lg active:scale-[0.98] mt-2">
+                Daftarkan Produk Baru
             </button>
         </form>
     </div>

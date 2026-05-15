@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="py-12 bg-[#FAF8F5] min-h-screen">
+    <div class="container mx-auto px-4">
+        
+        <div class="text-center mb-12">
+            <h1 class="text-3xl font-serif text-[#8C7454] mb-2">Wishlist Saya</h1>
+            <p class="text-stone-500 text-sm">Produk-produk kecantikan pilihan yang Anda simpan.</p>
+        </div>
+
+        <div id="wishlist-content-wrapper">
+            {% if wishlist_items %}
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6" id="wishlist-grid">
+                    
+                    {% for item in wishlist_items %}
+                    <div class="product-card group bg-white rounded-2xl overflow-hidden shadow-sm border border-stone-100 transition-all duration-300 hover:shadow-md" 
+                         data-product-id="{{ item.produk.id }}">
+                        
+                        <div class="h-56 bg-[#F4F1EA] relative overflow-hidden">
+                            {% if item.produk.gambar %}
+                                <img src="{{ item.produk.gambar.url }}" alt="{{ item.produk.nama }}" 
+                                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+                            {% else %}
+                                <div class="w-full h-full flex items-center justify-center text-stone-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="absolute top-3 right-3 z-20">
+                                <button onclick="toggleWishlist(this, '{{ item.produk.id }}')" 
+                                        class="wishlist-btn p-2 bg-white/90 backdrop-blur-sm rounded-full active shadow-sm transition-colors hover:bg-white">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-[#8C7454]" fill="#8C7454" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="p-4">
+                            <span class="text-[10px] uppercase tracking-widest text-stone-400 font-semibold">
+                                {{ item.produk.kategori.nama }}
+                            </span>
+                            <h3 class="text-sm font-medium text-stone-800 mt-1 mb-2">
+                                {{ item.produk.nama }}
+                            </h3>
+                            <div class="flex justify-between items-center">
+                                <p class="text-[#8C7454] font-bold text-sm">Rp {{ item.produk.harga }}</p>
+                                <a href="#" class="text-[11px] font-bold text-stone-600 hover:text-[#8C7454] uppercase tracking-tight">
+                                    Lihat Detail
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                </div> {% else %}
+                <div class="text-center py-20 bg-white rounded-3xl border border-dashed border-stone-200">
+                    <div class="mb-6 flex justify-center">
+                        <div class="p-6 bg-[#F4F1EA] rounded-full">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-[#8C7454]/50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                            </svg>
+                        </div>
+                    </div>
+                    <h2 class="text-xl text-stone-800 font-medium mb-2">Wishlist Anda Kosong</h2>
+                    <p class="text-stone-500 mb-8 max-w-xs mx-auto">Sepertinya Anda belum menambahkan produk apapun ke daftar keinginan.</p>
+                    <a href="{% url 'home' %}" 
+                       class="inline-block bg-[#2C2A29] text-white px-10 py-3 rounded-full text-sm font-medium hover:bg-[#8C7454] transition-all transform hover:-translate-y-1">
+                        Mulai Belanja Sekarang
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+</section>
+
+<style>
+    .product-card {
+        transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+</style>
+{% endblock %}

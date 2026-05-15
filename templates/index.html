@@ -51,11 +51,32 @@
             <div class="bg-white product-card-flash rounded-2xl overflow-hidden border border-[#EAE3D2] hover:shadow-md transition-shadow group cursor-pointer flex flex-col justify-between" data-category="{{ produk.kategori.slug }}">
                 <div>
                     <div class="h-48 bg-[#F4F1EA] flex items-center justify-center relative overflow-hidden">
-                        {% if produk.gambar %}
-                            <img src="{{ produk.gambar.url }}" alt="{{ produk.nama }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
-                        {% else %}
-                            <span class="text-stone-400 italic text-xs font-medium text-center">[ {{ produk.nama }} ]</span>
-                        {% endif %}
+                        <a href="{% url 'detail_produk' produk.id %}" class="absolute inset-0 z-10">
+                            {% if produk.gambar %}
+                                <img src="{{ produk.gambar.url }}" alt="{{ produk.nama }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            {% else %}
+                                <div class="w-full h-full flex items-center justify-center">
+                                    <span class="text-stone-400 italic text-xs font-medium text-center">[ {{ produk.nama }} ]</span>
+                                </div>
+                            {% endif %}
+                        </a>
+
+                        <div class="absolute top-3 right-3 z-20 flex flex-col gap-2">
+                            <button onclick="toggleLike(this, '{{ produk.id }}')" 
+                                    class="like-btn p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all group/like {% if produk.id in user_likes %}active{% endif %}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-stone-600 group-hover/like:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                            </button>
+
+                            <!-- TOMBOL WISHLIST (SAVE/BOOKMARK) -->
+                            <button onclick="toggleWishlist(this, '{{ produk.id }}')" 
+                                    class="wishlist-btn p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all group/wish {% if produk.id in user_wishlists %}active{% endif %}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-stone-600 group-hover/wish:text-[#8C7454]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                </svg>
+                            </button>
+                        </div>
                         
                         <span class="absolute top-3 left-3 bg-amber-500 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded shadow-sm animate-pulse">
                             ⚡ Flash Sale
@@ -106,8 +127,33 @@
             {% for produk in produk_biasa %}
             <div class="bg-white product-card-reguler rounded-2xl overflow-hidden border border-[#EAE3D2] hover:shadow-md transition-shadow group cursor-pointer flex flex-col justify-between" data-category="{{ produk.kategori.slug }}">
                 <div>
-                    <div class="h-48 bg-[#F4F1EA] flex items-center justify-center relative p-4">
-                        <span class="text-stone-400 italic text-xs font-medium text-center">[ {{ produk.nama }} ]</span>
+                    <div class="h-48 bg-[#F4F1EA] flex items-center justify-center relative overflow-hidden">
+                        <a href="{% url 'detail_produk' produk.id %}" class="absolute inset-0 z-10">
+                        {% if produk.gambar %}
+                            <img src="{{ produk.gambar.url }}" alt="{{ produk.nama }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                        {% else %}
+                            <!-- Tampilan jika admin lupa upload gambar -->
+                            <span class="text-stone-400 italic text-xs font-medium text-center">[ {{ produk.nama }} ]</span>
+                        {% endif %}
+                        </a>
+
+                        <div class="absolute top-3 right-3 z-20 flex flex-col gap-2">
+                            <!-- TOMBOL LIKE (LOVE) -->
+                            <button onclick="toggleLike(this, '{{ produk.id }}')" 
+                                    class="like-btn p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all group/like {% if produk.id in user_likes %}active{% endif %}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-stone-600 group-hover/like:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                </svg>
+                            </button>
+
+                            <!-- TOMBOL WISHLIST (SAVE/BOOKMARK) -->
+                           <button onclick="toggleWishlist(this, '{{ produk.id }}')" 
+                                    class="wishlist-btn p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all group/wish {% if produk.id in user_wishlists %}active{% endif %}">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-stone-600 group-hover/wish:text-[#8C7454]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                </svg>
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="p-4">
