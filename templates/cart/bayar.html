@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="bg-[#FAF8F5] min-h-screen py-20 flex items-center justify-center">
+    <div class="bg-white p-10 rounded-3xl border border-stone-100 shadow-xl max-w-md w-full text-center">
+        <div class="w-16 h-16 bg-amber-50 rounded-full flex items-center justify-center text-2xl text-[#8C7454] mx-auto mb-4">
+            💳
+        </div>
+        <h2 class="text-2xl font-serif text-stone-900 mb-2">Satu Langkah Lagi</h2>
+        <p class="text-sm text-stone-500 mb-6">Pesanan <span class="font-bold">#INV-{{ pesanan.id }}</span> telah dicatat. Silakan selesaikan pembayaran premi Anda.</p>
+        
+        <button id="pay-button" class="w-full bg-[#8C7454] text-white py-4 rounded-full font-medium hover:bg-[#735F43] transition-colors shadow-lg cursor-pointer">
+            Bayar Sekarang
+        </button>
+    </div>
+</div>
+
+<script type="text/javascript" src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ client_key }}"></script>
+<script type="text/javascript">
+    // Tambahkan parameter pesananId ke fungsi ini
+    function kosongkanKeranjangBackend(urlTujuan, pesananId = null) {
+        fetch("{% url 'bersihkan_keranjang_ajax' %}", {
+            method: "POST",
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}",
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                'pesanan_id': pesananId // Kirim ID pesanan ke Django
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            window.location.href = urlTujuan;
+        })
+        .catch(error => {
+            console.error("Gagal memproses data:", error);
+            window.location.href = urlTujuan;
+        });
+    }
+
+    const payButton = document.getElementById('pay-button');
+    payButton.addEventListener('click', function () {
+        window.snap.pay('{{ snap_token }}', {
+            onSuccess: function (result) {
+                alert("Pembayaran berhasil!");
+                let targetUrl = "{% url 'user_dashboard' username=request.user.username %}";
+                // Kirim ID pesanan ke fungsi di sini
+                kosongkanKeranjangBackend(targetUrl, "{{ pesanan.id }}");
+            },
+            onPending: function (result) {
+                alert("Menunggu pembayaran Anda.");
+                let targetUrl = "{% url 'user_dashboard' username=request.user.username %}"; 
+                // Untuk pending (VA belum dibayar), jangan kirim ID pesanan agar status tetap MENUNGGU
+                kosongkanKeranjangBackend(targetUrl);
+            },
+            onError: function (result) {
+                alert("Pembayaran gagal, silakan coba lagi.");
+            },
+            onClose: function () {
+                alert('Anda menutup jendela pembayaran. Item tetap tersimpan di keranjang.');
+            }
+        });
+    });
+</script>
+{% endblock %}

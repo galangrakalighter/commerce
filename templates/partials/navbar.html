@@ -1,71 +1,106 @@
 <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-[#EAE3D2] shadow-sm">
     <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-6">
+        
         <a href="{% url 'home' %}" class="text-2xl font-semibold tracking-widest serif-font text-[#8C7454] block">
             LAURA<span class="text-xs block tracking-normal text-center text-[#A69076]">DERMA</span>
         </a>
 
         <div class="flex-1 max-w-2xl relative">
-            <input type="text" placeholder="Cari perawatan atau produk skincare di sini..." class="w-full bg-[#F4F1EA] border border-transparent focus:border-[#8C7454] focus:bg-white rounded-full py-2 px-5 text-sm outline-none transition-all">
+            <input type="text" placeholder="Cari perawatan atau skincare di sini..." class="w-full bg-[#F4F1EA] border border-transparent focus:border-[#8C7454] focus:bg-white rounded-full py-2 px-5 text-sm outline-none transition-all">
             <button class="absolute right-4 top-2.5 text-[#8C7454]">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.603 10.603Z" /></svg>
             </button>
         </div>
 
         <div class="flex items-center gap-6 text-[#2C2A29]">
+            
             {% if not user.is_staff %}
-            <a href="{% url 'halaman_like' %}" class="text-stone-600 hover:text-red-500 transition-colors relative p-1">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-            </a>
+                <div class="flex items-center gap-4">
+                    
+                    <a href="{% url 'halaman_like' %}" class="text-stone-600 hover:text-red-500 hover:scale-105 transition-all relative p-1.5 rounded-xl hover:bg-stone-50" title="Suka">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                    </a>
 
-            <!-- Ikon Wishlist (Dengan Badge Hitungan) -->
-            <a href="{% url 'halaman_wishlist' %}" class="text-stone-600 hover:text-[#8C7454] transition-colors relative p-1">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                </svg>
-                
-                <!-- Badge Angka Wishlist -->
-                <span id="wishlist-badge" 
-                    class="{% if wish_count == 0 %}hidden{% endif %} absolute -top-1 -right-1 bg-[#8C7454] text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full border-2 border-white">
-                    {{ wish_count }}
-                </span>
-            </a>
-            <div class="h-5 w-px bg-[#EAE3D2]"></div>
-            {% endif %}
+                    <a href="{% url 'halaman_wishlist' %}" class="text-stone-600 hover:text-[#8C7454] hover:scale-105 transition-all relative p-1.5 rounded-xl hover:bg-stone-50" title="Wishlist">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                        </svg>
+                        <span id="wishlist-badge" class="{% if wish_count == 0 %}hidden{% endif %} absolute -top-0.5 -right-0.5 bg-[#8C7454] text-white text-[9px] font-extrabold w-4 h-4 flex items-center justify-center rounded-full border-2 border-white shadow-sm font-sans">
+                            {{ wish_count }}
+                        </span>
+                    </a>
+
+                    <a href="{% url 'detail_keranjang' %}" class="text-stone-600 hover:text-[#8C7454] hover:scale-105 transition-all relative p-1.5 rounded-xl hover:bg-stone-50" title="Keranjang">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
+                        </svg>
+                        {% if request.session.cart %}
+                        <span class="absolute -top-0.5 -right-0.5 bg-[#8C7454] text-white text-[9px] font-extrabold w-4 h-4 flex items-center justify-center rounded-full border-2 border-white shadow-sm font-sans animate-fade-in">
+                            {{ request.session.cart|length }}
+                        </span>
+                        {% endif %}
+                    </a>
+
+                    <div class="h-5 w-px bg-[#EAE3D2] mx-1"></div>
+
+                </div>
+                {% endif %}
 
             {% if user.is_authenticated %}
-                <div class="flex items-center gap-4 text-sm">
+                <div class="flex items-center gap-3 text-sm relative">
                     
                     {% if user.is_superuser %}
-                        <a href="{% url 'kelola_staff' %}" class="bg-blue-600 text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-blue-700 transition-colors flex items-center gap-1 shadow-sm">
-                            👤 Kelola Tim Staff
+                        <a href="{% url 'kelola_staff' %}" class="hidden sm:flex bg-blue-600 text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-blue-700 transition-colors items-center gap-1 shadow-sm">
+                            👤 Staff
                         </a>
-                    
-                        <a href="{% url 'kelola_produk' %}" class="bg-amber-700 text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-amber-800 transition-colors flex items-center gap-1 shadow-sm">
-                            💼 Kelola Produk
+                        <a href="{% url 'kelola_produk' %}" class="hidden sm:flex bg-amber-700 text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-amber-800 transition-colors items-center gap-1 shadow-sm">
+                            💼 Produk
                         </a>
                     {% elif user.is_staff %}
-                        <a href="{% url 'kelola_produk' %}" class="bg-amber-700 text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-amber-800 transition-colors flex items-center gap-1 shadow-sm">
-                            💼 Kelola Produk
+                        <a href="{% url 'kelola_produk' %}" class="hidden sm:flex bg-amber-700 text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-amber-800 transition-colors items-center gap-1 shadow-sm">
+                            💼 Produk
                         </a>
                     {% endif %}
 
-                    <div class="text-sm font-medium text-[#2C2A29] ml-2">
-                        Halo, <span class="font-semibold text-[#8C7454]">{{ user.username }}</span>
-                        {% if user.is_superuser %}
-                            <span class="ml-1 text-[10px] bg-red-100 text-red-700 border border-red-300 px-2 py-0.5 rounded-full font-bold">SUPERADMIN</span>
-                        {% elif user.is_staff %}
-                            <span class="ml-1 text-[10px] bg-amber-100 text-amber-700 border border-amber-300 px-2 py-0.5 rounded-full font-bold">STAFF</span>
-                        {% else %}
-                            <span class="ml-1 text-[10px] bg-stone-100 text-stone-600 border border-stone-300 px-2 py-0.5 rounded-full font-bold">MEMBER</span>
+                    <button id="userDropdownBtn" class="flex items-center gap-2 font-medium text-[#2C2A29] hover:text-[#8C7454] focus:outline-none cursor-pointer transition-colors p-1 rounded-xl">
+    
+                        <div class="w-7 h-7 rounded-full flex items-center justify-center overflow-hidden shadow-sm border border-stone-100/50 bg-[#8C7454] text-white text-xs font-bold font-serif flex-shrink-0">
+                            {% if user.profile.foto %}
+                                <img src="{{ user.profile.foto.url }}" alt="Foto Profil" class="w-full h-full object-cover">
+                            {% else %}
+                                {{ user.first_name|default:user.username|slice:":1"|upper }}
+                            {% endif %}
+                        </div>
+                        
+                        <span class="max-w-[100px] truncate text-sm">
+                            {{ user.first_name|default:user.username }}
+                        </span>
+                        
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3 h-3 text-stone-400 transition-transform duration-200" id="dropdownArrow">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                        </svg>
+                    </button>
+
+                    <div id="userDropdownMenu" class="hidden absolute right-0 top-full mt-2 w-56 bg-white border border-[#EAE3D2] rounded-2xl shadow-xl py-2 z-50 transform origin-top-right transition-all">
+
+                        <a href="{% url 'user_dashboard' username=user.username %}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-stone-700 hover:bg-[#FAF8F5] hover:text-[#8C7454] transition-colors">
+                            <span class="text-base">👤</span> Detail Profil Saya
+                        </a>
+
+                        {% if user.is_staff %}
+                            <a href="{% url 'kelola_produk' %}" class="flex sm:hidden items-center gap-3 px-4 py-2.5 text-sm text-stone-700 hover:bg-[#FAF8F5] transition-colors">
+                                <span class="text-base">💼</span> Kelola Produk
+                            </a>
                         {% endif %}
+
+                        <hr class="border-stone-100 my-1">
+
+                        <a href="{% url 'logout' %}" class="flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors font-medium">
+                            <span class="text-base">🚪</span> Logout
+                        </a>
                     </div>
-
-                    <div class="h-4 w-px bg-[#EAE3D2]"></div>
-                    <a href="{% url 'logout' %}" class="text-sm text-red-600 hover:underline">Keluar</a>
-                </div>
-
             {% else %}
                 <button onclick="openLoginModal()" class="text-sm font-medium hover:text-[#8C7454] transition-colors cursor-pointer">Masuk</button>
                 <button onclick="openRegisterModal()" class="text-sm bg-[#8C7454] text-white px-5 py-2 rounded-full hover:bg-[#735F43] transition-colors shadow-sm cursor-pointer">Daftar</button>
@@ -108,8 +143,14 @@
             <h2 class="serif-font text-2xl text-[#8C7454] tracking-wide">Bergabung Bersama Kami</h2>
             <p class="text-xs text-stone-500 mt-1">Buat akun untuk menikmati pengalaman belanja produk premium</p>
         </div>
+        
         <form action="{% url 'register' %}" method="POST" class="space-y-4">
             {% csrf_token %}
+            
+            <div>
+                <label class="block text-xs font-medium text-stone-700 mb-1">Nama Lengkap</label>
+                <input type="text" name="nama_lengkap" required placeholder="Contoh: Galang Raka" class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none">
+            </div>
             <div>
                 <label class="block text-xs font-medium text-stone-700 mb-1">Username</label>
                 <input type="text" name="username" required class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none">
@@ -161,4 +202,27 @@
         if (event.target == registerModal) { closeRegisterModal(); }
         if (event.target == staffModal) { closeStaffModal(); }
     }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const dropdownBtn = document.getElementById("userDropdownBtn");
+        const dropdownMenu = document.getElementById("userDropdownMenu");
+        const dropdownArrow = document.getElementById("dropdownArrow");
+
+        if (dropdownBtn && dropdownMenu) {
+            // Fungsi Toggle Menu Buka Tutup
+            dropdownBtn.addEventListener("click", function (event) {
+                event.stopPropagation();
+                dropdownMenu.classList.toggle("hidden");
+                dropdownArrow.classList.toggle("rotate-180");
+            });
+
+            // Tutup otomatis dropdown jika user mengklik area luar navbar
+            document.addEventListener("click", function (event) {
+                if (!dropdownBtn.contains(event.target) && !dropdownMenu.contains(event.target)) {
+                    dropdownMenu.classList.add("hidden");
+                    dropdownArrow.classList.remove("rotate-180");
+                }
+            });
+        }
+    });
 </script>

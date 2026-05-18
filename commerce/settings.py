@@ -25,8 +25,11 @@ SECRET_KEY = 'django-insecure-vj5mqu9*sv6rkpv)&y*p04_i^1yb_s$@#w*49l12doctdisg=c
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.14.99', 'localhost', '127.0.0.1']
 
+MIDTRANS_SERVER_KEY = 'Mid-server-Tx6GtBGD8zPYmKuw3u8czpXO'
+MIDTRANS_CLIENT_KEY = 'Mid-client-bJCUP24v9a55oDpV'
+MIDTRANS_IS_PRODUCTION = False
 
 # Application definition
 

@@ -1,0 +1,336 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="bg-[#FAF8F5] min-h-screen py-12">
+    <div class="container mx-auto px-4 max-w-4xl">
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            
+            <div class="md:col-span-1 space-y-4">
+                <div class="bg-white p-6 rounded-3xl border border-stone-100 shadow-sm text-center">
+                    
+                    <div class="w-20 h-20 rounded-full mx-auto flex items-center justify-center overflow-hidden shadow-inner border border-stone-100 bg-gradient-to-tr from-[#8C7454] to-[#EAE3D2]">
+                        {% if user.profile.foto %}
+                            <img src="{{ user.profile.foto.url }}" alt="Foto Profil" class="w-full h-full object-cover">
+                        {% else %}
+                            <span class="text-white text-2xl font-serif font-bold">
+                                {{ user.username|slice:":1"|upper }}
+                            </span>
+                        {% endif %}
+                    </div>
+                    
+                    <h3 class="text-lg font-serif text-stone-900 mt-4">@{{ user.username }}</h3>
+                    <p class="text-xs text-stone-400">Pelanggan Setia</p>
+                </div>
+
+                <div class="bg-white p-4 rounded-3xl border border-stone-100 shadow-sm space-y-1">
+                    <a href="{% url 'user_dashboard' username=user.username %}" class="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium bg-amber-50/60 text-[#8C7454] border border-amber-100/50 transition-colors">
+                        <span>👤</span> Detail Profil
+                    </a>
+                    <a href="{% url 'home' %}" class="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-colors">
+                        <span>🛒</span> Lanjut Belanja
+                    </a>
+                </div>
+            </div>
+
+            <div class="md:col-span-2 space-y-6">
+                
+                <div class="bg-gradient-to-r from-stone-900 to-stone-800 p-8 rounded-3xl text-white shadow-md relative overflow-hidden">
+                    <div class="absolute right-0 bottom-0 translate-x-4 translate-y-4 opacity-10 font-serif text-9xl pointer-events-none">
+                        ✨
+                    </div>
+                    <span class="text-xs font-semibold text-[#EAE3D2] tracking-wider uppercase">Ruang Personal</span>
+                    <h1 class="text-3xl font-serif mt-1">Halo, {{ user.first_name|default:user.username }}!</h1>
+                    <p class="text-sm text-stone-300 mt-2 max-w-md">
+                        Melalui dashboard ini, Anda dapat mengelola detail akun serta memantau status pesanan digital Anda secara real-time.
+                    </p>
+                </div>
+
+                <div class="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm space-y-6">
+                    <div class="border-b border-stone-100 pb-4 flex justify-between items-center">
+                        <h2 class="text-xl font-serif text-stone-900 flex items-center gap-2">
+                            <span>📋</span> Informasi Akun Resmi
+                        </h2>
+                        <button onclick="openEditProfilModal()" class="text-xs border border-[#EAE3D2] hover:border-[#8C7454] hover:text-[#8C7454] text-stone-600 px-4 py-2 rounded-full font-medium transition-colors cursor-pointer">
+                            ✏️ Edit Profil
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                        <div>
+                            <span class="text-xs text-stone-400 block uppercase tracking-wider font-semibold">Username</span>
+                            <span class="text-base font-mono font-medium text-stone-800">@{{ user.username }}</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-stone-400 block uppercase tracking-wider font-semibold">Alamat Email</span>
+                            <span class="text-base text-stone-800 font-medium">{{ user.email|default:"Belum diatur" }}</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-stone-400 block uppercase tracking-wider font-semibold">Nama Lengkap</span>
+                            <span class="text-base text-stone-800 font-medium">
+                                {% if user.first_name or user.last_name %}
+                                    {{ user.first_name }} {{ user.last_name }}
+                                {% else %}
+                                    <span class="text-stone-400 italic text-sm">Belum dikonfigurasi</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-stone-400 block uppercase tracking-wider font-semibold">Tanggal Bergabung</span>
+                            <span class="text-base text-stone-800 font-medium">{{ user.date_joined|date:"d F Y" }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm space-y-6">
+                    <div class="border-b border-stone-100 pb-4">
+                        <h2 class="text-xl font-serif text-stone-900 flex items-center gap-2">
+                            <span>📦</span> Riwayat Pesanan Saya
+                        </h2>
+                    </div>
+
+                    {% if pesanan_saya %}
+                        <div class="space-y-4">
+                            {% for pesanan in pesanan_saya %}
+                            <div class="border border-stone-100 rounded-2xl p-5 hover:border-amber-200/70 transition-all bg-[#FAF8F5]/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div class="space-y-1.5">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-xs font-mono font-semibold text-stone-500">#INV-{{ pesanan.id }}</span>
+                                        
+                                        {% if pesanan.status == 'SELESAI' %}
+                                            <span class="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-emerald-100">Selesai</span>
+                                        {% elif pesanan.status == 'BATAL' %}
+                                            <span class="bg-rose-50 text-rose-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-rose-100">Dibatalkan</span>
+                                        {% elif pesanan.status == 'PROSES' %}
+                                            <span class="bg-amber-50 text-amber-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-amber-100">Sedang Diproses</span>
+                                        {% elif pesanan.status == 'KIRIM' %}
+                                            <span class="bg-blue-50 text-blue-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-blue-100">Sedang Dikirim</span>
+                                        {% else %}
+                                            <span class="bg-stone-100 text-stone-600 text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-stone-200">Menunggu Pembayaran</span>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <h4 class="text-base font-serif text-stone-800 font-medium">
+                                        {% with first_item=pesanan.items.all|first %}
+                                            {% if first_item %}
+                                                {{ first_item.produk.nama|default:"Produk Telah Dihapus" }}
+                                                
+                                                {% if pesanan.items.all|length > 1 %}
+                                                    <span class="text-xs text-stone-400 font-sans font-normal ml-1">
+                                                        +{{ pesanan.items.all|length|add:"-1" }} produk lainnya
+                                                    </span>
+                                                {% endif %}
+                                            {% else %}
+                                                <span class="text-stone-400 italic">Tidak ada item produk</span>
+                                            {% endif %}
+                                        {% endwith %}
+                                    </h4>
+                                    
+                                    <p class="text-xs text-stone-400">Dipesan pada: <span class="font-medium text-stone-600">{{ pesanan.tanggal_dibuat|date:"d M Y • H:i" }}</span></p>
+                                </div>
+
+                                <div class="flex sm:flex-col items-between sm:items-end justify-between sm:justify-center gap-2 pt-3 sm:pt-0 border-t sm:border-t-0 border-stone-100">
+                                    <div class="text-sm font-semibold text-[#8C7454]">
+                                        Rp {{ pesanan.total_harga }}
+                                    </div>
+                                    
+                                    <button onclick="openDetailModal('{{ pesanan.id }}')" class="text-xs bg-white border border-[#EAE3D2] hover:bg-[#8C7454] hover:text-white text-stone-700 px-4 py-1.5 rounded-xl font-medium transition-colors text-center shadow-sm cursor-pointer">
+                                        Lihat Detail
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="modalDetail-{{ pesanan.id }}" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 detail-modal-wrapper">
+                                <div class="bg-white rounded-3xl max-w-lg w-full p-8 border border-[#EAE3D2] shadow-2xl relative max-h-[90vh] overflow-y-auto">
+                                    <button onclick="closeDetailModal('{{ pesanan.id }}')" class="absolute top-4 right-4 text-stone-400 hover:text-stone-700 text-xl cursor-pointer">&times;</button>
+                                    
+                                    <div class="border-b border-stone-100 pb-4 mb-4">
+                                        <span class="text-xs font-mono text-stone-400 block">FAKTUR RESMI</span>
+                                        <h3 class="text-xl font-serif text-stone-900 mt-0.5">#INV-{{ pesanan.id }}</h3>
+                                        <p class="text-xs text-stone-400 mt-1">Waktu Transaksi: {{ pesanan.tanggal_dibuat|date:"d F Y • H:i" }}</p>
+                                    </div>
+
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[#FAF8F5] p-4 rounded-2xl border border-stone-100 text-xs mb-4">
+                                        <div>
+                                            <span class="text-stone-400 block uppercase tracking-wider font-semibold mb-1">Tujuan Pengiriman</span>
+                                            <span class="font-medium text-stone-800 block">{{ pesanan.nama_penerima }}</span>
+                                            <span class="font-mono text-stone-600 block mt-0.5">{{ pesanan.telepon }}</span>
+                                            <p class="text-stone-500 mt-1 leading-relaxed">{{ pesanan.alamat_lengkap }}</p>
+                                        </div>
+                                        <div>
+                                            <span class="text-stone-400 block uppercase tracking-wider font-semibold mb-1">Status Logistik</span>
+                                            <span class="inline-block px-2.5 py-1 rounded-md font-bold text-[11px] mt-0.5
+                                                {% if pesanan.status == 'SELESAI' %} bg-emerald-50 text-emerald-700 border border-emerald-200
+                                                {% elif pesanan.status == 'BATAL' %} bg-rose-50 text-rose-700 border border-rose-200
+                                                {% elif pesanan.status == 'KIRIM' %} bg-blue-50 text-blue-700 border border-blue-200
+                                                {% elif pesanan.status == 'PROSES' %} bg-amber-50 text-amber-700 border border-amber-200
+                                                {% else %} bg-stone-100 text-stone-600 border border-stone-200 {% endif %}">
+                                                {{ pesanan.get_status_display }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div class="space-y-3 mb-6">
+                                        <span class="text-xs font-semibold text-stone-400 tracking-wider uppercase block">Rincian Belanja</span>
+                                        <div class="divide-y divide-stone-100 max-h-40 overflow-y-auto pr-1">
+                                            {% for item in pesanan.items.all %}
+                                            <div class="py-2.5 flex items-center justify-between text-sm {% if forloop.first %}pt-0{% endif %}">
+                                                <div>
+                                                    <span class="font-serif text-stone-800 block font-medium">{{ item.produk.nama|default:"Produk Dihapus" }}</span>
+                                                    <span class="text-xs text-stone-400 font-mono">{{ item.jumlah }}x Rp {{ item.harga_saat_beli }}</span>
+                                                </div>
+                                                <span class="font-mono font-semibold text-stone-800">Rp {{ item.subtotal }}</span>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+
+                                    <div class="border-t border-stone-100 pt-4 space-y-2">
+                                        {% if pesanan.catatan %}
+                                        <div class="text-xs text-stone-500 bg-stone-50 p-2.5 rounded-xl">
+                                            <span class="font-semibold block text-[10px] text-stone-400 uppercase">Catatan:</span>
+                                            <span class="italic">"{{ pesanan.catatan }}"</span>
+                                        </div>
+                                        {% endif %}
+                                        <div class="flex justify-between items-center pt-2">
+                                            <span class="text-sm font-serif font-medium text-stone-900">Total Pembayaran</span>
+                                            <span class="text-base font-bold text-[#8C7454] font-mono">Rp {{ pesanan.total_harga }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center py-12 px-4 bg-[#FAF8F5]/50 rounded-2xl border border-dashed border-stone-200">
+                            <div class="text-4xl mb-3">📭</div>
+                            <h3 class="text-sm font-medium text-stone-800 font-serif">Belum Ada Pesanan</h3>
+                            <p class="text-xs text-stone-400 mt-1 max-w-xs mx-auto">Anda belum memiliki riwayat transaksi atau invoice belanja di akun ini.</p>
+                            <a href="{% url 'home' %}" class="inline-block mt-4 text-xs bg-[#8C7454] text-white px-5 py-2 rounded-full font-medium hover:bg-[#735F43] transition-colors shadow-sm">
+                                Mulai Belanja
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="editProfilModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-8 border border-[#EAE3D2] shadow-2xl relative">
+        <button onclick="closeEditProfilModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-700 text-xl cursor-pointer">&times;</button>
+        
+        <div class="text-center mb-6">
+            <h2 class="serif-font text-2xl text-[#8C7454] tracking-wide">Perbarui Profil Anda</h2>
+            <p class="text-xs text-stone-500 mt-1">Pastikan informasi kontak Anda tetap akurat dan aktif</p>
+        </div>
+        
+        <form action="{% url 'edit_profil' %}" method="POST" enctype="multipart/form-data" class="space-y-4">
+            {% csrf_token %}
+            
+            <div>
+                <label class="block text-xs font-medium text-stone-700 mb-1">Foto Profil Baru</label>
+                <div class="flex items-center gap-4 bg-[#FAF8F5] p-3 rounded-xl border border-[#EAE3D2]">
+                    <div class="w-12 h-12 rounded-full overflow-hidden bg-stone-200 flex-shrink-0 flex items-center justify-center">
+                        {% if user.profile.foto %}
+                            <img id="previewFoto" src="{{ user.profile.foto.url }}" class="w-full h-full object-cover">
+                        {% else %}
+                            <div id="previewFallback" class="w-full h-full flex items-center justify-center text-stone-400 bg-stone-100 font-bold text-xs uppercase">{{ user.username|slice:":1" }}</div>
+                        {% endif %}
+                    </div>
+                    <input type="file" name="foto_profil" id="inputFoto" accept="image/*" class="text-xs text-stone-600 file:mr-4 file:py-1.5 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-medium file:bg-amber-50 file:text-[#8C7454] hover:file:bg-amber-100 cursor-pointer">
+                </div>
+            </div>
+            
+            <div>
+                <label class="block text-xs font-medium text-stone-700 mb-1">Nama Lengkap</label>
+                <input type="text" name="nama_lengkap" required value="{{ user.first_name }} {{ user.last_name }}" class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none">
+            </div>
+            
+            <div>
+                <label class="block text-xs font-medium text-stone-700 mb-1">Alamat Email</label>
+                <input type="email" name="email" required value="{{ user.email }}" class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none">
+            </div>
+
+            <button type="submit" class="w-full bg-[#8C7454] text-white py-2.5 rounded-full text-sm font-medium hover:bg-[#735F43] transition-colors shadow-md mt-2 cursor-pointer">
+                Simpan Perubahan
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openEditProfilModal() {
+        const modal = document.getElementById('editProfilModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    // Perbaikan utama: Kata "function" kini ditulis dengan benar dan lengkap
+    function closeEditProfilModal() {
+        const modal = document.getElementById('editProfilModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('editProfilModal');
+        if (event.target === modal) { 
+            closeEditProfilModal(); 
+        }
+    }
+
+    // Preview Gambar Instan Sebelum Diupload
+    const inputFoto = document.getElementById('inputFoto');
+    if (inputFoto) {
+        inputFoto.onchange = evt => {
+            const [file] = inputFoto.files;
+            if (file) {
+                let previewImg = document.getElementById('previewFoto');
+                if (!previewImg) {
+                    const fallback = document.getElementById('previewFallback');
+                    if (fallback) {
+                        previewImg = document.createElement('img');
+                        previewImg.id = 'previewFoto';
+                        previewImg.className = 'w-full h-full object-cover';
+                        fallback.parentNode.replaceChild(previewImg, fallback);
+                    }
+                }
+                if (previewImg) {
+                    previewImg.src = URL.createObjectURL(file);
+                }
+            }
+        }
+    }
+
+    function openDetailModal(id) {
+        const modal = document.getElementById(`modalDetail-${id}`);
+        if (modal) {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Kunci scroll background
+        }
+    }
+
+    function closeDetailModal(id) {
+        const modal = document.getElementById(`modalDetail-${id}`);
+        if (modal) {
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto'; // Kembalikan scroll background
+        }
+    }
+
+    // Menutup modal jika area luar (backdrop-blur) diklik
+    window.addEventListener('click', function(event) {
+        if (event.target.classList.contains('detail-modal-wrapper')) {
+            event.target.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+    });
+</script>
+{% endblock %}

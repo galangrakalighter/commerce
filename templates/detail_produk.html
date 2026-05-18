@@ -38,15 +38,33 @@
             <div class="lg:w-1/2">
                 <h1 class="text-4xl font-serif text-stone-900 mb-4">{{ produk.nama }}</h1>
                 <p class="text-2xl font-bold text-[#8C7454] mb-6">Rp {{ produk.harga }}</p>
+                
                 <div class="text-stone-600 leading-relaxed mb-8 prose prose-sm">
                     {{ produk.deskripsi|linebreaks }}
                 </div>
 
-                <div class="flex gap-4 mb-10">
-                    <button class="flex-1 bg-[#2C2A29] text-white py-4 rounded-full font-medium hover:bg-[#8C7454] transition-all shadow-lg">
-                        Tambah ke Keranjang
-                    </button>
-                </div>
+                <form action="{% url 'tambah_ke_keranjang' produk.id %}" method="POST" class="space-y-6 mb-10">
+                    {% csrf_token %}
+                    
+                    <div class="space-y-2">
+                        <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wider">Jumlah Pesanan</label>
+                        <div class="flex items-center w-32 bg-[#FAF8F5] border border-[#EAE3D2] rounded-2xl p-1">
+                            <button type="button" onclick="adjustQty(-1)" class="w-8 h-8 flex items-center justify-center text-stone-600 hover:text-[#8C7454] font-bold cursor-pointer select-none">–</button>
+                            <input type="number" id="input-jumlah" name="jumlah" value="1" min="1" class="w-12 text-center bg-transparent border-none outline-none font-medium font-mono text-sm text-stone-800 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                            <button type="button" onclick="adjustQty(1)" class="w-8 h-8 flex items-center justify-center text-stone-600 hover:text-[#8C7454] font-bold cursor-pointer select-none">+</button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row gap-4 pt-2">
+                        <button type="submit" class="flex-1 bg-stone-100 border border-stone-200 text-stone-800 py-4 px-6 rounded-full font-medium hover:bg-[#8C7454] hover:text-white hover:border-[#8C7454] transition-all shadow-sm cursor-pointer text-sm">
+                            🛒 Tambah ke Keranjang
+                        </button>
+                        
+                        <button type="submit" name="action" value="checkout_langsung" class="flex-1 bg-[#2C2A29] text-white py-4 px-6 rounded-full font-medium hover:bg-[#8C7454] transition-all shadow-lg cursor-pointer text-sm">
+                            ⚡ Beli Langsung
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -127,15 +145,13 @@
                 </div>
             </div>
         </section>
-    </div>
-    {% if produk_terkait %}
-        <div class="container mx-auto px-4">
+
+        {% if produk_terkait %}
             <div class="mt-20 border-t border-stone-100 pt-16 pb-12">
-                
                 <div class="flex items-end justify-between mb-8">
                     <div>
                         <h2 class="text-xl md:text-2xl font-serif text-stone-900 uppercase tracking-tight">Produk Terkait</h2>
-                        <p class="text-stone-400 text-[11px] mt-1 font-light italic">Pelengkap ritual kecantikan Anda</p>
+                        <p class="text-stone-400 text-[11px] mt-1 font-light italic">Pelengkap ritual pilihan Anda</p>
                     </div>
                     <a href="{% url 'home' %}" class="text-[10px] font-bold uppercase tracking-[0.15em] text-[#8C7454] border-b border-[#8C7454] pb-0.5 hover:text-[#735F43] transition-colors">
                         Lihat Semua
@@ -147,19 +163,14 @@
                     <div class="group">
                         <div class="relative aspect-square rounded-2xl overflow-hidden bg-[#FAF8F5] mb-3 border border-stone-50 transition-all duration-300 group-hover:shadow-md">
                             {% if p.gambar %}
-                            <img src="{{ p.gambar.url }}" 
-                                alt="{{ p.nama }}"
-                                class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
+                            <img src="{{ p.gambar.url }}" alt="{{ p.nama }}" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700">
                             {% endif %}
-
                             <div class="absolute inset-0 bg-stone-900/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                                <a href="{% url 'detail_produk' p.id %}" 
-                                class="px-5 py-2 bg-white/90 backdrop-blur-sm text-stone-900 text-[10px] font-bold uppercase tracking-wider rounded-full shadow-sm transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                                <a href="{% url 'detail_produk' p.id %}" class="px-5 py-2 bg-white/90 backdrop-blur-sm text-stone-900 text-[10px] font-bold uppercase tracking-wider rounded-full shadow-sm transform translate-y-2 group-hover:translate-y-0 transition-all duration-300">
                                     Lihat
                                 </a>
                             </div>
                         </div>
-
                         <div class="px-1">
                             <p class="text-[9px] text-stone-400 uppercase tracking-[0.2em] mb-1">{{ p.kategori.nama }}</p>
                             <a href="{% url 'detail_produk' p.id %}">
@@ -173,7 +184,18 @@
                     {% endfor %}
                 </div>
             </div>
-        </div>
-    {% endif %}
+        {% endif %}
+    </div>
 </section>
+
+<script>
+    // Handler Plus Minus Counter Kuantitas
+    function adjustQty(amount) {
+        const input = document.getElementById('input-jumlah');
+        let currentVal = parseInt(input.value) || 1;
+        currentVal += amount;
+        if (currentVal < 1) currentVal = 1;
+        input.value = currentVal;
+    }
+</script>
 {% endblock %}
