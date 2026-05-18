@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from toko.views import halaman_utama, dashboard_utama_view, kelola_kategori_view, daftar_produk_internal_view, tambah_produk_proses, hapus_produk_proses, tambah_kategori_proses, hapus_kategori_proses, toggle_like_view, toggle_wishlist_view, halaman_wishlist, halaman_like, detail_produk, kirim_review, tambah_ke_keranjang, detail_keranjang, hapus_dari_keranjang, checkout_view, bersihkan_keranjang_ajax, update_kuantitas_keranjang
+from toko.views import halaman_utama, dashboard_utama_view, kelola_kategori_view, daftar_produk_internal_view, tambah_produk_proses, hapus_produk_proses, tambah_kategori_proses, hapus_kategori_proses, toggle_like_view, toggle_wishlist_view, halaman_wishlist, halaman_like, detail_produk, kirim_review, tambah_ke_keranjang, detail_keranjang, hapus_dari_keranjang, checkout_view, bersihkan_keranjang_ajax, update_kuantitas_keranjang, live_search_view
 from akun.views import register_view, login_view, logout_view, kelola_staff_view, tambah_staff_proses, pecat_staff_proses, user_dashboard, edit_profil_view
 
 urlpatterns = [
@@ -32,6 +32,7 @@ urlpatterns = [
     path('dashboard/produk-list/', daftar_produk_internal_view, name='daftar_produk_internal'),
     path('dashboard/produk/tambah/', tambah_produk_proses, name='tambah_produk'),
     path('dashboard/produk/hapus/<int:produk_id>/', hapus_produk_proses, name='hapus_produk'),
+    path('dashboard/produk/edit/<int:id>/', edit_produk, name='edit_produk'),
     path('dashboard/kategori/tambah/', tambah_kategori_proses, name='tambah_kategori'),
     path('dashboard/kategori/hapus/<int:kategori_id>/', hapus_kategori_proses, name='hapus_kategori'),
     path('dashboard/staff/', kelola_staff_view, name='kelola_staff'),
@@ -51,6 +52,7 @@ urlpatterns = [
     path('profile/edit/', edit_profil_view, name='edit_profil'),
     path('<str:username>/', user_dashboard, name='user_dashboard'),
     path('cart/update/<int:produk_id>/<str:aksi>/', update_kuantitas_keranjang, name='update_kuantitas_keranjang'),
+    path('api/search-live/', live_search_view, name='live_search_view'),
 ]
 
 if settings.DEBUG:

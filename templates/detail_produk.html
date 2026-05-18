@@ -12,26 +12,46 @@
         <div class="flex flex-col lg:flex-row gap-12">
             <div class="lg:w-1/2">
                 <div class="sticky top-24">
-                    <div class="aspect-square rounded-3xl overflow-hidden bg-[#F4F1EA] mb-4 border border-stone-100">
+                    <div class="aspect-square rounded-3xl overflow-hidden bg-[#F4F1EA] mb-4 border border-stone-100 flex items-center justify-center relative">
+                        
+                        {% if produk.video_produk %}
+                            <video id="main-video" src="{{ produk.video_produk.url }}" autoplay loop muted playsinline controls 
+                                class="w-full h-full object-cover transition-opacity duration-300">
+                            </video>
+                        {% endif %}
+
                         {% if produk.gambar %}
-                            <img id="main-image" src="{{ produk.gambar.url }}" class="w-full h-full object-cover transition-opacity duration-300">
+                            <img id="main-image" src="{{ produk.gambar.url }}" 
+                                class="w-full h-full object-cover transition-opacity duration-300 {% if produk.video_produk %}hidden{% endif %}">
                         {% endif %}
                     </div>
 
-                    {% if produk.galeri.all %}
                     <div class="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-                        <div class="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden cursor-pointer border-2 border-[#8C7454] thumbnail-item"
-                             onclick="changeImage('{{ produk.gambar.url }}', this)">
+                        
+                        {% if produk.video_produk %}
+                        <div class="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden cursor-pointer border-2 border-[#8C7454] thumbnail-item relative bg-stone-900"
+                            onclick="showVideo(this)">
+                            <div class="absolute inset-0 flex items-center justify-center bg-black/30 text-white text-lg z-10">▶</div>
+                            <video src="{{ produk.video_produk.url }}" class="w-full h-full object-cover opacity-60"></video>
+                        </div>
+                        {% endif %}
+
+                        {% if produk.gambar %}
+                        <div class="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden cursor-pointer border-2 {% if not produk.video_produk %}border-[#8C7454]{% else %}border-transparent{% endif %} hover:border-stone-300 thumbnail-item"
+                            onclick="changeImage('{{ produk.gambar.url }}', this)">
                             <img src="{{ produk.gambar.url }}" class="w-full h-full object-cover">
                         </div>
-                        {% for item in produk.galeri.all %}
-                        <div class="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden cursor-pointer border-2 border-transparent hover:border-stone-300 thumbnail-item"
-                             onclick="changeImage('{{ item.gambar.url }}', this)">
-                            <img src="{{ item.gambar.url }}" class="w-full h-full object-cover">
-                        </div>
-                        {% endfor %}
+                        {% endif %}
+
+                        {% if produk.galeri.all %}
+                            {% for item in produk.galeri.all %}
+                            <div class="w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden cursor-pointer border-2 border-transparent hover:border-stone-300 thumbnail-item"
+                                onclick="changeImage('{{ item.gambar.url }}', this)">
+                                <img src="{{ item.gambar.url }}" class="w-full h-full object-cover">
+                            </div>
+                            {% endfor %}
+                        {% endif %}
                     </div>
-                    {% endif %}
                 </div>
             </div>
 

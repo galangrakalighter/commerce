@@ -18,6 +18,7 @@ class Produk(models.Model):
     nama = models.CharField(max_length=200)
     slug = models.SlugField(unique=True, max_length=250)
     gambar = models.ImageField(upload_to='produk/thumbnails/', blank=True, null=True)
+    video_produk = models.FileField(upload_to='produk/videos/', null=True, blank=True)
     deskripsi = models.TextField(blank=True, null=True)
     harga = models.IntegerField()  # Menggunakan integer agar pas untuk mata uang Rupiah
     stok = models.IntegerField(default=0)

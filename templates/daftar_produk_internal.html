@@ -90,6 +90,21 @@
                             {% endif %}
                         </td>
                         <td class="p-4 text-center">
+                            <button type="button" 
+                                    onclick="openEditModal(this)"
+                                    data-id="{{ produk.id }}"
+                                    data-nama="{{ produk.nama }}"
+                                    data-kategori="{{ produk.kategori.id }}"
+                                    data-harga="{{ produk.harga }}"
+                                    data-stok="{{ produk.stok }}"
+                                    data-flash="{{ produk.is_flash_sale|yesno:'true,false' }}"
+                                    data-deskripsi="{{ produk.deskripsi }}"
+                                    data-gambar="{% if produk.gambar %}{{ produk.gambar.url }}{% endif %}"
+                                    data-video="{% if produk.video_produk %}{{ produk.video_produk.url }}{% endif %}"
+                                    data-galeri="{% for item in produk.galeri.all %}{{ item.gambar.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
+                                    class="text-[#8C7454] hover:text-white font-medium text-xs bg-[#8C7454]/10 hover:bg-[#8C7454] px-3 py-1.5 rounded-full transition-all cursor-pointer">
+                                Edit
+                            </button>
                             <a href="{% url 'hapus_produk' produk.id %}" onclick="return confirm('Apakah Anda yakin ingin menghapus produk &quot;{{ produk.nama }}&quot; dari katalog?')" class="text-red-500 hover:text-red-700 font-medium text-xs hover:underline bg-red-50/50 hover:bg-red-50 px-3 py-1.5 rounded-full transition-all">
                                 Hapus
                             </a>
@@ -185,12 +200,115 @@
             </div>
 
             <div>
+                <label class="block text-xs font-medium text-stone-700 mb-2">Video Singkat Produk (Maks 5 Detik - Opsional)</label>
+                <div class="flex flex-col gap-2 p-3 border border-[#EAE3D2] rounded-xl bg-[#FAF8F5]">
+                    <input type="file" name="video_produk" id="product_video" accept="video/*" onchange="validateVideoDuration(this)"
+                        class="w-full text-xs text-stone-500 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:bg-[#8C7454]/10 file:text-[#8C7454] cursor-pointer">
+                    <p id="video-error-msg" class="text-[10px] text-red-500 hidden font-medium">⚠️ Durasi video terlalu lama! Maksimal durasi adalah 5 detik.</p>
+                </div>
+            </div>
+
+            <div>
                 <label class="block text-xs font-medium text-stone-700 mb-1">Deskripsi Produk</label>
                 <textarea name="deskripsi" rows="3" placeholder="Kandungan utama, manfaat, dan cara pakai..." class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none resize-none transition-all"></textarea>
             </div>
 
             <button type="submit" class="w-full bg-[#8C7454] text-white py-3 rounded-full text-sm font-semibold hover:bg-[#735F43] transition-all shadow-lg active:scale-[0.98] mt-2">
                 Daftarkan Produk Baru
+            </button>
+        </form>
+    </div>
+</div>
+
+<div id="editProdukModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-8 border border-[#EAE3D2] shadow-2xl relative max-h-[90vh] overflow-y-auto scrollbar-hide">
+        <button onclick="closeEditModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-700 text-xl cursor-pointer p-2">&times;</button>
+        
+        <div class="mb-6">
+            <h2 class="serif-font text-2xl text-[#8C7454] tracking-wide">Form Perbarui Data Produk</h2>
+            <p class="text-xs text-stone-500 mt-1">Ubah rincian spesifikasi data kosmetik LauraDerma terpilih</p>
+        </div>
+        
+        <form id="editForm" action="" method="POST" enctype="multipart/form-data" class="space-y-4">
+            {% csrf_token %}
+            
+            <div>
+                <label class="block text-xs font-medium text-stone-700 mb-1">Nama Resmi Produk</label>
+                <input type="text" name="nama" id="edit_nama" required class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none transition-all">
+            </div>
+            
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-medium text-stone-700 mb-1">Rumpun Kategori</label>
+                    <select name="kategori" id="edit_kategori" required class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-3 text-sm outline-none appearance-none">
+                        {% for kategori in daftar_kategori %}
+                            <option value="{{ kategori.id }}">{{ kategori.nama }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="flex flex-col justify-end">
+                    <label class="inline-flex items-center cursor-pointer select-none text-xs text-stone-700 mb-2">
+                        <input type="checkbox" name="is_flash_sale" id="edit_flash" class="rounded border-[#EAE3D2] text-[#8C7454] focus:ring-[#8C7454] mr-2">
+                        Ikutkan Flash Sale ⚡
+                    </label>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-medium text-stone-700 mb-1">Harga Satuan (Rp)</label>
+                    <input type="number" name="harga" id="edit_harga" required class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-stone-700 mb-1">Jumlah Stok</label>
+                    <input type="number" name="stok" id="edit_stok" required class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none font-mono">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-medium text-stone-700 mb-2">Gambar Sampul Utama</label>
+                <div class="flex items-center gap-4 p-3 border border-[#EAE3D2] rounded-xl bg-[#FAF8F5]">
+                    <div id="editImagePreviewContainer" class="w-16 h-16 rounded-lg bg-white border border-[#EAE3D2] flex items-center justify-center overflow-hidden shrink-0">
+                        <img id="editImagePreview" src="" alt="Preview" class="w-full h-full object-cover">
+                        <span id="editPreviewPlaceholder" class="text-stone-300 text-[10px] hidden">No Pic</span>
+                    </div>
+                    <div class="flex-1">
+                        <input type="file" name="gambar" accept="image/*" onchange="previewEditImage(this)" class="w-full text-xs text-stone-500 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:bg-[#8C7454]/10 file:text-[#8C7454] cursor-pointer">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-medium text-stone-700 mb-2">Galeri Foto Tambahan Saat Ini</label>
+                <div class="border border-[#EAE3D2] rounded-xl p-4 bg-[#FAF8F5]">
+                    <div id="edit-galeri-preview-container" class="flex flex-wrap gap-2 justify-start"></div>
+                    <div class="mt-3 pt-3 border-t border-[#EAE3D2]/60">
+                        <p class="text-[10px] text-stone-400 mb-2">Upload file baru jika ingin memperbarui seluruh galeri:</p>
+                        <input type="file" name="galeri_produk" multiple accept="image/*" onchange="previewEditGallery(this)" class="w-full text-xs text-stone-500 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:bg-[#8C7454]/10 file:text-[#8C7454] cursor-pointer">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-medium text-stone-700 mb-2">Video Promosi Saat Ini</label>
+                <div class="flex flex-col gap-3 p-3 border border-[#EAE3D2] rounded-xl bg-[#FAF8F5]">
+                    <div id="editVideoPreviewContainer" class="w-full aspect-video rounded-lg bg-stone-900 overflow-hidden hidden flex items-center justify-center relative">
+                        <video id="editVideoPreview" src="" controls class="w-full h-full object-cover"></video>
+                    </div>
+                    <div class="flex-1">
+                        <input type="file" name="video_produk" id="edit_product_video" accept="video/*" onchange="validateEditVideo(this)" class="w-full text-xs text-stone-500 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:bg-[#8C7454]/10 file:text-[#8C7454] cursor-pointer">
+                        <p id="edit-video-error-msg" class="text-[10px] text-red-500 hidden font-medium mt-1">⚠️ Durasi video terlalu lama! Maksimal durasi adalah 5 detik.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-medium text-stone-700 mb-1">Deskripsi Produk</label>
+                <textarea name="deskripsi" id="edit_deskripsi" rows="3" class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none resize-none transition-all"></textarea>
+            </div>
+
+            <button type="submit" class="w-full bg-[#8C7454] text-white py-3 rounded-full text-sm font-semibold hover:bg-[#735F43] transition-all shadow-lg active:scale-[0.98] mt-2">
+                Simpan Perubahan Data
             </button>
         </form>
     </div>
@@ -252,6 +370,168 @@
     window.onclick = function(event) {
         let modal = document.getElementById('produkModal');
         if (event.target == modal) { closeProdukModal(); }
+    }
+
+    function validateVideoDuration(input) {
+        const file = input.files[0];
+        const errorMsg = document.getElementById('video-error-msg');
+        
+        if (file) {
+            // Buat elemen video virtual untuk membaca metadata file
+            const video = document.createElement('video');
+            video.preload = 'metadata';
+
+            video.onloadedmetadata = function() {
+                // Membuka akses URL temporary object video
+                window.URL.revokeObjectURL(video.src);
+                const duration = video.duration;
+
+                // Jika durasi melebihi 5.5 detik (toleransi rounding micro-second)
+                if (duration > 10) {
+                    errorMsg.classList.remove('hidden');
+                    input.value = ''; // Mengosongkan kembali input file yang tidak valid
+                    alert('Gagal memilih video! Durasi video Anda adalah ' + duration.toFixed(1) + ' detik. LauraDerma hanya mengizinkan video promosi produk maksimal sepanjang 5 detik.');
+                } else {
+                    errorMsg.classList.add('hidden');
+                }
+            };
+
+            // Mengubah file video menjadi objek URL agar bisa dibaca metadatanya
+            video.src = URL.createObjectURL(file);
+        } else {
+            errorMsg.classList.add('hidden');
+        }
+    }
+
+    function openEditModal(button) {
+        const modal = document.getElementById('editProdukModal');
+        
+        // 1. Ambil data dasar dari atribut tombol
+        const id = button.getAttribute('data-id');
+        const nama = button.getAttribute('data-nama');
+        const kategori = button.getAttribute('data-kategori');
+        const harga = button.getAttribute('data-harga');
+        const stok = button.getAttribute('data-stok');
+        const flash = button.getAttribute('data-flash') === 'true';
+        const deskripsi = button.getAttribute('data-deskripsi');
+        const gambarUrl = button.getAttribute('data-gambar');
+        
+        // Ambil data baru (video & galeri string)
+        const videoUrl = button.getAttribute('data-video');
+        const galeriData = button.getAttribute('data-galeri'); // Contoh isi: "/media/g1.jpg,/media/g2.jpg"
+
+        // 2. Suntikkan ke Form Input
+        document.getElementById('edit_nama').value = nama;
+        document.getElementById('edit_kategori').value = kategori;
+        document.getElementById('edit_harga').value = harga;
+        document.getElementById('edit_stok').value = stok;
+        document.getElementById('edit_flash').checked = flash;
+        document.getElementById('edit_deskripsi').value = deskripsi;
+        document.getElementById('editForm').action = `/kelola-produk/edit/${id}/`;
+
+        // 3. Render Preview Gambar Utama
+        const imgPreview = document.getElementById('editImagePreview');
+        const imgPlaceholder = document.getElementById('editPreviewPlaceholder');
+        if (gambarUrl) {
+            imgPreview.src = gambarUrl;
+            imgPreview.classList.remove('hidden');
+            imgPlaceholder.classList.add('hidden');
+        } else {
+            imgPreview.src = "";
+            imgPreview.classList.add('hidden');
+            imgPlaceholder.classList.remove('hidden');
+        }
+
+        // 4. Render Preview Video (Jika Ada)
+        const videoPreview = document.getElementById('editVideoPreview');
+        const videoContainer = document.getElementById('editVideoPreviewContainer');
+        if (videoUrl) {
+            videoPreview.src = videoUrl;
+            videoContainer.classList.remove('hidden');
+        } else {
+            videoPreview.src = "";
+            videoContainer.classList.add('hidden');
+        }
+
+        // 5. Render Preview Galeri Foto-Foto Lama
+        const galeriContainer = document.getElementById('edit-galeri-preview-container');
+        galeriContainer.innerHTML = ""; // Bersihkan sisa render sebelumnya
+
+        if (galeriData) {
+            // Pecah string koma menjadi Array URL jernih
+            const listFoto = galeriData.split(',');
+            listFoto.forEach(url => {
+                if(url.trim() === "") return;
+                
+                const box = document.createElement('div');
+                box.className = "w-12 h-12 rounded-lg overflow-hidden border border-[#EAE3D2] bg-white shadow-sm shrink-0";
+                
+                const img = document.createElement('img');
+                img.src = url;
+                img.className = "w-full h-full object-cover";
+                
+                box.appendChild(img);
+                galeriContainer.appendChild(box);
+            });
+        } else {
+            galeriContainer.innerHTML = `<span class="text-stone-400 text-xs italic">Tidak ada foto galeri tambahan</span>`;
+        }
+
+        // Tampilkan Modal Edit
+        modal.classList.remove('hidden');
+    }
+
+    function previewEditGallery(input) {
+        const container = document.getElementById('edit-galeri-preview-container');
+        container.innerHTML = ""; // Ganti isi galeri lama dengan preview foto baru
+
+        if (input.files && input.files.length > 0) {
+            Array.from(input.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const box = document.createElement('div');
+                    box.className = "w-12 h-12 rounded-lg overflow-hidden border border-[#8C7454] bg-white shadow-sm shrink-0 animate-pulse";
+                    
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.className = "w-full h-full object-cover";
+                    
+                    box.appendChild(img);
+                    container.appendChild(box);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+    }
+
+    function validateEditVideo(input) {
+        const file = input.files[0];
+        const errorMsg = document.getElementById('edit-video-error-msg');
+        const videoPreview = document.getElementById('editVideoPreview');
+        const videoContainer = document.getElementById('editVideoPreviewContainer');
+        
+        if (file) {
+            const tempVideo = document.createElement('video');
+            tempVideo.preload = 'metadata';
+            tempVideo.onloadedmetadata = function() {
+                window.URL.revokeObjectURL(tempVideo.src);
+                if (tempVideo.duration > 5.5) {
+                    errorMsg.classList.remove('hidden');
+                    input.value = '';
+                    alert('Durasi video baru terlalu lama! Maksimal 5 detik.');
+                } else {
+                    errorMsg.classList.add('hidden');
+                    videoPreview.src = URL.createObjectURL(file);
+                    videoContainer.classList.remove('hidden');
+                }
+            };
+            tempVideo.src = URL.createObjectURL(file);
+        }
+    }
+
+    function closeEditModal() {
+        document.getElementById('editProdukModal').classList.add('hidden');
+        document.getElementById('editVideoPreview').pause(); // Berhentikan video jika sedang distraming
     }
 </script>
 {% endblock %}

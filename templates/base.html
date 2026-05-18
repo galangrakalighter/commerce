@@ -228,22 +228,123 @@
 
         function changeImage(url, element) {
             const mainImage = document.getElementById('main-image');
-            
-            // Animasi fade out
-            mainImage.style.opacity = '0';
-            
-            setTimeout(() => {
-                mainImage.src = url;
-                mainImage.style.opacity = '1';
-            }, 200);
+            const mainVideo = document.getElementById('main-video');
 
-            // Update border thumbnail
-            document.querySelectorAll('.thumbnail-item').forEach(item => {
-                item.classList.remove('border-[#8C7454]');
-                item.classList.add('border-transparent');
-            });
-            element.classList.remove('border-transparent');
+            // 1. Ganti source gambar utama dan munculkan gambarnya
+            if (mainImage) {
+                mainImage.src = imgUrl;
+                mainImage.classList.remove('hidden');
+            }
+
+            // 2. Sembunyikan video dan pause jika sedang berputar
+            if (mainVideo) {
+                mainVideo.classList.add('hidden');
+                mainVideo.pause();
+            }
+
+            // 3. Atur highlight border aktif pada thumbnail
+            resetThumbnailBorders();
             element.classList.add('border-[#8C7454]');
+            element.classList.remove('border-transparent');
+        }
+
+        function showVideo(element) {
+            const mainImage = document.getElementById('main-image');
+            const mainVideo = document.getElementById('main-video');
+
+            // 1. Munculkan video dan putar kembali
+            if (mainVideo) {
+                mainVideo.classList.remove('hidden');
+                mainVideo.play();
+            }
+
+            // 2. Sembunyikan gambar utama
+            if (mainImage) {
+                mainImage.classList.add('hidden');
+            }
+
+            // 3. Atur highlight border aktif pada thumbnail
+            resetThumbnailBorders();
+            element.classList.add('border-[#8C7454]');
+            element.classList.remove('border-transparent');
+        }
+
+        function resetThumbnailBorders() {
+            const thumbnails = document.querySelectorAll('.thumbnail-item');
+            thumbnails.forEach(thumb => {
+                thumb.classList.remove('border-[#8C7454]');
+                thumb.classList.add('border-transparent');
+            });
+        }
+
+        function previewGallery(input) {
+            const container = document.getElementById('galeri-preview-container');
+            const prompt = document.getElementById('galeri-upload-prompt');
+            
+            // Bersihkan preview lama terlebih dahulu
+            container.innerHTML = "";
+
+            if (input.files && input.files.length > 0) {
+                // Sembunyikan icon/tulisan petunjuk upload jika ada gambar yang masuk
+                prompt.classList.add('hidden');
+
+                Array.from(input.files).forEach(file => {
+                    if (!file.type.startsWith('image/')) return; // Lewati jika bukan file gambar
+
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        // Buat pembungkus element foto kecil
+                        const wrapper = document.createElement('div');
+                        wrapper.className = "w-14 h-14 rounded-lg overflow-hidden border border-[#EAE3D2] relative group/item bg-white shadow-sm";
+
+                        // Tag Image untuk menampilkan file gambar biner
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.className = "w-full h-full object-cover";
+
+                        wrapper.appendChild(img);
+                        container.appendChild(wrapper);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            } else {
+                // Tampilkan kembali text petunjuk jika inputan kosong (batal memilih)
+                prompt.classList.remove('hidden');
+            }
+        }
+
+        function validateAndPreviewVideo(input) {
+            const file = input.files[0];
+            const errorMsg = document.getElementById('video-error-msg');
+            const videoPreview = document.getElementById('videoPreview');
+            const videoContainer = document.getElementById('videoPreviewContainer');
+            
+            if (file) {
+                // Buat element video virtual sementara untuk memeriksa durasi detik media
+                const tempVideo = document.createElement('video');
+                tempVideo.preload = 'metadata';
+
+                tempVideo.onloadedmetadata = function() {
+                    window.URL.revokeObjectURL(tempVideo.src);
+                    const duration = tempVideo.duration;
+
+                    // Jika durasi video melebih batas toleransi 5.5 detik
+                    if (duration > 10) {
+                        errorMsg.classList.remove('hidden');
+                        resetVideoInput(); // Reset view dan inputan karena tidak valid
+                        alert('Gagal memuat video! Durasi video Anda adalah ' + duration.toFixed(1) + ' detik. LauraDerma hanya mengizinkan durasi video produk maksimal sepanjang 5 detik.');
+                    } else {
+                        // Validasi lolos, tampilkan element preview video ke user
+                        errorMsg.classList.add('hidden');
+                        videoPreview.src = URL.createObjectURL(file);
+                        videoContainer.classList.remove('hidden');
+                    }
+                };
+
+                tempVideo.src = URL.createObjectURL(file);
+            } else {
+                resetVideoInput();
+            }
         }
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -267,6 +368,71 @@
                     });
                 });
             }
+
+            const searchInput = document.getElementById("search-input");
+            const previewBox = document.getElementById("search-preview-box");
+            const searchContainer = document.getElementById("search-container");
+            let debounceTimer;
+
+            searchInput.addEventListener("input", function () {
+                clearTimeout(debounceTimer);
+                const query = searchInput.value.trim();
+
+                if (query.length < 2) {
+                    previewBox.innerHTML = "";
+                    previewBox.classList.add("hidden");
+                    return;
+                }
+
+                // Debounce selama 300ms agar tidak spamming request ke server Django
+                debounceTimer = setTimeout(() => {
+                    fetch(`/api/search-live/?q=${encodeURIComponent(query)}`)
+                        .then(response => response.json())
+                        .then(data => {
+                            previewBox.innerHTML = "";
+                            
+                            if (data.results.length > 0) {
+                                data.results.forEach(item => {
+                                    const row = `
+                                        <a href="${item.url}" class="flex items-center gap-4 px-5 py-3 hover:bg-[#FAF8F5] transition-colors group">
+                                            <div class="w-10 h-10 bg-stone-50 rounded-xl overflow-hidden flex-shrink-0 border border-stone-100">
+                                                <img src="${item.gambar}" class="w-full h-full object-cover">
+                                            </div>
+                                            <div class="flex-1 min-w-0">
+                                                <h4 class="text-sm font-medium text-stone-900 truncate group-hover:text-[#8C7454] transition-colors">${item.nama}</h4>
+                                                <p class="text-xs text-[#8C7454] font-semibold mt-0.5">${item.harga}</p>
+                                            </div>
+                                            <span class="text-stone-300 group-hover:text-[#8C7454] transition-transform group-hover:translate-x-1 duration-200 text-xs">→</span>
+                                        </a>
+                                    `;
+                                    previewBox.insertAdjacentHTML("beforeend", row);
+                                });
+                                previewBox.classList.remove("hidden");
+                            } else {
+                                // Tampilan jika produk tidak ditemukan
+                                previewBox.innerHTML = `
+                                    <div class="px-5 py-4 text-center text-xs text-stone-400 italic">
+                                        Produk "${query}" tidak ditemukan.
+                                    </div>
+                                `;
+                                previewBox.classList.remove("hidden");
+                            }
+                        })
+                        .catch(err => console.error("Error live search:", err));
+                }, 300);
+            });
+
+            document.addEventListener("click", function (e) {
+                if (!searchContainer.contains(e.target)) {
+                    previewBox.classList.add("hidden");
+                }
+            });
+
+            searchInput.addEventListener("focus", function () {
+                if (searchInput.value.trim().length >= 2 && previewBox.children.length > 0) {
+                    previewBox.classList.remove("hidden");
+                }
+            });
         });
 
         document.getElementById('reviewForm').addEventListener('submit', function(e) {

@@ -69,7 +69,6 @@
                                 </svg>
                             </button>
 
-                            <!-- TOMBOL WISHLIST (SAVE/BOOKMARK) -->
                             <button onclick="toggleWishlist(this, '{{ produk.id }}')" 
                                     class="wishlist-btn p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all group/wish {% if produk.id in user_wishlists %}active{% endif %}">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-stone-600 group-hover/wish:text-[#8C7454]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -92,17 +91,34 @@
                             {% endif %}
                         </span>
                         
-                        <h3 class="text-sm font-medium mt-1 text-[#2C2A29] truncate group-hover:text-[#8C7454] transition-colors" title="{{ produk.nama }}">
-                            {{ produk.nama }}
-                        </h3>
+                        <a href="{% url 'detail_produk' produk.id %}" class="relative z-20">
+                            <h3 class="text-sm font-medium mt-1 text-[#2C2A29] truncate group-hover:text-[#8C7454] transition-colors" title="{{ produk.nama }}">
+                                {{ produk.nama }}
+                            </h3>
+                        </a>
                     </div>
                 </div>
 
-                <div class="p-4 pt-0">
-                    <div class="flex items-center justify-between gap-2 pt-2 border-t border-stone-100">
+                <div class="p-4 pt-0 relative z-20">
+                    <div class="flex items-center justify-between gap-2 pt-2 border-t border-stone-100 mb-3">
                         <span class="text-sm font-semibold text-[#2C2A29]">Rp {{ produk.harga }}</span>
                         <span class="text-[10px] bg-stone-100 text-stone-600 px-2 py-0.5 rounded font-mono">Stok: {{ produk.stok }}</span>
                     </div>
+
+                    {% if request.user.is_authenticated %}
+                        <form action="{% url 'tambah_ke_keranjang' produk.id %}" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="jumlah" value="1">
+                            <button type="submit" class="w-full bg-amber-500 text-white py-2.5 rounded-xl text-xs font-medium hover:bg-amber-600 transition-colors shadow-sm flex items-center justify-center gap-1.5">
+                                ⚡ Beli Langsung
+                            </button>
+                        </form>
+                    {% else %}
+                        <button type="button" onclick="openLoginModal()" 
+                                class="w-full bg-stone-400 text-white py-2.5 rounded-xl text-xs font-medium hover:bg-stone-500 transition-colors shadow-sm flex items-center justify-center gap-1.5">
+                            ⚡ Beli Langsung
+                        </button>
+                    {% endif %}
                 </div>
             </div>
             {% empty %}
@@ -132,13 +148,11 @@
                         {% if produk.gambar %}
                             <img src="{{ produk.gambar.url }}" alt="{{ produk.nama }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
                         {% else %}
-                            <!-- Tampilan jika admin lupa upload gambar -->
                             <span class="text-stone-400 italic text-xs font-medium text-center">[ {{ produk.nama }} ]</span>
                         {% endif %}
                         </a>
 
                         <div class="absolute top-3 right-3 z-20 flex flex-col gap-2">
-                            <!-- TOMBOL LIKE (LOVE) -->
                             <button onclick="toggleLike(this, '{{ produk.id }}')" 
                                     class="like-btn p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all group/like {% if produk.id in user_likes %}active{% endif %}">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-stone-600 group-hover/like:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -146,8 +160,7 @@
                                 </svg>
                             </button>
 
-                            <!-- TOMBOL WISHLIST (SAVE/BOOKMARK) -->
-                           <button onclick="toggleWishlist(this, '{{ produk.id }}')" 
+                            <button onclick="toggleWishlist(this, '{{ produk.id }}')" 
                                     class="wishlist-btn p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all group/wish {% if produk.id in user_wishlists %}active{% endif %}">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-stone-600 group-hover/wish:text-[#8C7454]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
@@ -158,17 +171,35 @@
                     
                     <div class="p-4">
                         <span class="text-[10px] text-stone-400 uppercase tracking-wider block">{{ produk.kategori.nama }}</span>
-                        <h3 class="text-sm font-medium mt-1 text-[#2C2A29] truncate group-hover:text-[#8C7454] transition-colors" title="{{ produk.nama }}">
-                            {{ produk.nama }}
-                        </h3>
+                        <a href="{% url 'detail_produk' produk.id %}" class="relative z-20">
+                            <h3 class="text-sm font-medium mt-1 text-[#2C2A29] truncate group-hover:text-[#8C7454] transition-colors" title="{{ produk.nama }}">
+                                {{ produk.nama }}
+                            </h3>
+                        </a>
                     </div>
                 </div>
 
-                <div class="p-4 pt-0">
-                    <div class="flex items-center justify-between gap-2 pt-2 border-t border-stone-100">
+                <div class="p-4 pt-0 relative z-20">
+                    <div class="flex items-center justify-between gap-2 pt-2 border-t border-stone-100 mb-3">
                         <span class="text-sm font-semibold text-[#2C2A29]">Rp {{ produk.harga }}</span>
                         <span class="text-[10px] bg-stone-100 text-stone-600 px-2 py-0.5 rounded font-mono">Stok: {{ produk.stok }}</span>
                     </div>
+
+                    {% if request.user.is_authenticated %}
+                        <form action="{% url 'tambah_ke_keranjang' produk.id %}" method="POST">
+                            {% csrf_token %}
+                            <input type="hidden" name="jumlah" value="1">
+                            
+                            <button type="submit" class="w-full bg-[#2C2A29] text-white py-2.5 rounded-xl text-xs font-medium hover:bg-[#8C7454] transition-colors shadow-sm flex items-center justify-center gap-1.5">
+                                ⚡ Beli Langsung
+                            </button>
+                        </form>
+                    {% else %}
+                        <button type="button" onclick="openLoginModal()" 
+                                class="w-full bg-stone-400 text-white py-2.5 rounded-xl text-xs font-medium hover:bg-stone-500 transition-colors shadow-sm flex items-center justify-center gap-1.5">
+                            ⚡ Beli Langsung
+                        </button>
+                    {% endif %}
                 </div>
             </div>
             {% empty %}

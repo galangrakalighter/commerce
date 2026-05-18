@@ -9,6 +9,7 @@ from django.utils.text import slugify
 from toko.models import Produk, Kategori, Like, Wishlist, ProdukGambar, Review, Pesanan, DetailPesanan
 from django.db.models import Avg
 from django.urls import reverse
+from django.views.decorators.csrf import csrf_exempt
 
 def halaman_utama(request):
     produk_spesial = Produk.objects.filter(is_flash_sale=True)
@@ -61,6 +62,7 @@ def tambah_produk_proses(request):
         is_flash_sale = request.POST.get('is_flash_sale') == 'on'
         deskripsi = request.POST.get('deskripsi')
         gambar = request.FILES.get('gambar')
+        video = request.FILES.get('video_produk')
 
         from django.utils.text import slugify
         slug = slugify(nama)
@@ -80,7 +82,8 @@ def tambah_produk_proses(request):
             harga=harga,
             stok=stok,
             is_flash_sale=is_flash_sale,
-            deskripsi=deskripsi
+            deskripsi=deskripsi,
+            video_produk=video
         )
         # produk.save()  # create() sudah otomatis memanggil save()
 
@@ -431,23 +434,45 @@ def hapus_dari_keranjang(request, produk_id):
 
 @login_required
 def checkout_view(request):
-    # Cek parameter penanda di URL (?source=buy_now)
-    is_buy_now = request.GET.get('source') == 'buy_now'
+    # Cek parameter penanda di URL (?source=...)
+    source = request.GET.get('source')
     
-    if is_buy_now:
-        # Hanya ambil produk dari session buy_now
+    # === STEP 1: TANGKAP DATA CHECKBOX JIKA DATANG DARI FORM KERANJANG ===
+    if source == 'selected' and request.method == 'POST' and 'pilihan_item' in request.POST:
+        produk_terpilih_ids = request.POST.getlist('pilihan_item')
+        cart = request.session.get('cart', {})
+        
+        # Saring isi cart lama, ambil yang id-nya dicentang saja
+        checkout_selected = {}
+        for prod_id in produk_terpilih_ids:
+            if str(prod_id) in cart:
+                checkout_selected[str(prod_id)] = cart[str(prod_id)]
+                
+        # Amankan ke session temporary khusus checkout ini
+        request.session['checkout_selected'] = checkout_selected
+        request.session.modified = True
+    
+    # === STEP 2: TENTUKAN SUMBER DATA PRODUK YANG AKAN DI-CHECKOUT ===
+    if source == 'buy_now':
+        # Kondisi 1: Langsung beli dari halaman katalog / detail produk
         items_to_checkout = request.session.get('buy_now', {})
+    elif source == 'selected':
+        # Kondisi 2: Menggunakan produk hasil pilihan centang di keranjang
+        items_to_checkout = request.session.get('checkout_selected', {})
     else:
-        # Ambil semua produk dari keranjang biasa
+        # Kondisi 3: Fallback jika klik checkout biasa tanpa parameter (Beli Semua)
         items_to_checkout = request.session.get('cart', {})
         
+    # Jika tidak ada item yang siap diproses, kembalikan ke keranjang
     if not items_to_checkout:
         return redirect('detail_keranjang')
         
-    # Hitung total belanja hanya dari item yang sedang di-checkout
+    # Hitung total belanja hanya dari item yang sedang lolos seleksi checkout
     total_belanja = sum(item['jumlah'] * item['harga'] for item in items_to_checkout.values())
     
-    if request.method == 'POST':
+    # === STEP 3: PROSES SUBMIT ALAMAT & INREMENT KE MIDTRANS ===
+    # Pengecekan 'nama_penerima' memastikan ini adalah POST dari form alamat checkout, bukan POST dari checkbox keranjang
+    if request.method == 'POST' and request.POST.get('nama_penerima'):
         nama_penerima = request.POST.get('nama_penerima')
         telepon = request.POST.get('telepon')
         alamat_lengkap = request.POST.get('alamat_lengkap')
@@ -499,19 +524,31 @@ def checkout_view(request):
             transaction = snap.create_transaction(param)
             snap_token = transaction['token']
             
-            # ================== PERBAIKAN DI BAGIAN INI ==================
-            if is_buy_now:
-                # JIKA BELI LANGSUNG: Hanya hapus session 'buy_now'. 
-                # Session 'cart' (keranjang lama) sengaja DIBIARKAN UTUH agar tidak hilang.
+            # === STEP 4: REDISTRIBUSI & PEMBERSIHAN DATA KERANJANG ===
+            if source == 'buy_now':
+                # JIKA BELI LANGSUNG: Hanya hapus session flash buy_now
                 if 'buy_now' in request.session:
                     del request.session['buy_now']
+                    
+            elif source == 'selected':
+                # JIKA CHECKOUT SELEKSI:
+                cart = request.session.get('cart', {})
+                # Hapus HANYA produk yang tadi dicentang dari keranjang belanja utama
+                for produk_id in items_to_checkout.keys():
+                    if produk_id in cart:
+                        del cart[produk_id]
+                
+                # Simpan sisa barang yang tidak dicentang agar tetap awet di dalam cart
+                request.session['cart'] = cart
+                # Hapus data sampah temporary pilihan
+                if 'checkout_selected' in request.session:
+                    del request.session['checkout_selected']
             else:
-                # JIKA CHECKOUT BIASA: Baru hapus seluruh isi keranjang belanja belanjaan
+                # JIKA CHECKOUT ALL (Tanpa Filter): Bersihkan seluruh isi keranjang biasa
                 if 'cart' in request.session:
                     del request.session['cart']
             
             request.session.modified = True
-            # =============================================================
             
             return render(request, 'cart/bayar.html', {
                 'pesanan': pesanan, 
@@ -532,23 +569,51 @@ def checkout_view(request):
 
 def bersihkan_keranjang_ajax(request):
     if request.method == 'POST':
-        # 1. Kosongkan session keranjang
-        request.session['cart'] = {}
-        request.session.modified = True
-        
-        # 2. Ambil data pesanan_id dari JavaScript jika ada
         try:
             data = json.loads(request.body)
             pesanan_id = data.get('pesanan_id')
-            if pesanan_id:
-                pesanan = Pesanan.objects.get(id=pesanan_id)
-                pesanan.status = 'SELESAI' # Ubah status menjadi Selesai
-                pesanan.save()
-        except Exception as e:
-            print(f"Gagal mengupdate status pesanan: {e}")
             
-        return JsonResponse({'status': 'success', 'message': 'Keranjang dibersihkan dan status diperbarui'})
-    return JsonResponse({'status': 'error', 'message': 'Metode tidak diizinkan'}, status=405)
+            cart = request.session.get('cart', {})
+            
+            # KONDISI 1: Jika pesanan_id dikirim (User Berhasil Bayar / Skenario Seleksi)
+            if pesanan_id:
+                # Ambil semua item produk yang dibeli di dalam pesanan ini
+                item_terbeli = DetailPesanan.objects.filter(pesanan_id=pesanan_id)
+                
+                # Hapus HANYA produk yang ada di pesanan ini dari session cart
+                for item in item_terbeli:
+                    id_produk_str = str(item.produk_id)
+                    if id_produk_str in cart:
+                        del cart[id_produk_str]
+                
+                # Simpan sisa produk yang tidak dipilih kembali ke session
+                request.session['cart'] = cart
+                
+            # KONDISI 2: Jika pesanan_id TIDAK dikirim (karena onPending / VA baru keluar)
+            else:
+                # Sesuai logika onPending di JS-mu, jika datang dari keranjang belanja seleksi (selected),
+                # hapus item yang dicentang dari cart utama agar tidak double pas bayar nanti.
+                checkout_selected = request.session.get('checkout_selected', {})
+                
+                if checkout_selected:
+                    for prod_id in checkout_selected.keys():
+                        if str(prod_id) in cart:
+                            del cart[str(prod_id)]
+                    request.session['cart'] = cart
+
+            # Bersihkan session sampah temporary jika ada
+            if 'checkout_selected' in request.session:
+                del request.session['checkout_selected']
+            if 'buy_now' in request.session:
+                del request.session['buy_now']
+                
+            request.session.modified = True
+            return JsonResponse({'status': 'success', 'message': 'Keranjang berhasil diperbarui'})
+            
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+            
+    return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
 
 def update_kuantitas_keranjang(request, produk_id, aksi):
     cart = request.session.get('cart', {})
@@ -568,3 +633,82 @@ def update_kuantitas_keranjang(request, produk_id, aksi):
         request.session.modified = True
         
     return redirect('detail_keranjang')
+
+def live_search_view(request):
+    query = request.GET.get('q', '').strip()
+    results = []
+    
+    if len(query) >= 2:
+        produks = Produk.objects.filter(nama__icontains=query)[:6]
+        
+        for p in produks:
+            gambar_url = p.gambar.url if p.gambar else '/static/images/default-avatar.png'
+            
+            detail_url = reverse('detail_produk', kwargs={'id': p.id}) 
+            
+            results.append({
+                'id': p.id,
+                'nama': p.nama,
+                'harga': f"Rp {p.harga:,}".replace(",", "."),
+                'gambar': gambar_url,
+                'url': detail_url
+            })
+            
+    return JsonResponse({'results': results})
+
+def edit_produk(request, id):
+    # 1. Ambil objek produk berdasarkan ID atau return 404 jika tidak ketemu
+    produk = get_object_or_404(Produk, id=id)
+    
+    if request.method == 'POST':
+        # 2. Ambil data teks dari form text/number/select
+        nama = request.POST.get('nama')
+        kategori_id = request.POST.get('kategori')
+        harga = request.POST.get('harga')
+        stok = request.POST.get('stok')
+        is_flash_sale = request.POST.get('is_flash_sale') == 'on' # Checkbox menghasilkan 'on' jika dicentang
+        deskripsi = request.POST.get('deskripsi')
+        
+        try:
+            # 3. Update data teks & relasi kategori
+            kategori = get_object_or_404(Kategori, id=kategori_id)
+            
+            produk.nama = nama
+            produk.kategori = kategori
+            produk.harga = harga
+            produk.stok = stok
+            produk.is_flash_sale = is_flash_sale
+            produk.deskripsi = deskripsi
+            
+            # 4. Handle Gambar Sampul Utama (Hanya ganti jika user upload file baru)
+            if 'gambar' in request.FILES:
+                produk.gambar = request.FILES['gambar']
+                
+            # 5. Handle Video Produk (Hanya ganti jika user upload file baru)
+            if 'video_produk' in request.FILES:
+                produk.video_produk = request.FILES['video_produk']
+            
+            # Simpan perubahan produk utama ke database
+            produk.save()
+            
+            # 6. Handle Galeri Foto Tambahan (Multiple Files)
+            # Jika user mengunggah foto baru di galeri, biasanya galeri lama diganti atau ditambah.
+            # Di sini kita asumsikan mengganti galeri lama dengan yang baru jika ada inputan baru:
+            if 'galeri_produk' in request.FILES:
+                files = request.FILES.getlist('galeri_produk')
+                if files:
+                    # Hapus rekam jejak galeri foto lama jika ingin overwrite total
+                    produk.galeri.all().delete() 
+                    
+                    # Simpan barisan foto galeri baru satu per satu
+                    for f in files:
+                        GaleriProduk.objects.create(produk=produk, gambar=f)
+
+            messages.success(request, f'Produk "{produk.nama}" berhasil diperbarui!')
+        except Exception as e:
+            messages.error(request, f'Gagal memperbarui produk: {str(e)}')
+            
+        return redirect('kelola_produk')
+        
+    # Jika diakses lewat GET (keamanan tambahan jika user iseng ketik URL langsung)
+    return redirect('kelola_produk')
