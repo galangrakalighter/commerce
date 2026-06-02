@@ -3,33 +3,70 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.dateparse import parse_datetime
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+from django.views.decorators.http import require_POST
 from django.http import JsonResponse
 from django.contrib import messages
+from .forms import BannerPromoForm
 from django.http import HttpResponseForbidden
 from django.conf import settings
 from django.utils.text import slugify
-from toko.models import Produk, Kategori, Like, Wishlist, ProdukGambar, Review, Pesanan, DetailPesanan
-from django.db.models import Avg
+from toko.models import Produk, Kategori, Like, Wishlist, ProdukGambar, Review, Pesanan, DetailPesanan, BannerPromo
+from django.db.models import Avg, Count
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 
 def halaman_utama(request):
-    produk_spesial = Produk.objects.filter(is_flash_sale=True)
-    produk_biasa = Produk.objects.filter(is_flash_sale=False)
+    # 1. AMBIL DATA MASTER BANNER & KATEGORI
+    daftar_banner = BannerPromo.objects.filter(is_aktif=True).order_by('-diperbarui_pada')
     daftar_kategori = Kategori.objects.all()
+    
+    # 2. QUERY SEMUA PRODUK UNTUK GRID UTAMA (Mendukung filter JavaScript)
+    # Kita gabungkan produk flash sale dan reguler di sini, diurutkan agar flash sale muncul paling atas
+    daftar_produk = Produk.objects.all().order_by('-is_flash_sale', '-dibuat_pada')
 
+    # 3. GENERATE PRODUK POPULER (BACKUP ALGORITMA REKOMENDASI)
+    produk_populer = Produk.objects.annotate(
+        total_likes=Count('likes')
+    ).order_by('-total_likes', '-dibuat_pada')[:9]
+    
     user_wishlists = []
     user_likes = []
+    produk_rekomendasi = None
 
+    # 4. PROSES ALGORITMA "YANG MUNGKIN ANDA SUKA" (BERDASARKAN AKTIVITAS USER)
     if request.user.is_authenticated:
-        user_wishlists = Wishlist.objects.filter(user=request.user).values_list('produk_id', flat=True)
         user_likes = Like.objects.filter(user=request.user).values_list('produk_id', flat=True)
+        user_wishlists = Wishlist.objects.filter(user=request.user).values_list('produk_id', flat=True)
+        
+        user_pembelian = DetailPesanan.objects.filter(
+            pesanan__user=request.user
+        ).values_list('produk_id', flat=True)
+        
+        # Gabungkan semua ID produk yang berinteraksi dengan user
+        produk_terkait_user = list(user_likes) + list(user_wishlists) + list(user_pembelian)
+        
+        if produk_terkait_user:
+            kategori_tertarik = Produk.objects.filter(
+                id__in=produk_terkait_user
+            ).values_list('kategori_id', flat=True).distinct()
+            
+            # Ambil produk rekomendasi acak berdasarkan ketertarikan kategori
+            produk_rekomendasi = Produk.objects.filter(
+                kategori_id__in=kategori_tertarik
+            ).exclude(id__in=produk_terkait_user).order_by('?')[:9]
 
+    # 5. FALLBACK SAFETY NET
+    if not produk_rekomendasi or not produk_rekomendasi.exists():
+        produk_rekomendasi = produk_populer
+
+    # 6. KIRIMKAN DATA KE TEMPLATE
     context = {
-        'produk_spesial': produk_spesial,
-        'produk_biasa': produk_biasa,
+        'daftar_banner': daftar_banner,
         'daftar_kategori': daftar_kategori,
-        'user_wishlists': list(user_wishlists), # Diubah ke list biasa agar Django template mudah membacanya
+        'daftar_produk': daftar_produk, # Menggantikan produk_spesial dan produk_biasa
+        'produk_rekomendasi': produk_rekomendasi,
+        'user_wishlists': list(user_wishlists), 
         'user_likes': list(user_likes),
     }
     return render(request, 'index.html', context)
@@ -895,3 +932,53 @@ def cek_status_kurir_api(request, pesanan_id):
             'status': 'error',
             'message': 'Pesanan tidak ditemukan'
         }, status=404)
+
+@login_required
+def kelola_banner(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+        
+    # JIKA STAFF MENGIRIM DATA BANNER BARU (DARI MODAL)
+    if request.method == 'POST':
+        form = BannerPromoForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('kelola_banner') # Refresh halaman agar banner baru langsung muncul
+            
+    # JIKA STAFF HANYA MELIHAT HALAMAN (GET)
+    else:
+        form = BannerPromoForm()
+        
+    semua_banner = BannerPromo.objects.all().order_by('-diperbarui_pada')
+    
+    context = {
+        'semua_banner': semua_banner,
+        'form': form # Form dikirim ke template untuk dirender di dalam modal
+    }
+    return render(request, 'kelola_banner.html', context)
+
+# 2. VIEW EDIT STATUS AKTIF (TOGGLE)
+@login_required
+def toggle_status_banner(request, banner_id):
+    if not request.user.is_staff:
+        raise PermissionDenied
+    
+    banner = get_object_or_404(BannerPromo, id=banner_id)
+    banner.is_aktif = not banner.is_aktif  # Balikkan statusnya (True jadi False, atau sebaliknya)
+    banner.save()
+    return redirect('kelola_banner')
+
+# 3. VIEW UNTUK HAPUS BANNER
+@login_required
+@require_POST # Mengamankan penghapusan hanya bisa lewat metode POST
+def hapus_banner(request, banner_id):
+    if not request.user.is_staff:
+        raise PermissionDenied
+        
+    banner = get_object_or_404(BannerPromo, id=banner_id)
+    # Hapus file gambar fisik dari penyimpanan server agar tidak menumpuk sampah data
+    if banner.gambar:
+        banner.gambar.delete()
+        
+    banner.delete()
+    return redirect('kelola_banner')

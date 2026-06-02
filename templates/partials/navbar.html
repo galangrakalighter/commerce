@@ -46,7 +46,6 @@
 
             {% if user.is_authenticated %}
                 <div class="flex items-center gap-3 text-sm relative">
-                    
                     {% if user.is_superuser %}
                         <a href="{% url 'kelola_staff' %}" class="hidden sm:flex bg-blue-600 text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-blue-700 transition-colors items-center gap-1 shadow-sm">
                             👤 Staff
@@ -54,9 +53,12 @@
                         <a href="{% url 'kelola_produk' %}" class="hidden sm:flex bg-amber-700 text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-amber-800 transition-colors items-center gap-1 shadow-sm">
                             💼 Produk
                         </a>
+                        <a href="{% url 'kelola_banner' %}" class="text-sm font-medium text-[#2C2A29] hover:text-[#8C7454]">
+                            💼 Manajemen Banner Iklan
+                        </a>
                     {% elif user.is_staff %}
-                        <a href="{% url 'kelola_produk' %}" class="hidden sm:flex bg-amber-700 text-white px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-amber-800 transition-colors items-center gap-1 shadow-sm">
-                            💼 Produk
+                        <a href="{% url 'kelola_banner' %}" class="text-sm font-medium text-[#2C2A29] hover:text-[#8C7454]">
+                            💼 Manajemen Banner Iklan
                         </a>
                     {% endif %}
 

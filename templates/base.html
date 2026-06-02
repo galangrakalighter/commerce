@@ -52,6 +52,14 @@
         .animate-fade-in-down {
             animation: fadeInDown 0.5s ease-out;
         }
+
+        .scrollbar-none::-webkit-scrollbar {
+            display: none;
+        }
+        .scrollbar-none {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -246,6 +254,50 @@
             element.classList.add('border-[#8C7454]');
             element.classList.remove('border-transparent');
         }
+
+        function scrollImgSlider(direction) {
+            const slider = document.getElementById('imagePromoSlider');
+            if (!slider) return;
+
+            const clientWidth = slider.clientWidth;
+            const currentScroll = slider.scrollLeft;
+            const maxScroll = slider.scrollWidth - clientWidth;
+            
+            // Toleransi 5 piksel untuk mengantisipasi perbedaan kalkulasi sub-pixel di layar resolusi tinggi (Retina/4K)
+            const isAtRightEnd = currentScroll >= maxScroll - 5;
+            const isAtLeftEnd = currentScroll <= 5;
+
+            if (direction === 'right') {
+                if (isAtRightEnd) {
+                    // Jika sudah mentok kanan, balikkan paksa ke posisi paling awal (kiri)
+                    slider.scrollTo({ left: 0, behavior: 'smooth' });
+                } else {
+                    // Jika belum mentok, geser maju 1 slide ke kanan
+                    slider.scrollBy({ left: clientWidth, behavior: 'smooth' });
+                }
+            } else if (direction === 'left') {
+                if (isAtLeftEnd) {
+                    // Jika sudah mentok kiri, lompatkan langsung ke posisi paling akhir (kanan)
+                    slider.scrollTo({ left: maxScroll, behavior: 'smooth' });
+                } else {
+                    // Jika belum mentok, geser mundur 1 slide ke kiri
+                    slider.scrollBy({ left: -clientWidth, behavior: 'smooth' });
+                }
+            }
+        }
+
+        // AUTO PLAY ALGORITMA (Opsional: Otomatis menggeser banner tiap 5 detik seperti Shopee)
+        setInterval(() => {
+            const slider = document.getElementById('imagePromoSlider');
+            if(slider) {
+                // Jika sudah di mentok kanan, balik ke awal, jika belum geser kanan
+                if (slider.scrollLeft + slider.clientWidth >= slider.scrollWidth - 5) {
+                    slider.scrollTo({ left: 0, behavior: 'smooth' });
+                } else {
+                    slider.scrollBy({ left: slider.clientWidth, behavior: 'smooth' });
+                }
+            }
+        }, 5000);
 
         function showVideo(element) {
             const mainImage = document.getElementById('main-image');

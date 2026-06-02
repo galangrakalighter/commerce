@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+
+{% block title %}LauraDerma - Toko Skincare & Estetika Premium{% endblock %}
+
+{% block content %}
+    <div class="max-w-6xl mx-auto relative">
+            
+            <div class="flex items-center justify-between border-b border-[#EAE3D2] pb-6 mb-8 gap-4 flex-wrap">
+                <div>
+                    <a href="{% url 'home' %}" class="text-xs text-[#8C7454] hover:underline flex items-center gap-1 mb-2">
+                        ← Kembali ke Beranda Toko
+                    </a>
+                    <h1 class="text-3xl font-normal serif-font tracking-wide">Manajemen Banner Iklan</h1>
+                    <p class="text-xs text-stone-500 mt-1">Atur, nonaktifkan, atau unggah materi promosi komersial beranda utama</p>
+                </div>
+                
+                <button type="button" onclick="openBannerModal()" class="bg-[#2C2A29] hover:bg-[#8C7454] text-white text-xs font-medium px-5 py-3 rounded-xl transition-colors shadow-sm flex items-center gap-2 cursor-pointer">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Unggah Banner Baru
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {% for banner in semua_banner %}
+                <div class="bg-white rounded-2xl border border-[#EAE3D2] overflow-hidden shadow-sm flex flex-col justify-between group">
+                    
+                    <div class="aspect-[21/9] bg-stone-100 relative overflow-hidden border-b border-[#EAE3D2]/50">
+                        <img src="{{ banner.gambar.url }}" alt="{{ banner.judul }}" class="w-full h-full object-cover">
+                        
+                        <span class="absolute top-3 left-3 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-md shadow-sm z-10 {% if banner.is_aktif %} bg-emerald-500 text-white {% else %} bg-stone-400 text-white {% endif %}">
+                            {% if banner.is_aktif %} ● Aktif Berjalan {% else %} ○ Nonaktif {% endif %}
+                        </span>
+                    </div>
+
+                    <div class="p-5 flex-1 flex flex-col justify-between">
+                        <div>
+                            <h3 class="font-medium text-base text-[#2C2A29] line-clamp-1" title="{{ banner.judul }}">{{ banner.judul }}</h3>
+                            
+                            <div class="mt-2 space-y-1">
+                                <p class="text-xs text-stone-500 truncate flex items-center gap-1">
+                                    <span class="font-semibold text-stone-700">Link Tujuan:</span> 
+                                    {% if banner.url_tujuan %}{{ banner.url_tujuan }}{% else %}<span class="italic text-stone-400">Tidak diatur (hanya gambar)</span>{% endif %}
+                                </p>
+                                <p class="text-[10px] text-stone-400">
+                                    Diperbarui: {{ banner.diperbarui_pada|date:"d M Y, H:i" }} WIB
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between border-t border-stone-100 pt-4 mt-5 gap-3">
+                            
+                            <a href="{% url 'toggle_status_banner' banner.id %}" class="text-xs font-medium px-4 py-2 rounded-xl border transition-all flex items-center gap-1.5 {% if banner.is_aktif %} border-stone-200 text-stone-600 hover:bg-stone-50 {% else %} border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 {% endif %}">
+                                {% if banner.is_aktif %}
+                                    ⏸️ Matikan Sementara
+                                {% else %}
+                                    ▶️ Hidupkan di Beranda
+                                {% endif %}
+                            </a>
+
+                            <form action="{% url 'hapus_banner' banner.id %}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menghapus banner ini secara permanen dari server?');">
+                                {% csrf_token %}
+                                <button type="submit" class="text-xs font-medium text-red-600 hover:text-white border border-red-200 hover:bg-red-600 px-4 py-2 rounded-xl transition-all flex items-center gap-1 cursor-pointer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    Hapus
+                                </button>
+                            </form>
+
+                        </div>
+                    </div>
+
+                </div>
+                {% empty %}
+                <div class="col-span-full text-center py-12 bg-white rounded-2xl border border-dashed border-[#EAE3D2]">
+                    <div class="w-12 h-12 bg-[#F4F1EA] text-[#8C7454] rounded-full flex items-center justify-center mx-auto mb-3">
+                        🖼️
+                    </div>
+                    <h3 class="text-sm font-medium text-[#2C2A29]">Belum Ada Banner</h3>
+                    <p class="text-xs text-stone-400 mt-1 max-w-xs mx-auto">Klik tombol 'Unggah Banner Baru' di atas untuk memasang iklan komersial pertama Anda.</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div id="bannerModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 hidden opacity-0 transition-opacity duration-300">
+                <div class="w-full max-w-lg bg-white rounded-2xl border border-[#EAE3D2] shadow-xl p-6 md:p-8 transform scale-95 transition-transform duration-300">
+                    
+                    <div class="flex items-center justify-between border-b border-[#EAE3D2] pb-4 mb-5">
+                        <div>
+                            <h2 class="text-xl font-normal serif-font text-[#2C2A29] tracking-wide">Unggah Banner Baru</h2>
+                            <p class="text-[11px] text-stone-500 mt-0.5">Tambahkan poster iklan langsung ke slide halaman utama</p>
+                        </div>
+                        <button type="button" onclick="closeBannerModal()" class="text-stone-400 hover:text-stone-700 p-1 cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <form id="formBanner" method="POST" enctype="multipart/form-data" class="space-y-4">
+                        {% csrf_token %}
+
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-1.5">Judul Promo / Banner</label>
+                            {{ form.judul }}
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-stone-600 mb-1.5">File Gambar Banner</label>
+                            <div class="border border-dashed border-[#EAE3D2] p-3 rounded-xl bg-[#FAF8F5]">
+                                {{ form.gambar }}
+                            </div>
+                            <div id="errorGambar" class="mt-2 text-xs hidden"></div>
+                        </div>
+
+                        <div class="flex items-center gap-3 bg-[#FAF8F5] p-3 rounded-xl border border-[#EAE3D2]/60">
+                            {{ form.is_aktif }}
+                            <div>
+                                <label for="{{ form.is_aktif.id_for_label }}" class="block text-xs font-semibold text-[#2C2A29] cursor-pointer">Aktifkan Banner Langsung</label>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 pt-3 border-t border-stone-100">
+                            <button type="button" onclick="closeBannerModal()" class="w-1/2 border border-[#EAE3D2] text-[#2C2A29] py-2.5 rounded-xl text-xs font-medium hover:bg-stone-50 transition-colors cursor-pointer">
+                                Batal
+                            </button>
+                            <button id="btnSubmitBanner" type="submit" class="w-1/2 bg-[#2C2A29] hover:bg-[#8C7454] disabled:bg-stone-300 disabled:cursor-not-allowed text-white py-2.5 rounded-xl text-xs font-medium transition-colors shadow-sm cursor-pointer">
+                                Simpan Banner
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+    </div>
+
+    <script>
+        function openBannerModal() {
+            const modal = document.getElementById('bannerModal');
+            const modalContent = modal.querySelector('.transform');
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('opacity-0');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 20);
+        }
+
+        function closeBannerModal() {
+            const modal = document.getElementById('bannerModal');
+            const modalContent = modal.querySelector('.transform');
+
+            modal.classList.add('opacity-0');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // Menggunakan Event Listener agar dijamin tidak bentrok dengan script bawaan base.html
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('bannerModal');
+            if (event.target === modal) {
+                closeBannerModal();
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // Mencari input file bawaan Django di dalam form
+            const form = document.getElementById("formBanner");
+            const inputGambar = form.querySelector("input[type='file']");
+            const errorContainer = document.getElementById("errorGambar");
+            const btnSubmit = document.getElementById("btnSubmitBanner");
+
+            if (!inputGambar) return;
+
+            inputGambar.addEventListener("change", function () {
+                const file = this.files[0];
+
+                if (file) {
+                    const reader = new FileReader();
+
+                    reader.onload = function (e) {
+                        const img = new Image();
+                        img.src = e.target.result;
+
+                        img.onload = function () {
+                            const width = this.width;
+                            const height = this.height;
+                            
+                            // Menghitung rasio gambar asli
+                            const rasio = width / height;
+                            
+                            // Batas toleransi rasio mendekati 3:1 (3.0) atau 21:9 (2.33)
+                            // Menggunakan toleransi agar gambar yang meleset beberapa piksel tetap lolos
+                            const rasioCocok = (rasio >= 2.2 && rasio <= 2.4) || (rasio >= 2.9 && rasio <= 3.1);
+
+                            if (!rasioCocok) {
+                                // Tampilkan Pesan Eror
+                                errorContainer.innerHTML = `❌ Ukuran tidak sesuai (${width}x${height}px). Gunakan gambar berasio ideal <b>21:9</b> atau <b>3:1</b> (Contoh: 1200x400px atau 1400x600px).`;
+                                errorContainer.className = "mt-2 text-xs text-red-600 bg-red-50 p-2 rounded-lg border border-red-200";
+                                
+                                // Kunci tombol submit
+                                btnSubmit.disabled = true;
+                            } else {
+                                // Tampilkan Info Valid Berhasil
+                                errorContainer.innerHTML = `✓ Ukuran sesuai (${width}x${height}px). Rasio gambar siap digunakan.`;
+                                errorContainer.className = "mt-2 text-xs text-emerald-600 bg-emerald-50 p-2 rounded-lg border border-emerald-200";
+                                
+                                // Buka kunci tombol submit
+                                btnSubmit.disabled = false;
+                            }
+                            errorContainer.classList.remove("hidden");
+                        };
+                    };
+                    
+                    reader.readAsDataURL(file);
+                } else {
+                    // Bersihkan jika input dibatalkan
+                    errorContainer.classList.add("hidden");
+                    btnSubmit.disabled = false;
+                }
+            });
+
+            // Validasi double-check saat form mencoba melakukan submit data
+            form.addEventListener("submit", function (e) {
+                if (btnSubmit.disabled) {
+                    e.preventDefault();
+                    alert("Harap unggah gambar dengan ukuran rasio yang sesuai sebelum menyimpan.");
+                }
+            });
+        });
+    </script>
+{% endblock %}

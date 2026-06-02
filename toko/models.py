@@ -133,3 +133,16 @@ class DetailPesanan(models.Model):
     @property
     def subtotal(self):
         return self.jumlah * self.harga_saat_beli
+
+class BannerPromo(models.Model):
+    judul = models.CharField(max_length=150, help_text="Nama promo (contoh: Concert Season Deal)")
+    gambar = models.ImageField(upload_to='banners/', help_text="Rekomendasi ukuran banner e-commerce: 1200x450 piksel")
+    url_tujuan = models.CharField(max_length=255, blank=True, null=True, help_text="Link tujuan saat diklik (contoh: /kategori/serum/ atau link eksternal)")
+    is_aktif = models.BooleanField(default=True, help_text="Centang untuk menampilkan di halaman utama")
+    diperbarui_pada = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name_plural = "Banner Promo Beranda"
+
+    def __str__(self):
+        return self.judul
