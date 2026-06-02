@@ -94,11 +94,12 @@
                                     onclick="openEditModal(this)"
                                     data-id="{{ produk.id }}"
                                     data-nama="{{ produk.nama }}"
-                                    data-kategori="{{ produk.kategori.id }}"
+                                    data-kategori="{% if produk.kategori %}{{ produk.kategori.id }}{% endif %}"
                                     data-harga="{{ produk.harga }}"
                                     data-stok="{{ produk.stok }}"
                                     data-flash="{{ produk.is_flash_sale|yesno:'true,false' }}"
-                                    data-deskripsi="{{ produk.deskripsi }}"
+                                    data-flash-end="{% if produk.flash_sale_end %}{{ produk.flash_sale_end|date:'Y-m-d\TH:i' }}{% endif %}"
+                                    data-deskripsi="{{ produk.deskripsi|default:'' }}"
                                     data-gambar="{% if produk.gambar %}{{ produk.gambar.url }}{% endif %}"
                                     data-video="{% if produk.video_produk %}{{ produk.video_produk.url }}{% endif %}"
                                     data-galeri="{% for item in produk.galeri.all %}{{ item.gambar.url }}{% if not forloop.last %},{% endif %}{% endfor %}"
@@ -153,10 +154,15 @@
                 </div>
                 <div class="flex flex-col justify-end">
                     <label class="inline-flex items-center cursor-pointer select-none text-xs text-stone-700 mb-2">
-                        <input type="checkbox" name="is_flash_sale" class="rounded border-[#EAE3D2] text-[#8C7454] focus:ring-[#8C7454] mr-2">
+                        <input type="checkbox" name="is_flash_sale" id="tambah_flash_check" onchange="toggleFlashSaleTime('tambah')" class="rounded border-[#EAE3D2] text-[#8C7454] focus:ring-[#8C7454] mr-2">
                         Ikutkan Flash Sale ⚡
                     </label>
                 </div>
+            </div>
+
+            <div id="tambah_flash_timer_container" class="hidden transition-all duration-300 bg-amber-50/50 border border-amber-200/60 rounded-xl p-3">
+                <label class="block text-xs font-medium text-amber-800 mb-1">Waktu Berakhir Flash Sale</label>
+                <input type="datetime-local" name="flash_sale_end" id="tambah_flash_end" class="w-full bg-white border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none text-stone-700 font-mono">
             </div>
 
             <div class="grid grid-cols-2 gap-4">
@@ -187,8 +193,7 @@
             <div>
                 <label class="block text-xs font-medium text-stone-700 mb-2">Galeri Foto Tambahan (Opsional)</label>
                 <div class="relative group border-2 border-dashed border-[#EAE3D2] rounded-xl p-4 text-center hover:bg-[#FAF8F5] transition-all">
-                    <input type="file" name="galeri_produk" id="galeri_input" multiple accept="image/*" 
-                        class="absolute inset-0 opacity-0 cursor-pointer z-10">
+                    <input type="file" name="galeri_produk" id="galeri_input" multiple accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10">
                     <div class="space-y-1">
                         <svg class="mx-auto h-6 w-6 text-stone-400 group-hover:text-[#8C7454]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -200,11 +205,11 @@
             </div>
 
             <div>
-                <label class="block text-xs font-medium text-stone-700 mb-2">Video Singkat Produk (Maks 5 Detik - Opsional)</label>
+                <label class="block text-xs font-medium text-stone-700 mb-2">Video Singkat Produk (Maks 10 Detik - Opsional)</label>
                 <div class="flex flex-col gap-2 p-3 border border-[#EAE3D2] rounded-xl bg-[#FAF8F5]">
                     <input type="file" name="video_produk" id="product_video" accept="video/*" onchange="validateVideoDuration(this)"
                         class="w-full text-xs text-stone-500 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:bg-[#8C7454]/10 file:text-[#8C7454] cursor-pointer">
-                    <p id="video-error-msg" class="text-[10px] text-red-500 hidden font-medium">⚠️ Durasi video terlalu lama! Maksimal durasi adalah 5 detik.</p>
+                    <p id="video-error-msg" class="text-[10px] text-red-500 hidden font-medium">⚠️ Durasi video terlalu lama! Maksimal durasi adalah 10 detik.</p>
                 </div>
             </div>
 
@@ -219,6 +224,7 @@
         </form>
     </div>
 </div>
+
 
 <div id="editProdukModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-3xl max-w-lg w-full p-8 border border-[#EAE3D2] shadow-2xl relative max-h-[90vh] overflow-y-auto scrollbar-hide">
@@ -248,10 +254,15 @@
                 </div>
                 <div class="flex flex-col justify-end">
                     <label class="inline-flex items-center cursor-pointer select-none text-xs text-stone-700 mb-2">
-                        <input type="checkbox" name="is_flash_sale" id="edit_flash" class="rounded border-[#EAE3D2] text-[#8C7454] focus:ring-[#8C7454] mr-2">
+                        <input type="checkbox" name="is_flash_sale" id="edit_flash" onchange="toggleFlashSaleTime('edit')" class="rounded border-[#EAE3D2] text-[#8C7454] focus:ring-[#8C7454] mr-2">
                         Ikutkan Flash Sale ⚡
                     </label>
                 </div>
+            </div>
+
+            <div id="edit_flash_timer_container" class="hidden transition-all duration-300 bg-amber-50/50 border border-amber-200/60 rounded-xl p-3">
+                <label class="block text-xs font-medium text-amber-800 mb-1">Waktu Berakhir Flash Sale</label>
+                <input type="datetime-local" name="flash_sale_end" id="edit_flash_end" class="w-full bg-white border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2 px-4 text-sm outline-none text-stone-700 font-mono">
             </div>
 
             <div class="grid grid-cols-2 gap-4">
@@ -297,7 +308,7 @@
                     </div>
                     <div class="flex-1">
                         <input type="file" name="video_produk" id="edit_product_video" accept="video/*" onchange="validateEditVideo(this)" class="w-full text-xs text-stone-500 file:mr-2 file:py-1 file:px-3 file:rounded-full file:border-0 file:bg-[#8C7454]/10 file:text-[#8C7454] cursor-pointer">
-                        <p id="edit-video-error-msg" class="text-[10px] text-red-500 hidden font-medium mt-1">⚠️ Durasi video terlalu lama! Maksimal durasi adalah 5 detik.</p>
+                        <p id="edit-video-error-msg" class="text-[10px] text-red-500 hidden font-medium mt-1">⚠️ Durasi video terlalu lama! Maksimal durasi adalah 10 detik.</p>
                     </div>
                 </div>
             </div>
@@ -386,11 +397,10 @@
                 window.URL.revokeObjectURL(video.src);
                 const duration = video.duration;
 
-                // Jika durasi melebihi 5.5 detik (toleransi rounding micro-second)
                 if (duration > 10) {
                     errorMsg.classList.remove('hidden');
                     input.value = ''; // Mengosongkan kembali input file yang tidak valid
-                    alert('Gagal memilih video! Durasi video Anda adalah ' + duration.toFixed(1) + ' detik. LauraDerma hanya mengizinkan video promosi produk maksimal sepanjang 5 detik.');
+                    alert('Gagal memilih video! Durasi video Anda adalah ' + duration.toFixed(1) + ' detik. LauraDerma hanya mengizinkan video promosi produk maksimal sepanjang 10 detik.');
                 } else {
                     errorMsg.classList.add('hidden');
                 }
@@ -400,6 +410,21 @@
             video.src = URL.createObjectURL(file);
         } else {
             errorMsg.classList.add('hidden');
+        }
+    }
+
+    function toggleFlashSaleTime(mode) {
+        let checkbox = document.getElementById(mode === 'tambah' ? 'tambah_flash_check' : 'edit_flash');
+        let container = document.getElementById(mode === 'tambah' ? 'tambah_flash_timer_container' : 'edit_flash_timer_container');
+        let inputWaktu = document.getElementById(mode === 'tambah' ? 'tambah_flash_end' : 'edit_flash_end');
+
+        if (checkbox.checked) {
+            container.classList.remove('hidden');
+            inputWaktu.required = true;
+        } else {
+            container.classList.add('hidden');
+            inputWaktu.required = false;
+            inputWaktu.value = ""; // Bersihkan data jika batal ikut flash sale
         }
     }
 
@@ -415,6 +440,8 @@
         const flash = button.getAttribute('data-flash') === 'true';
         const deskripsi = button.getAttribute('data-deskripsi');
         const gambarUrl = button.getAttribute('data-gambar');
+
+        let flashSaleEnd = button.getAttribute('data-flash-end');
         
         // Ambil data baru (video & galeri string)
         const videoUrl = button.getAttribute('data-video');
@@ -427,7 +454,20 @@
         document.getElementById('edit_stok').value = stok;
         document.getElementById('edit_flash').checked = flash;
         document.getElementById('edit_deskripsi').value = deskripsi;
-        document.getElementById('editForm').action = `/kelola-produk/edit/${id}/`;
+        document.getElementById('editForm').action = `/dashboard/produk/edit/${id}/`;
+
+        document.getElementById('edit_flash').checked = flash;
+        if (flash && flashSaleEnd) {
+            // Konversi jika format date bawaan django mengandung space/timezone (misal replace space dengan 'T')
+            if (flashSaleEnd.includes(' ')) {
+                flashSaleEnd = flashSaleEnd.replace(' ', 'T').substring(0, 16);
+            }
+            document.getElementById('edit_flash_end').value = flashSaleEnd;
+        } else {
+            document.getElementById('edit_flash_end').value = "";
+        }
+
+        toggleFlashSaleTime('edit');
 
         // 3. Render Preview Gambar Utama
         const imgPreview = document.getElementById('editImagePreview');
@@ -515,10 +555,10 @@
             tempVideo.preload = 'metadata';
             tempVideo.onloadedmetadata = function() {
                 window.URL.revokeObjectURL(tempVideo.src);
-                if (tempVideo.duration > 5.5) {
+                if (tempVideo.duration > 10.5) {
                     errorMsg.classList.remove('hidden');
                     input.value = '';
-                    alert('Durasi video baru terlalu lama! Maksimal 5 detik.');
+                    alert('Durasi video baru terlalu lama! Maksimal 10 detik.');
                 } else {
                     errorMsg.classList.add('hidden');
                     videoPreview.src = URL.createObjectURL(file);

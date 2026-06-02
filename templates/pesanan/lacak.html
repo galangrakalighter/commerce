@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block title %}Lacak Pesanan #{{ pesanan.id }} - Gafistore{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+{% endblock %}
+
+{% block content %}
+<section class="max-w-3xl mx-auto px-4 py-12">
+    <div class="bg-white border border-gray-200 rounded-3xl p-6 md:p-8 shadow-sm">
+        
+        <div class="border-b border-gray-100 pb-5 mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 tracking-tight">Pelacakan Paket</h2>
+            <p class="text-sm text-gray-500 mt-1">
+                Order ID: <span class="font-mono font-semibold text-gray-700">#{{ pesanan.id }}</span>
+            </p>
+        </div>
+
+        {% if error_msg %}
+            <div class="p-4 bg-amber-50 text-amber-900 border border-amber-200 text-sm rounded-2xl flex items-center gap-3">
+                <svg class="w-5 h-5 text-amber-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p>{{ error_msg }}</p>
+            </div>
+        {% else %}
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 bg-gray-50 border border-gray-100 rounded-2xl p-5 mb-6 text-sm">
+                <div>
+                    <span class="text-gray-400 block text-xs font-medium uppercase tracking-wider">Ekspedisi</span>
+                    <span class="font-bold text-gray-800 uppercase mt-0.5 block">{{ summary_data.courier }}</span>
+                </div>
+                <div>
+                    <span class="text-gray-400 block text-xs font-medium uppercase tracking-wider">No. Resi</span>
+                    <span class="font-bold text-gray-800 mt-0.5 block tracking-wide">{{ summary_data.awb }}</span>
+                </div>
+                <div class="col-span-2 md:col-span-1">
+                    <span class="text-gray-400 block text-xs font-medium uppercase tracking-wider">Status Terakhir</span>
+                    <span class="inline-block mt-1 px-2.5 py-0.5 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 uppercase">
+                        {{ summary_data.status }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="mb-8 space-y-2">
+                <label class="text-xs font-medium text-gray-400 uppercase tracking-wider block">Posisi Paket Terkini (Estimasi Kota)</label>
+                <div id="map" class="w-full h-64 md:h-80 rounded-2xl border border-gray-200 shadow-inner bg-gray-100 relative z-10"></div>
+            </div>
+
+            <div class="relative border-l-2 border-gray-100 ml-3 md:ml-4 space-y-8">
+                
+                {% for history in tracking_data %}
+                <div class="relative pl-6 md:pl-8">
+                    
+                    <div class="absolute -left-[7px] top-1 w-3 h-3 rounded-full {% if forloop.first %}bg-emerald-600 ring-4 ring-emerald-100{% else %}bg-gray-300{% endif %}"></div>
+                    
+                    <div class="bg-white border border-gray-50 p-4 rounded-xl shadow-xs -mt-1 hover:border-gray-100 transition-colors">
+                        <p class="text-sm font-semibold {% if forloop.first %}text-emerald-700{% else %}text-gray-900{% endif %}">
+                            {{ history.desc }}
+                        </p>
+                        <div class="flex items-center gap-2 text-xs text-gray-400 mt-2">
+                            <svg class="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span>{{ history.date }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
+
+        {% endif %}
+        
+        <div class="mt-8 pt-6 border-t border-gray-100 flex justify-end">
+            <a href="javascript:history.back()" class="px-5 py-2.5 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors">
+                Kembali
+            </a>
+        </div>
+
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+{% if not error_msg %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Ambil data alamat lengkap dari database Django
+        const alamatTujuan = "{{ pesanan.alamat_lengkap|escapejs }}"; 
+        console.log("Alamat Tujuan:", alamatTujuan);
+
+        // Koordinat Awal Toko/Gudang Gafistore (Titik keberangkatan kurir)
+        const startLat = -6.9175;
+        const startLon = 107.6191;
+
+        // Inisialisasi awal peta (Fokus awal ke area kota di sekitar toko)
+        const map = L.map('map').setView([startLat, startLon], 13); 
+
+        // Muat ubin peta gratis dari OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+        }).addTo(map);
+
+        // Custom Icon untuk Kurir Motor memakai Emoji
+        const kurirIcon = L.divIcon({
+            html: '<span class="text-3xl" style="display:block; transform: scaleX(-1); text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">🏽‍♂️🏍️</span>',
+            iconSize: [30, 30],
+            className: 'border-0'
+        });
+
+        // Pasang Marker Kurir di lokasi awal (Akan bergeser real-time sesuai data database)
+        const markerKurir = L.marker([startLat, startLon], { icon: kurirIcon }).addTo(map);
+        markerKurir.bindPopup("<b>Kurir sedang memproses paket</b>").openPopup();
+
+        // Cari koordinat rumah pembeli berdasarkan string alamat lengkap
+        const queryGeocoding = alamatTujuan;
+
+        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryGeocoding)}&limit=1`)
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                if (data && data.length > 0) {
+                    const targetLat = parseFloat(data[0].lat);
+                    const targetLon = parseFloat(data[0].lon);
+
+                    inisialisasiRuteDanPelacakan(targetLat, targetLon, alamatTujuan);
+                } else {
+                    // Fallback ke kota besar jika alamat terlalu spesifik dan gagal di-geocoding
+                    const kotaBesar = "{{ summary_data.destination|default:'Jakarta' }}";
+                    return fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(kotaBesar)}&limit=1`);
+                }
+            })
+            .then(function(response) {
+                return response ? response.json() : null;
+            })
+            .then(function(fallbackData) {
+                if (fallbackData && fallbackData.length > 0) {
+                    const targetLat = parseFloat(fallbackData[0].lat);
+                    const targetLon = parseFloat(fallbackData[0].lon);
+                    
+                    const areaNama = "{{ summary_data.destination }}";
+                    inisialisasiRuteDanPelacakan(targetLat, targetLon, `Area ${areaNama}`);
+                }
+            })
+            .catch(function(error) {
+                console.error("Gagal memuat koordinat peta:", error);
+            });
+
+        // ========================================================
+        // FUNGSI MENGGAMBAR JALUR UTAMA (DIJALANKAN SEKALI DI AWAL)
+        // ========================================================
+        function inisialisasiRuteDanPelacakan(destLat, destLon, textAlamat) {
+            // Pasang Penanda tetap di lokasi rumah pembeli
+            L.marker([destLat, destLon]).addTo(map)
+                .bindPopup(`
+                    <div class="text-sm font-sans">
+                        <span class="text-xs text-emerald-600 block font-semibold uppercase tracking-wider">Alamat Pengiriman:</span>
+                        <strong class="text-stone-800 block mt-0.5">${textAlamat}</strong>
+                    </div>
+                `);
+
+            // Panggil API Rute OSRM gratis untuk menggambar perkiraan jalan raya yang dilewati
+            const urlRouting = `https://router.project-osrm.org/route/v1/driving/${startLon},${startLat};${destLon},${destLat}?overview=full&geometries=geojson`;
+
+            fetch(urlRouting)
+                .then(response => response.json())
+                .then(routingData => {
+                    if (routingData.routes && routingData.routes.length > 0) {
+                        const koordinatJalan = routingData.routes[0].geometry.coordinates;
+                        const ruteSesuaiJalan = koordinatJalan.map(coord => [coord[1], coord[0]]);
+
+                        // Gambar garis biru penunjuk rute jalan asli di peta pembeli
+                        L.polyline(ruteSesuaiJalan, { color: '#3b82f6', weight: 4, opacity: 0.7 }).addTo(map);
+                    }
+                    
+                    // Setelah rute digambar, mulai jalankan pemantauan posisi asli kurir
+                    mulaiSinkronisasiDatabaseKurir(destLat, destLon);
+                })
+                .catch(err => {
+                    console.error("Eror memuat rute OSRM:", err);
+                    // Jika rute gagal digambar, pelacakan koordinat real tetap diaktifkan
+                    mulaiSinkronisasiDatabaseKurir(destLat, destLon);
+                });
+        }
+
+        // =============================================================
+        // LOGIKA UTAMA SINKRONISASI KOORDINAT ASLI (AJAX POLLING)
+        // =============================================================
+        function mulaiSinkronisasiDatabaseKurir(destLat, destLon) {
+            console.log("Sistem pelacakan real-time aktif. Memantau perubahan database...");
+
+            // Jalankan fungsi hit ke server Django setiap 10 detik secara terus-menerus
+            const intervalPelacakanAsli = setInterval(function() {
+                
+                // Minta data koordinat ter-update kurir ke endpoint Django yang kita buat
+                fetch(`/api/cek-status-pesanan/{{ pesanan.id }}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        // Jika kurir sudah mulai jalan dan datanya ada di database
+                        if (data.kurir_lat && data.kurir_lon) {
+                            const kLat = parseFloat(data.kurir_lat);
+                            const kLon = parseFloat(data.kurir_lon);
+
+                            // Geser posisi ikon motor ke tempat baru sesuai lokasi kurir sesungguhnya
+                            markerKurir.setLatLng([kLat, kLon]);
+
+                            // Kontrol kamera bebas total sesuai keinginanmu (tidak ditarik paksa ke kurir).
+                            // Pembeli bisa bebas menggeser peta tanpa memantul kembali.
+
+                            // Hitung sisa jarak koordinat ke lokasi tujuan akhir rumah pembeli
+                            const selisihLat = destLat - kLat;
+                            const selisihLon = destLon - kLon;
+
+                            // Jika posisi kurir sudah sangat dekat/berhimpitan dengan titik rumah pembeli
+                            if (Math.abs(selisihLat) < 0.00015 && Math.abs(selisihLon) < 0.00015) {
+                                clearInterval(intervalPelacakanAsli); // Matikan request pooling
+                                markerKurir.bindPopup("<div class='text-sm'><b>🏍️ Kurir:</b><br>Paket telah sampai secara nyata di lokasi Anda!</div>").openPopup();
+                            }
+                        }
+                    })
+                    .catch(err => console.error("Gagal melakukan sinkronisasi lokasi kurir:", err));
+
+            }, 10000); // 10000 milidetik = Cek database setiap 10 detik sekali
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}

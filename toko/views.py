@@ -1,5 +1,7 @@
-import midtransclient, json
+import midtransclient, json, time, requests
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils.dateparse import parse_datetime
+from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib import messages
@@ -59,10 +61,19 @@ def tambah_produk_proses(request):
         kategori_id = request.POST.get('kategori')
         harga = request.POST.get('harga')
         stok = request.POST.get('stok')
-        is_flash_sale = request.POST.get('is_flash_sale') == 'on'
+        is_flash_sale = 'is_flash_sale' in request.POST
         deskripsi = request.POST.get('deskripsi')
         gambar = request.FILES.get('gambar')
         video = request.FILES.get('video_produk')
+        
+        # Tangkap data string dari datetime-local HTML
+        flash_sale_end_raw = request.POST.get('flash_sale_end')
+        
+        # 2. PERBAIKAN LOGIKA: Jika ikut flash sale dan inputnya ada, ubah ke objek datetime
+        if is_flash_sale and flash_sale_end_raw:
+            flash_sale_end = parse_datetime(flash_sale_end_raw)
+        else:
+            flash_sale_end = None
 
         from django.utils.text import slugify
         slug = slugify(nama)
@@ -73,7 +84,7 @@ def tambah_produk_proses(request):
 
         kategori = get_object_or_404(Kategori, id=kategori_id)
 
-        # 1. Simpan ke database produk utama
+        # 3. MASUKKAN FIELD KE DATABASE DI SINI
         produk = Produk.objects.create(
             kategori=kategori,
             nama=nama,
@@ -82,13 +93,12 @@ def tambah_produk_proses(request):
             harga=harga,
             stok=stok,
             is_flash_sale=is_flash_sale,
+            flash_sale_end=flash_sale_end,  # <-- Tambahkan baris ini agar tersimpan
             deskripsi=deskripsi,
             video_produk=video
         )
-        # produk.save()  # create() sudah otomatis memanggil save()
 
-        # 2. TAMBAHKAN BAGIAN INI: Simpan Galeri Tambahan
-        # 'galeri_produk' harus sesuai dengan name="galeri_produk" di modal HTML
+        # 2. Simpan Galeri Tambahan
         gambar_galeri = request.FILES.getlist('galeri_produk')
         
         for foto in gambar_galeri:
@@ -434,7 +444,6 @@ def hapus_dari_keranjang(request, produk_id):
 
 @login_required
 def checkout_view(request):
-    # Cek parameter penanda di URL (?source=...)
     source = request.GET.get('source')
     
     # === STEP 1: TANGKAP DATA CHECKBOX JIKA DATANG DARI FORM KERANJANG ===
@@ -486,7 +495,9 @@ def checkout_view(request):
             nama_penerima=nama_penerima,
             telepon=telepon,
             alamat_lengkap=alamat_lengkap,
-            catatan=catatan
+            catatan=catatan,
+            kurir='spx',
+            no_resi='260506P9RF9FN0'
         )
         
         # 2. Simpan item produk ke DetailPesanan
@@ -504,9 +515,12 @@ def checkout_view(request):
             server_key=settings.MIDTRANS_SERVER_KEY
         )
         
+        order_id_asli = str(pesanan.id)  # atau 'LAURADERMA-102'
+        order_id_midtrans = f"{order_id_asli}-{int(time.time())}"
+        
         # 4. Set parameter data Midtrans
         transaction_details = {
-            'order_id': f"INV-{pesanan.id}", 
+            'order_id': order_id_midtrans, 
             'gross_amount': int(total_belanja)
         }
         customer_details = {
@@ -567,6 +581,58 @@ def checkout_view(request):
             
     return render(request, 'cart/checkout.html', {'total_belanja': total_belanja})
 
+@login_required
+def bayar_ulang_pesanan_view(request, pesanan_id):
+    # Ambil data pesanan lama milik user yang sedang login
+    pesanan = get_object_or_404(Pesanan, id=pesanan_id, user=request.user)
+    
+    # Inisialisasi Midtrans Snap
+    snap = midtransclient.Snap(
+        is_production=settings.MIDTRANS_IS_PRODUCTION,
+        server_key=settings.MIDTRANS_SERVER_KEY
+    )
+    
+    # Gunakan kombinasi timestamp agar tidak terkena error order_id has been taken (HTTP 400)
+    order_id_midtrans = f"{pesanan.id}-{int(time.time())}"
+    
+    transaction_details = {
+        'order_id': order_id_midtrans, 
+        'gross_amount': int(pesanan.total_harga)
+    }
+    
+    customer_details = {
+        'first_name': pesanan.nama_penerima,
+        'phone': pesanan.telepon,
+        'email': request.user.email
+    }
+    
+    param = {
+        'transaction_details': transaction_details,
+        'customer_details': customer_details
+    }
+    
+    try:
+        transaction = snap.create_transaction(param)
+        snap_token = transaction['token']
+        
+        # Lempar langsung ke template bayar.html bawaan checkout kamu
+        return render(request, 'cart/bayar.html', {
+            'pesanan': pesanan, 
+            'snap_token': snap_token,
+            'client_key': settings.MIDTRANS_CLIENT_KEY
+        })
+        
+    except Exception as e:
+        error_msg = f"Midtrans API Error: {str(e)}"
+        print(error_msg)
+        
+        # Jika gagal generate token, kembalikan ke dashboard dengan pesan error (opsional)
+        # Atau render halaman error khusus
+        return render(request, 'cart/bayar.html', {
+            'pesanan': pesanan,
+            'error_api': error_msg
+        })
+
 def bersihkan_keranjang_ajax(request):
     if request.method == 'POST':
         try:
@@ -575,40 +641,67 @@ def bersihkan_keranjang_ajax(request):
             
             cart = request.session.get('cart', {})
             
-            # KONDISI 1: Jika pesanan_id dikirim (User Berhasil Bayar / Skenario Seleksi)
+            # KONDISI 1: Jika pesanan_id dikirim (User Berhasil Bayar)
             if pesanan_id:
-                # Ambil semua item produk yang dibeli di dalam pesanan ini
-                item_terbeli = DetailPesanan.objects.filter(pesanan_id=pesanan_id)
+                try:
+                    clean_id = int(str(pesanan_id).split('-')[0])
+                    
+                    # Gunakan transaction.atomic agar jika salah satu proses gagal, database dibatalkan (rollback)
+                    with transaction.atomic():
+                        # 1. Cari pesanan dan ubah status menjadi SELESAI
+                        pesanan = Pesanan.objects.select_for_update().get(id=clean_id, user=request.user)
+                        
+                        # Tambahkan pengecekan agar jika user me-refresh halaman, stok tidak berkurang dua kali
+                        if pesanan.status != 'SELESAI':
+                            pesanan.status = 'SELESAI'
+                            pesanan.save()
+                            
+                            # 2. Ambil semua item yang dibeli untuk diproses stok dan keranjangnya
+                            item_terbeli = DetailPesanan.objects.filter(pesanan_id=clean_id)
+                            
+                            for item in item_terbeli:
+                                # === SEGMEN PENGURANGAN STOK PRODUK ===
+                                try:
+                                    # Menggunakan select_for_update() untuk menghindari race condition (rebutan stok)
+                                    produk = Produk.objects.select_for_update().get(id=item.produk_id)
+                                    
+                                    # Kurangi stok berdasarkan jumlah yang dibeli
+                                    if produk.stok >= item.jumlah:
+                                        produk.stok -= item.jumlah
+                                    else:
+                                        produk.stok = 0 # Jaga-jaga jika stok kurang, set ke 0 atau berikan logika lain
+                                        
+                                    produk.save()
+                                except Produk.DoesNotExist:
+                                    pass
+                                
+                                # === HAPUS DARI SESSION CART ===
+                                id_produk_str = str(item.produk_id)
+                                if id_produk_str in cart:
+                                    del cart[id_produk_str]
+                                    
+                            request.session['cart'] = cart
+                    
+                except (Pesanan.DoesNotExist, ValueError):
+                    pass
                 
-                # Hapus HANYA produk yang ada di pesanan ini dari session cart
-                for item in item_terbeli:
-                    id_produk_str = str(item.produk_id)
-                    if id_produk_str in cart:
-                        del cart[id_produk_str]
-                
-                # Simpan sisa produk yang tidak dipilih kembali ke session
-                request.session['cart'] = cart
-                
-            # KONDISI 2: Jika pesanan_id TIDAK dikirim (karena onPending / VA baru keluar)
+            # KONDISI 2: Jika pesanan_id TIDAK dikirim (karena onPending)
             else:
-                # Sesuai logika onPending di JS-mu, jika datang dari keranjang belanja seleksi (selected),
-                # hapus item yang dicentang dari cart utama agar tidak double pas bayar nanti.
                 checkout_selected = request.session.get('checkout_selected', {})
-                
                 if checkout_selected:
                     for prod_id in checkout_selected.keys():
                         if str(prod_id) in cart:
                             del cart[str(prod_id)]
                     request.session['cart'] = cart
 
-            # Bersihkan session sampah temporary jika ada
+            # Bersihkan session sampah temporary
             if 'checkout_selected' in request.session:
                 del request.session['checkout_selected']
             if 'buy_now' in request.session:
                 del request.session['buy_now']
                 
             request.session.modified = True
-            return JsonResponse({'status': 'success', 'message': 'Keranjang berhasil diperbarui'})
+            return JsonResponse({'status': 'success', 'message': 'Status diperbarui dan stok berhasil dikurangi'})
             
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
@@ -666,8 +759,12 @@ def edit_produk(request, id):
         kategori_id = request.POST.get('kategori')
         harga = request.POST.get('harga')
         stok = request.POST.get('stok')
-        is_flash_sale = request.POST.get('is_flash_sale') == 'on' # Checkbox menghasilkan 'on' jika dicentang
+        is_flash_sale = 'is_flash_sale' in request.POST # Checkbox menghasilkan 'on' jika dicentang
         deskripsi = request.POST.get('deskripsi')
+        flash_sale_end = request.POST.get('flash_sale_end')
+        
+        if not is_flash_sale or not flash_sale_end:
+            flash_sale_end = None
         
         try:
             # 3. Update data teks & relasi kategori
@@ -702,13 +799,99 @@ def edit_produk(request, id):
                     
                     # Simpan barisan foto galeri baru satu per satu
                     for f in files:
-                        GaleriProduk.objects.create(produk=produk, gambar=f)
+                        ProdukGambar.objects.create(produk=produk, gambar=f)
 
             messages.success(request, f'Produk "{produk.nama}" berhasil diperbarui!')
         except Exception as e:
             messages.error(request, f'Gagal memperbarui produk: {str(e)}')
             
-        return redirect('kelola_produk')
+        return redirect('daftar_produk_internal')
         
     # Jika diakses lewat GET (keamanan tambahan jika user iseng ketik URL langsung)
-    return redirect('kelola_produk')
+    return redirect('daftar_produk_internal')
+
+def edit_kategori(request, id):
+    kategori = get_object_or_404(Kategori, id=id)
+    
+    if request.method == 'POST':
+        nama_baru = request.POST.get('nama')
+        if nama_baru:
+            kategori.nama = nama_baru
+            kategori.slug = slugify(nama_baru) # Otomatis generate ulang slug url biar bersih
+            kategori.save()
+            messages.success(request, f'Kategori berhasil diubah menjadi "{nama_baru}"!')
+        else:
+            messages.error(request, 'Nama kategori tidak boleh kosong.')
+            
+    return redirect('kelola_kategori')
+
+def matikan_flash_sale_ajax(request, produk_id):
+    if request.method == 'POST':
+        try:
+            produk = Produk.objects.get(id=produk_id)
+            produk.is_flash_sale = False
+            produk.flash_sale_end = None
+            produk.save()
+            return JsonResponse({'status': 'success', 'message': 'Flash sale berakhir'})
+        except Produk.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Produk tidak ditemukan'}, status=404)
+    return JsonResponse({'status': 'error', 'message': 'Metode tidak diizinkan'}, status=400)
+
+def lacak_paket(request, pesanan_id):
+    pesanan = get_object_or_404(Pesanan, id=pesanan_id, user=request.user)
+
+    tracking_data = None
+    summary_data = None
+    error_msg = None
+
+    if pesanan.no_resi and pesanan.kurir:
+        api_key = "062af482976fa00ed00067f4570424d53742c507a2341932dfe8b00dc1f89bbd"
+        url = "https://api.binderbyte.com/v1/track"
+
+        params = {
+            'api_key': api_key,
+            'courier': pesanan.kurir,
+            'awb': pesanan.no_resi
+        }
+
+        try:
+            response = requests.get(url, params=params)
+            result = response.json()
+
+            if result.get('status') == 200:
+                tracking_data = result['data']['history']
+                summary_data = result['data']['summary']
+            else:
+                error_msg = result.get('message', 'Terjadi kesalahan pada data resi.')
+        except requests.exceptions.RequestException:
+            error_msg = "Gagal terhubung ke server ekspedisi."
+    else:
+        error_msg = "Nomor resi atau ekspedisi belum diperbarui oleh admin toko."
+
+    return render(request, 'pesanan/lacak.html', {
+        'pesanan': pesanan,
+        'tracking_data': tracking_data,
+        'summary_data': summary_data,
+        'error_msg': error_msg
+    })
+    
+def cek_status_kurir_api(request, pesanan_id):
+    """
+    Endpoint API untuk mengembalikan lokasi koordinat terbaru kurir
+    yang terus diperbarui oleh perangkat GPS kurir di lapangan.
+    """
+    try:
+        pesanan = Pesanan.objects.get(id=pesanan_id)
+        
+        # Kirim data koordinat dalam format JSON ke frontend
+        return JsonResponse({
+            'status': 'success',
+            'status_pesanan': pesanan.status_pesanan, # misal: 'DIANTAR'
+            'kurir_lat': pesanan.kurir_lat,           # Pastikan field ini ada di model
+            'kurir_lon': pesanan.kurir_lon,           # Pastikan field ini ada di model
+        })
+    except Pesanan.DoesNotExist:
+        return JsonResponse({
+            'status': 'error',
+            'message': 'Pesanan tidak ditemukan'
+        }, status=404)

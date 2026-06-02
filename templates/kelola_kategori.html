@@ -44,10 +44,18 @@
                     <tr class="hover:bg-stone-50/40 transition-colors">
                         <td class="p-4 font-medium text-[#2C2A29]">{{ kategori.nama }}</td>
                         <td class="p-4 font-mono text-xs text-stone-400">/{{ kategori.slug }}</td>
-                        <td class="p-4 text-center">
+                        <td class="p-4 text-center flex items-center justify-center gap-2">
+                            <button type="button" 
+                                    onclick="openEditKategoriModal(this)"
+                                    data-id="{{ kategori.id }}"
+                                    data-nama="{{ kategori.nama }}"
+                                    class="text-[#8C7454] hover:text-white font-medium text-xs bg-[#8C7454]/10 hover:bg-[#8C7454] px-3 py-1.5 rounded-full transition-all cursor-pointer">
+                                Edit
+                            </button>
+
                             <a href="{% url 'hapus_kategori' kategori.id %}" 
-                            onclick="return confirm('Apakah Anda yakin ingin menghapus kategori &quot;{{ kategori.nama }}&quot;? Sistem akan menolak jika masih ada produk yang menggunakan kategori ini.')" 
-                            class="text-red-500 hover:text-red-700 font-medium text-xs hover:underline bg-red-50/50 hover:bg-red-50 px-3 py-1.5 rounded-full transition-all">
+                               onclick="return confirm('Apakah Anda yakin ingin menghapus kategori &quot;{{ kategori.nama }}&quot;? Sistem akan menolak jika masih ada produk yang menggunakan kategori ini.')" 
+                               class="text-red-500 hover:text-red-700 font-medium text-xs hover:underline bg-red-50/50 hover:bg-red-50 px-3 py-1.5 rounded-full transition-all">
                                 Hapus
                             </a>
                         </td>
@@ -88,13 +96,59 @@
     </div>
 </div>
 
+<div id="editKategoriModal" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-8 border border-[#EAE3D2] shadow-2xl relative">
+        <button onclick="closeEditKategoriModal()" class="absolute top-4 right-4 text-stone-400 hover:text-stone-700 text-xl cursor-pointer">&times;</button>
+        <div class="mb-6">
+            <h2 class="serif-font text-2xl text-[#8C7454] tracking-wide">Ubah Kategori</h2>
+            <p class="text-xs text-stone-500 mt-1">Perbarui nama klasifikasi produk LauraDerma</p>
+        </div>
+        
+        <form id="editKategoriForm" method="POST" class="space-y-4">
+            {% csrf_token %}
+            <div>
+                <label class="block text-xs font-medium text-stone-700 mb-1">Nama Rumpun Kategori</label>
+                <input type="text" name="nama" id="edit_kategori_nama" required class="w-full bg-[#FAF8F5] border border-[#EAE3D2] focus:border-[#8C7454] rounded-xl py-2.5 px-4 text-sm outline-none">
+            </div>
+
+            <button type="submit" class="w-full bg-[#8C7454] text-white py-2.5 rounded-full text-sm font-medium hover:bg-[#735F43] transition-colors shadow-md mt-2 cursor-pointer">
+                Perbarui Kategori
+            </button>
+        </form>
+    </div>
+</div>
+
 <script>
-    function openKategoriModal() { document.getElementById('kategoriModal').classList.remove('hidden'); }
-    function closeKategoriModal() { document.getElementById('kategoriModal').classList.add('hidden'); }
-    
-    window.onclick = function(event) {
-        let modal = document.getElementById('kategoriModal');
-        if (event.target == modal) { closeKategoriModal(); }
+    // Pengendali Modal Tambah
+    function openKategoriModal() { 
+        document.getElementById('kategoriModal').classList.remove('hidden'); 
     }
+    function closeKategoriModal() { 
+        document.getElementById('kategoriModal').classList.add('hidden'); 
+    }
+
+    // Pengendali Modal Edit (Dinamis)
+    function openEditKategoriModal(button) {
+        const id = button.getAttribute('data-id');
+        const nama = button.getAttribute('data-nama');
+        
+        document.getElementById('edit_kategori_nama').value = nama;
+        document.getElementById('editKategoriForm').action = `/dashboard/kategori/edit/${id}/`;
+        
+        document.getElementById('editKategoriModal').classList.remove('hidden');
+    }
+
+    function closeEditKategoriModal() { 
+        document.getElementById('editKategoriModal').classList.add('hidden'); 
+    }
+
+    // Gunakan Event Listener agar aman dan tidak menimpa script lain
+    window.addEventListener('click', function(event) {
+        let modalTambah = document.getElementById('kategoriModal');
+        let modalEdit = document.getElementById('editKategoriModal');
+        
+        if (event.target == modalTambah) { closeKategoriModal(); }
+        if (event.target == modalEdit) { closeEditKategoriModal(); }
+    });
 </script>
 {% endblock %}

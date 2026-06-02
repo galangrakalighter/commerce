@@ -82,6 +82,8 @@
                     </div>
                 </div>
 
+
+                {% if not user.is_staff %}
                 <div class="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm space-y-6">
                     <div class="border-b border-stone-100 pb-4">
                         <h2 class="text-xl font-serif text-stone-900 flex items-center gap-2">
@@ -129,16 +131,31 @@
                                     <p class="text-xs text-stone-400">Dipesan pada: <span class="font-medium text-stone-600">{{ pesanan.tanggal_dibuat|date:"d M Y • H:i" }}</span></p>
                                 </div>
 
-                                <div class="flex sm:flex-col items-between sm:items-end justify-between sm:justify-center gap-2 pt-3 sm:pt-0 border-t sm:border-t-0 border-stone-100">
+                                <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 pt-3 sm:pt-0 border-t sm:border-t-0 border-stone-100">
                                     <div class="text-sm font-semibold text-[#8C7454]">
                                         Rp {{ pesanan.total_harga }}
                                     </div>
                                     
-                                    <button onclick="openDetailModal('{{ pesanan.id }}')" class="text-xs bg-white border border-[#EAE3D2] hover:bg-[#8C7454] hover:text-white text-stone-700 px-4 py-1.5 rounded-xl font-medium transition-colors text-center shadow-sm cursor-pointer">
-                                        Lihat Detail
-                                    </button>
+                                    <div class="flex gap-2">
+                                        {% if pesanan.status != 'SELESAI' and pesanan.status != 'BATAL' and pesanan.status != 'PROSES' and pesanan.status != 'KIRIM' %}
+                                            <a href="{% url 'bayar_ulang_pesanan' pesanan.id %}" class="text-xs bg-[#8C7454] hover:bg-[#735F43] text-white px-3 py-1.5 rounded-xl font-medium transition-colors text-center shadow-sm flex items-center gap-1">
+                                                💳 Bayar
+                                            </a>
+                                        {% endif %}
+
+                                        {% if pesanan.status == 'KIRIM' or pesanan.status == 'SELESAI' %}
+                                            <a href="{% url 'lacak_paket' pesanan.id %}" class="text-xs bg-emerald-50 border border-emerald-200 hover:bg-emerald-100/70 text-emerald-700 px-3 py-1.5 rounded-xl font-medium transition-colors text-center shadow-sm flex items-center gap-1">
+                                                🚚 Lacak Paket
+                                            </a>
+                                        {% endif %}
+                                        
+                                        <button onclick="openDetailModal('{{ pesanan.id }}')" class="text-xs bg-white border border-[#EAE3D2] hover:bg-stone-50 text-stone-700 px-3 py-1.5 rounded-xl font-medium transition-colors text-center shadow-sm cursor-pointer">
+                                            Lihat Detail
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
+
                             <div id="modalDetail-{{ pesanan.id }}" class="fixed inset-0 z-50 hidden bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 detail-modal-wrapper">
                                 <div class="bg-white rounded-3xl max-w-lg w-full p-8 border border-[#EAE3D2] shadow-2xl relative max-h-[90vh] overflow-y-auto">
                                     <button onclick="closeDetailModal('{{ pesanan.id }}')" class="absolute top-4 right-4 text-stone-400 hover:text-stone-700 text-xl cursor-pointer">&times;</button>
@@ -191,10 +208,19 @@
                                             <span class="italic">"{{ pesanan.catatan }}"</span>
                                         </div>
                                         {% endif %}
-                                        <div class="flex justify-between items-center pt-2">
+                                        <div class="flex justify-between items-center pt-2 mb-4">
                                             <span class="text-sm font-serif font-medium text-stone-900">Total Pembayaran</span>
                                             <span class="text-base font-bold text-[#8C7454] font-mono">Rp {{ pesanan.total_harga }}</span>
                                         </div>
+
+                                        {% if pesanan.status != 'SELESAI' and pesanan.status != 'BATAL' and pesanan.status != 'PROSES' and pesanan.status != 'KIRIM' %}
+                                            <div class="pt-2">
+                                                <a href="{% url 'bayar_ulang_pesanan' pesanan.id %}" class="w-full inline-block text-center bg-[#8C7454] hover:bg-[#735F43] text-white py-3 rounded-full text-sm font-medium transition-all shadow-md transform hover:-translate-y-0.5">
+                                                    🔒 Lanjutkan ke Pembayaran Aman
+                                                </a>
+                                                <p class="text-center text-[11px] text-stone-400 mt-2">Klik tombol di atas untuk membuka gerbang pembayaran Midtrans.</p>
+                                            </div>
+                                        {% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -211,6 +237,7 @@
                         </div>
                     {% endif %}
                 </div>
+                {% endif%}
 
             </div>
         </div>
@@ -270,7 +297,6 @@
         }
     }
 
-    // Perbaikan utama: Kata "function" kini ditulis dengan benar dan lengkap
     function closeEditProfilModal() {
         const modal = document.getElementById('editProfilModal');
         if (modal) {
@@ -286,7 +312,6 @@
         }
     }
 
-    // Preview Gambar Instan Sebelum Diupload
     const inputFoto = document.getElementById('inputFoto');
     if (inputFoto) {
         inputFoto.onchange = evt => {
@@ -313,7 +338,7 @@
         const modal = document.getElementById(`modalDetail-${id}`);
         if (modal) {
             modal.classList.remove('hidden');
-            document.body.style.overflow = 'hidden'; // Kunci scroll background
+            document.body.style.overflow = 'hidden';
         }
     }
 
@@ -321,11 +346,10 @@
         const modal = document.getElementById(`modalDetail-${id}`);
         if (modal) {
             modal.classList.add('hidden');
-            document.body.style.overflow = 'auto'; // Kembalikan scroll background
+            document.body.style.overflow = 'auto';
         }
     }
 
-    // Menutup modal jika area luar (backdrop-blur) diklik
     window.addEventListener('click', function(event) {
         if (event.target.classList.contains('detail-modal-wrapper')) {
             event.target.classList.add('hidden');

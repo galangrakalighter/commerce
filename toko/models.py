@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.utils import timezone
 class Kategori(models.Model):
     nama = models.CharField(max_length=100)
     # Slug digunakan untuk membuat URL ramah SEO (misal: /produk/serum-wajah)
@@ -24,12 +24,19 @@ class Produk(models.Model):
     stok = models.IntegerField(default=0)
     is_flash_sale = models.BooleanField(default=False) # Penanda untuk masuk bagian diskon
     dibuat_pada = models.DateTimeField(auto_now_add=True)
+    flash_sale_end = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         verbose_name_plural = "Produk"
 
     def __str__(self):
         return self.nama
+    
+    @property
+    def status_flash_aktif(self):
+        if self.is_flash_sale and self.flash_sale_end:
+            return timezone.now() < self.flash_sale_end
+        return False
 
 class Like(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='produk_disukai')
@@ -74,6 +81,15 @@ class Pesanan(models.Model):
         ('SELESAI', 'Selesai'),
         ('BATAL', 'Dibatalkan'),
     ]
+    
+    KURIR_CHOICES = [
+        ('jne', 'JNE Express'),
+        ('jnt', 'J&T Express'),
+        ('sicepat', 'SiCepat'),
+        ('pos', 'POS Indonesia'),
+        ('anteraja', 'AnterAja'),
+        ('tiki', 'TIKI'),
+    ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pesanan')
     total_harga = models.IntegerField()
@@ -84,6 +100,12 @@ class Pesanan(models.Model):
     nama_penerima = models.CharField(max_length=100)
     telepon = models.CharField(max_length=20)
     alamat_lengkap = models.TextField()
+    
+    status_kurir = models.CharField(max_length=20, default='gudang')
+    kurir_lat = models.FloatField(null=True, blank=True)
+    kurir_lon = models.FloatField(null=True, blank=True)
+    no_resi = models.CharField(max_length=100, blank=True, null=True, verbose_name="Nomor Resi")
+    kurir = models.CharField(max_length=20, choices=KURIR_CHOICES, blank=True, null=True, help_text="Pilih ekspedisi pengiriman")
     
     # Tracking otomatis waktu
     tanggal_dibuat = models.DateTimeField(auto_now_add=True)

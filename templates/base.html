@@ -10,8 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .serif-font { font-family: 'Playfair Display', serif; }
+        body, .serif-font { font-family: 'Inter', sans-serif; }
         .wishlist-btn svg {
             transition: all 0.3s ease;
             fill: transparent;
@@ -232,7 +231,7 @@
 
             // 1. Ganti source gambar utama dan munculkan gambarnya
             if (mainImage) {
-                mainImage.src = imgUrl;
+                mainImage.src = url;
                 mainImage.classList.remove('hidden');
             }
 
@@ -328,11 +327,10 @@
                     window.URL.revokeObjectURL(tempVideo.src);
                     const duration = tempVideo.duration;
 
-                    // Jika durasi video melebih batas toleransi 5.5 detik
                     if (duration > 10) {
                         errorMsg.classList.remove('hidden');
                         resetVideoInput(); // Reset view dan inputan karena tidak valid
-                        alert('Gagal memuat video! Durasi video Anda adalah ' + duration.toFixed(1) + ' detik. LauraDerma hanya mengizinkan durasi video produk maksimal sepanjang 5 detik.');
+                        alert('Gagal memuat video! Durasi video Anda adalah ' + duration.toFixed(1) + ' detik. LauraDerma hanya mengizinkan durasi video produk maksimal sepanjang 10 detik.');
                     } else {
                         // Validasi lolos, tampilkan element preview video ke user
                         errorMsg.classList.add('hidden');
@@ -510,6 +508,101 @@
                 alert("Terjadi kesalahan sistem.");
             });
         });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const timers = document.querySelectorAll('.countdown-timer');
+
+            timers.forEach(timer => {
+                let targetStr = timer.getAttribute('data-time'); 
+                const produkId = timer.getAttribute('data-id');
+                
+                if (!targetStr) return;
+
+                // Normalisasi spasi dari Django menjadi 'T' agar valid di semua browser
+                if (targetStr.includes(' ')) {
+                    targetStr = targetStr.replace(' ', 'T');
+                }
+
+                // Jalankan kalkulasi waktu
+                function perbaruiTimer() {
+                    const targetDate = new Date(targetStr).getTime();
+                    const sekarang = new Date().getTime();
+                    const sisaWaktu = targetDate - sekarang;
+
+                    if (isNaN(targetDate)) {
+                        console.error(`Format waktu salah pada produk ID ${produkId}`);
+                        timer.innerHTML = "FORMAT ERROR";
+                        return;
+                    }
+
+                    if (sisaWaktu > 0) {
+                        const hari = Math.floor(sisaWaktu / (1000 * 60 * 60 * 24));
+                        const jam = Math.floor((sisaWaktu % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                        const menit = Math.floor((sisaWaktu % (1000 * 60 * 60)) / (1000 * 60));
+                        const detik = Math.floor((sisaWaktu % (1000 * 60)) / 1000);
+
+                        const totalJam = (hari * 24) + jam;
+
+                        const formatJam = totalJam.toString().padStart(2, '0');
+                        const formatMenit = menit.toString().padStart(2, '0');
+                        const formatDetik = detik.toString().padStart(2, '0');
+
+                        timer.innerHTML = `${formatJam}:${formatMenit}:${formatDetik}`;
+                    } else {
+                        clearInterval(hitungMundur);
+                        timer.innerHTML = "SELESAI";
+                        timer.classList.replace('bg-[#8C7454]', 'bg-stone-400');
+                        
+                        // Cari container flash sale terdekat lalu hapus dari layar
+                        const parentContainer = timer.closest('.bg-amber-50');
+                        if (parentContainer) {
+                            setTimeout(() => parentContainer.remove(), 2000);
+                        }
+
+                        // Kirim perintah ke views.py untuk matikan status is_flash_sale di DB
+                        matikanFlashSaleBackend(produkId);
+                    }
+                }
+
+                // Jalankan sekali di awal agar tidak delay 1 detik saat page load
+                perbaruiTimer(); 
+                const hitungMundur = setInterval(perbaruiTimer, 1000);
+            });
+        });
+
+        // Fungsi AJAX untuk mematikan status di database secara background
+        function matikanFlashSaleBackend(produkId) {
+            fetch(`/dashboard/produk/matikan-flash-sale-ajax/${produkId}/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'), // Pastikan fungsi getCookie csrf kamu ada
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    console.log(`Product #${produkId} flash sale telah dinonaktifkan di database.`);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Fungsi pembantu mengambil CSRF Token Django jika belum punya
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
     </script>
 </body>
 </html>

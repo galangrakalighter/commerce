@@ -62,33 +62,38 @@
                         </a>
 
                         <div class="absolute top-3 right-3 z-20 flex flex-col gap-2">
-                            <button onclick="toggleLike(this, '{{ produk.id }}')" 
-                                    class="like-btn p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all group/like {% if produk.id in user_likes %}active{% endif %}">
+                            <button onclick="toggleLike(this, '{{ produk.id }}')" class="like-btn p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all group/like {% if produk.id in user_likes %}active{% endif %}">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-stone-600 group-hover/like:text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                                 </svg>
                             </button>
-
-                            <button onclick="toggleWishlist(this, '{{ produk.id }}')" 
-                                    class="wishlist-btn p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all group/wish {% if produk.id in user_wishlists %}active{% endif %}">
+                            <button onclick="toggleWishlist(this, '{{ produk.id }}')" class="wishlist-btn p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-sm hover:bg-white transition-all group/wish {% if produk.id in user_wishlists %}active{% endif %}">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-stone-600 group-hover/wish:text-[#8C7454]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                                 </svg>
                             </button>
                         </div>
                         
-                        <span class="absolute top-3 left-3 bg-amber-500 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded shadow-sm animate-pulse">
+                        <span class="absolute top-3 left-3 bg-amber-500 text-white text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded shadow-sm z-20 animate-pulse">
                             ⚡ Flash Sale
                         </span>
                     </div>
                     
-                    <div class="p-4">
+                    <div class="p-4 pb-2">
+                        {% if produk.status_flash_aktif %}
+                        <div class="bg-amber-50 border border-amber-100 rounded-xl p-2.5 flex items-center justify-between mb-3 shadow-inner">
+                            <div class="flex items-center gap-1">
+                                <span class="text-xs font-bold text-amber-900 tracking-wide">BERAKHIR:</span>
+                            </div>
+                            
+                            <div class="font-mono text-[11px] font-bold text-white bg-[#8C7454] px-2.5 py-1 rounded-md tracking-wider shadow-sm">
+                                {{ produk.flash_sale_end|date:"d/m/Y H:i" }} WIB
+                            </div>
+                        </div>
+                        {% endif %}
+
                         <span class="text-[10px] text-stone-400 uppercase tracking-wider block">
-                            {% if produk.kategori %}
-                                {{ produk.kategori.nama }}
-                            {% else %}
-                                Tanpa Kategori
-                            {% endif %}
+                            {% if produk.kategori %}{{ produk.kategori.nama }}{% else %}Tanpa Kategori{% endif %}
                         </span>
                         
                         <a href="{% url 'detail_produk' produk.id %}" class="relative z-20">
@@ -106,6 +111,7 @@
                     </div>
 
                     {% if request.user.is_authenticated %}
+                        {% if not user.is_staff %}
                         <form action="{% url 'tambah_ke_keranjang' produk.id %}" method="POST">
                             {% csrf_token %}
                             <input type="hidden" name="jumlah" value="1">
@@ -113,9 +119,9 @@
                                 ⚡ Beli Langsung
                             </button>
                         </form>
+                        {% endif %}
                     {% else %}
-                        <button type="button" onclick="openLoginModal()" 
-                                class="w-full bg-stone-400 text-white py-2.5 rounded-xl text-xs font-medium hover:bg-stone-500 transition-colors shadow-sm flex items-center justify-center gap-1.5">
+                        <button type="button" onclick="openLoginModal()" class="w-full bg-stone-400 text-white py-2.5 rounded-xl text-xs font-medium hover:bg-stone-500 transition-colors shadow-sm flex items-center justify-center gap-1.5">
                             ⚡ Beli Langsung
                         </button>
                     {% endif %}
@@ -186,6 +192,7 @@
                     </div>
 
                     {% if request.user.is_authenticated %}
+                        {% if not user.is_staff %}
                         <form action="{% url 'tambah_ke_keranjang' produk.id %}" method="POST">
                             {% csrf_token %}
                             <input type="hidden" name="jumlah" value="1">
@@ -194,6 +201,7 @@
                                 ⚡ Beli Langsung
                             </button>
                         </form>
+                        {% endif %}
                     {% else %}
                         <button type="button" onclick="openLoginModal()" 
                                 class="w-full bg-stone-400 text-white py-2.5 rounded-xl text-xs font-medium hover:bg-stone-500 transition-colors shadow-sm flex items-center justify-center gap-1.5">
