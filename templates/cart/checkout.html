@@ -23,142 +23,63 @@
                     <input type="text" name="telepon" required class="w-full bg-[#FAF8F5] border border-[#EAE3D2] rounded-xl py-2 px-4 text-sm outline-none focus:border-[#8C7454]">
                 </div>
                 
-                <div class="relative">
+                <div>
                     <label class="block text-xs font-medium text-stone-700 mb-1">Alamat Lengkap</label>
-                    <textarea id="input-alamat" name="alamat_lengkap" rows="4" required placeholder="Ketik nama jalan, komplek, atau kota tempat tinggalmu..." class="w-full bg-[#FAF8F5] border border-[#EAE3D2] rounded-xl py-2 px-4 text-sm outline-none focus:border-[#8C7454] resize-none"></textarea>
-                    
-                    <div id="dropdown-alamat" class="absolute left-0 right-0 mt-1 bg-white border border-stone-200 rounded-xl shadow-lg max-h-60 overflow-y-auto hidden z-50">
-                        </div>
-                    <span id="loading-alamat" class="absolute right-3 top-9 text-xs text-stone-400 hidden animate-pulse">Mencari...</span>
+                    <textarea id="input-alamat" name="alamat_lengkap" rows="3" required class="w-full bg-[#FAF8F5] border border-[#EAE3D2] rounded-xl py-2 px-4 text-sm outline-none focus:border-[#8C7454] resize-none"></textarea>
                 </div>
 
                 <div>
-                    <label class="block text-xs font-medium text-stone-700 mb-1">Catatan Tambahan (Opsional)</label>
-                    <input type="text" name="catatan" class="w-full bg-[#FAF8F5] border border-[#EAE3D2] rounded-xl py-2 px-4 text-sm outline-none focus:border-[#8C7454]">
+                    <label class="block text-xs font-medium text-stone-700 mb-2">Tandai Lokasi di Peta (Geser pin ke rumahmu):</label>
+                    <div id="map" class="w-full h-64 rounded-xl border border-stone-200 z-10"></div>
+                    <input type="hidden" name="lat" id="lat" value="-6.9175" required>
+                    <input type="hidden" name="lon" id="lon" value="107.6191" required>
                 </div>
-                
+
+                <div>
+                    <label class="block text-xs font-medium text-stone-700 mb-1">Kode Pos</label>
+                    <input type="text" name="kode_pos" class="w-full bg-[#FAF8F5] border border-[#EAE3D2] rounded-xl py-2 px-4 text-sm outline-none focus:border-[#8C7454]" required>
+                </div>
+
                 <div class="border-t border-stone-100 pt-4 mt-6 flex justify-between items-center">
                     <div>
                         <span class="text-xs text-stone-400 block">Total yang harus dibayar:</span>
                         <span class="text-xl font-bold text-[#8C7454]">Rp {{ total_belanja }}</span>
                     </div>
-                    <button type="submit" class="bg-[#8C7454] text-white px-8 py-3 rounded-full text-sm font-medium hover:bg-[#735F43] transition-colors shadow-md cursor-pointer">
+                    <button type="submit" class="bg-[#8C7454] text-white px-8 py-3 rounded-full text-sm font-medium hover:bg-[#735F43] transition-colors shadow-md">
                         Proses Pembayaran
                     </button>
                 </div>
             </form>
-            
-            <a href="{% url 'home' %}" class="block text-center text-xs text-stone-400 mt-4 hover:underline">
-                Kembali Belanja
-            </a>
         </div>
     </div>
 </div>
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        const inputAlamat = document.getElementById("input-alamat");
-        const dropdownAlamat = document.getElementById("dropdown-alamat");
-        const loadingAlamat = document.getElementById("loading-alamat");
-        let timeoutDebounce = null;
+        // Inisialisasi Peta (Default Bandung)
+        const map = L.map('map').setView([-6.9175, 107.6191], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
 
-        inputAlamat.addEventListener("input", function() {
-            const query = inputAlamat.value.trim();
+        // Marker yang bisa digeser
+        const marker = L.marker([-6.9175, 107.6191], { draggable: true }).addTo(map);
 
-            // Bersihkan timeout lama (Debouncing)
-            clearTimeout(timeoutDebounce);
-
-            // Jika inputan masih terlalu pendek, sembunyikan dropdown
-            if (query.length < 4) {
-                dropdownAlamat.classList.add("hidden");
-                return;
-            }
-
-            // Tunggu user selesai mengetik sejenak (300 milidetik)
-            timeoutDebounce = setTimeout(() => {
-                loadingAlamat.classList.remove("hidden");
-
-                const urlApi = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=id&limit=5&addressdetails=1`;
-
-                fetch(urlApi, {
-                    headers: { 'Accept-Language': 'id' }
-                })
-                .then(response => response.json())
-                .then(results => {
-                    dropdownAlamat.innerHTML = "";
-                    loadingAlamat.classList.add("hidden");
-
-                    if (results && results.length > 0) {
-                        dropdownAlamat.classList.remove("hidden");
-
-                        results.forEach(item => {
-                            const opsi = document.createElement("div");
-                            opsi.className = "px-4 py-3 text-sm text-stone-700 hover:bg-[#FAF8F5] cursor-pointer border-b border-stone-50 last:border-b-0 transition-colors flex items-start gap-2.5";
-                            
-                            const addr = item.address;
-                            
-                            // 1. KUNCI UTAMA: Baris atas harus berupa nama jalan atau nama tempat spesifik
-                            // Jika tidak ada data jalan (road), gunakan potongan pertama dari display_name asli
-                            let namaJalanUtama = addr.road || addr.pedestrian || addr.footway || addr.amenity || addr.shop || item.display_name.split(',')[0];
-                            
-                            // 2. KUNCI KEDUA: Menyusun wilayah dari tingkat terkecil ke terbesar
-                            let infoWilayah = [];
-                            
-                            // Kelurahan / Desa / Kampung
-                            if (addr.village || addr.suburb || addr.neighbourhood) {
-                                let kelurahan = addr.village || addr.suburb || addr.neighbourhood;
-                                // Pastikan nama kelurahan tidak kembar dengan nama jalan utama di atas
-                                if (kelurahan.toLowerCase() !== namaJalanUtama.toLowerCase()) {
-                                    infoWilayah.push(kelurahan);
-                                }
-                            }
-                            
-                            // Kecamatan
-                            if (addr.city_district || addr.subdistrict) {
-                                infoWilayah.push(addr.city_district || addr.subdistrict);
-                            }
-                            
-                            // Kota / Kabupaten
-                            if (addr.city || addr.regency || addr.municipality) {
-                                infoWilayah.push(addr.city || addr.regency || addr.municipality);
-                            }
-
-                            // Gabungkan array menjadi teks penjelas ("Kelurahan, Kecamatan, Kota")
-                            const teksWilayahPendek = infoWilayah.join(', ');
-
-                            // Suntikkan struktur ke dalam elemen dropdown
-                            opsi.innerHTML = `
-                                <span class="text-base mt-0.5 flex-shrink-0">📍</span>
-                                <div class="w-full">
-                                    <p class="font-medium text-stone-900">${namaJalanUtama}</p>
-                                    <p class="text-xs text-stone-400 mt-0.5">${teksWilayahPendek}</p>
-                                </div>
-                            `;
-
-                            // Ketika alamat diklik
-                            opsi.addEventListener("click", function() {
-                                inputAlamat.value = item.display_name;
-                                dropdownAlamat.classList.add("hidden");
-                            });
-
-                            dropdownAlamat.appendChild(opsi);
-                        });
-                    } else {
-                        dropdownAlamat.classList.add("hidden");
-                    }
-                })
-                .catch(error => {
-                    console.error("Gagal memuat autocomplete alamat:", error);
-                    loadingAlamat.classList.add("hidden");
-                });
-            }, 300);
+        // Update hidden input saat marker digeser
+        marker.on('dragend', function(e) {
+            const pos = marker.getLatLng();
+            document.getElementById('lat').value = pos.lat;
+            document.getElementById('lon').value = pos.lng;
         });
 
-        // Sembunyikan dropdown jika klik di luar area input
-        document.addEventListener("click", function(e) {
-            if (!inputAlamat.contains(e.target) && !dropdownAlamat.contains(e.target)) {
-                dropdownAlamat.classList.add("hidden");
-            }
+        // Opsional: Klik peta untuk memindahkan marker
+        map.on('click', function(e) {
+            marker.setLatLng(e.latlng);
+            document.getElementById('lat').value = e.latlng.lat;
+            document.getElementById('lon').value = e.latlng.lng;
         });
     });
 </script>

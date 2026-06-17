@@ -15,6 +15,7 @@ from toko.models import Produk, Kategori, Like, Wishlist, ProdukGambar, Review, 
 from django.db.models import Avg, Count
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
+from .shipping_service import BiteshipService
 
 def halaman_utama(request):
     # 1. AMBIL DATA MASTER BANNER & KATEGORI
@@ -522,7 +523,10 @@ def checkout_view(request):
         nama_penerima = request.POST.get('nama_penerima')
         telepon = request.POST.get('telepon')
         alamat_lengkap = request.POST.get('alamat_lengkap')
+        kode_pos = request.POST.get('kode_pos')
         catatan = request.POST.get('catatan', '')
+        lat = request.POST.get('lat')
+        lon = request.POST.get('lon')
         
         # 1. Simpan data induk Pesanan
         pesanan = Pesanan.objects.create(
@@ -533,8 +537,10 @@ def checkout_view(request):
             telepon=telepon,
             alamat_lengkap=alamat_lengkap,
             catatan=catatan,
-            kurir='spx',
-            no_resi='260506P9RF9FN0'
+            lokasi_lat=lat,
+            lokasi_lon=lon,
+            kode_pos=kode_pos,
+            kurir='jne'
         )
         
         # 2. Simpan item produk ke DetailPesanan
@@ -876,62 +882,87 @@ def matikan_flash_sale_ajax(request, produk_id):
 
 def lacak_paket(request, pesanan_id):
     pesanan = get_object_or_404(Pesanan, id=pesanan_id, user=request.user)
-
-    tracking_data = None
-    summary_data = None
+    tracking_data = []
+    summary_data = {'courier': pesanan.kurir, 'awb': pesanan.no_resi, 'status': 'Memuat...'}
     error_msg = None
 
+    # 1. AMBIL TRACKING DARI BINDERBYTE
     if pesanan.no_resi and pesanan.kurir:
         api_key = "062af482976fa00ed00067f4570424d53742c507a2341932dfe8b00dc1f89bbd"
         url = "https://api.binderbyte.com/v1/track"
-
-        params = {
-            'api_key': api_key,
-            'courier': pesanan.kurir,
-            'awb': pesanan.no_resi
-        }
-
+        params = {'api_key': api_key, 'courier': pesanan.kurir.lower(), 'awb': pesanan.no_resi}
+        
         try:
-            response = requests.get(url, params=params)
+            response = requests.get(url, params=params, timeout=5)
             result = response.json()
-
             if result.get('status') == 200:
                 tracking_data = result['data']['history']
                 summary_data = result['data']['summary']
             else:
-                error_msg = result.get('message', 'Terjadi kesalahan pada data resi.')
-        except requests.exceptions.RequestException:
-            error_msg = "Gagal terhubung ke server ekspedisi."
-    else:
-        error_msg = "Nomor resi atau ekspedisi belum diperbarui oleh admin toko."
+                summary_data['status'] = "Resi tidak ditemukan"
+        except Exception:
+            error_msg = "Sistem pelacakan sedang gangguan."
+    
+    # KITA TETAP MENGGUNAKAN KOORDINAT ORIGIN DARI BITESHIP (Database)
+    # Jika origin_lat di database kosong (belum di-update), gunakan koordinat default toko
+    origin_lat = pesanan.kurir_lat if pesanan.kurir_lat else -6.9175
+    origin_lon = pesanan.kurir_lon if pesanan.kurir_lon else 107.6191
 
     return render(request, 'pesanan/lacak.html', {
         'pesanan': pesanan,
         'tracking_data': tracking_data,
         'summary_data': summary_data,
-        'error_msg': error_msg
+        'error_msg': error_msg,
+        'origin_lat': origin_lat,
+        'origin_lon': origin_lon
     })
-    
+
 def cek_status_kurir_api(request, pesanan_id):
-    """
-    Endpoint API untuk mengembalikan lokasi koordinat terbaru kurir
-    yang terus diperbarui oleh perangkat GPS kurir di lapangan.
-    """
     try:
         pesanan = Pesanan.objects.get(id=pesanan_id)
         
-        # Kirim data koordinat dalam format JSON ke frontend
+        # 1. Update data dari BinderByte ke database SEBELUM membaca database
+        # Hanya update jika pesanan belum selesai/diterima
+        if pesanan.status_kurir not in ['DELIVERED', 'RETURN']:
+            update_posisi_dari_binderbyte(pesanan)
+            # Reload object dari database setelah di-save
+            pesanan.refresh_from_db()
+            
         return JsonResponse({
             'status': 'success',
-            'status_pesanan': pesanan.status_pesanan, # misal: 'DIANTAR'
-            'kurir_lat': pesanan.kurir_lat,           # Pastikan field ini ada di model
-            'kurir_lon': pesanan.kurir_lon,           # Pastikan field ini ada di model
+            'kurir_lat': float(pesanan.kurir_lat) if pesanan.kurir_lat else None,
+            'kurir_lon': float(pesanan.kurir_lon) if pesanan.kurir_lon else None,
+            'status_kurir': pesanan.status_kurir
         })
-    except Pesanan.DoesNotExist:
-        return JsonResponse({
-            'status': 'error',
-            'message': 'Pesanan tidak ditemukan'
-        }, status=404)
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    
+def update_posisi_dari_binderbyte(pesanan):
+    api_key = "062af482976fa00ed00067f4570424d53742c507a2341932dfe8b00dc1f89bbd"
+    url = "https://api.binderbyte.com/v1/track"
+    params = {
+        'api_key': api_key,
+        'courier': pesanan.kurir,
+        'awb': pesanan.no_resi
+    }
+    
+    try:
+        # Timeout 3 detik agar user tidak menunggu terlalu lama jika API lambat
+        response = requests.get(url, params=params, timeout=3)
+        if response.status_code == 200:
+            result = response.json()
+            # Contoh struktur data: sesuaikan dengan field di JSON response BinderByte
+            # Biasanya data terbaru ada di index 0 dari history/tracking
+            last_history = result['data']['history'][0]
+            
+            # Jika BinderByte memberikan koordinat langsung:
+            if 'lat' in last_history and 'lon' in last_history:
+                pesanan.kurir_lat = last_history['lat']
+                pesanan.kurir_lon = last_history['lon']
+                pesanan.status_kurir = last_history['status']
+                pesanan.save()
+    except Exception as e:
+        print(f"Error fetching BinderByte: {e}")
 
 @login_required
 def kelola_banner(request):
@@ -982,3 +1013,53 @@ def hapus_banner(request, banner_id):
         
     banner.delete()
     return redirect('kelola_banner')
+
+@login_required
+@csrf_exempt
+def create_shipping_order(request):
+    if request.method == 'POST':
+        pesanan_id = request.POST.get('pesanan_id')
+        try:
+            pesanan = Pesanan.objects.get(id=pesanan_id)
+            biteship = BiteshipService()
+            result = biteship.create_order(pesanan)
+            
+            # Cek sukses dari respons
+            if result.get('success'):
+                # 1. Mengambil tracking_id
+                tracking_id = result.get('courier', {}).get('tracking_id')
+                
+                # 2. MENGAMBIL KOORDINAT (Sesuai struktur log Anda)
+                # Lokasi koordinat ada di result['origin']['coordinate']
+                origin_data = result.get('origin', {}).get('coordinate', {})
+                lat = origin_data.get('latitude')
+                lon = origin_data.get('longitude')
+                
+                # UPDATE DATABASE
+                pesanan.no_resi = tracking_id
+                
+                # Hanya simpan jika koordinat valid (bukan None)
+                if lat and lon:
+                    pesanan.kurir_lat = lat
+                    pesanan.kurir_lon = lon
+                    
+                pesanan.save() 
+                
+                return JsonResponse({
+                    'status': 'success', 
+                    'resi': tracking_id,
+                    'lat': lat,
+                    'lon': lon
+                })
+            else:
+                return JsonResponse({
+                    'status': 'error', 
+                    'message': 'Gagal dari API: ' + str(result.get('error', 'Unknown'))
+                })
+                
+        except Pesanan.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Pesanan tidak ditemukan'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+            
+    return JsonResponse({'status': 'error', 'message': 'Invalid method'})

@@ -18,7 +18,7 @@ from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from toko.views import halaman_utama, dashboard_utama_view, kelola_banner, toggle_status_banner, hapus_banner, kelola_kategori_view, edit_kategori, daftar_produk_internal_view, cek_status_kurir_api, tambah_produk_proses, lacak_paket, hapus_produk_proses, bayar_ulang_pesanan_view, matikan_flash_sale_ajax, tambah_kategori_proses, hapus_kategori_proses, toggle_like_view, toggle_wishlist_view, halaman_wishlist, halaman_like, detail_produk, kirim_review, tambah_ke_keranjang, detail_keranjang, hapus_dari_keranjang, checkout_view, bersihkan_keranjang_ajax, update_kuantitas_keranjang, live_search_view, edit_produk
+from toko.views import halaman_utama, dashboard_utama_view, kelola_banner, toggle_status_banner, hapus_banner, kelola_kategori_view, edit_kategori, create_shipping_order, daftar_produk_internal_view, cek_status_kurir_api, tambah_produk_proses, lacak_paket, hapus_produk_proses, bayar_ulang_pesanan_view, matikan_flash_sale_ajax, tambah_kategori_proses, hapus_kategori_proses, toggle_like_view, toggle_wishlist_view, halaman_wishlist, halaman_like, detail_produk, kirim_review, tambah_ke_keranjang, detail_keranjang, hapus_dari_keranjang, checkout_view, bersihkan_keranjang_ajax, update_kuantitas_keranjang, live_search_view, edit_produk
 from akun.views import register_view, login_view, logout_view, kelola_staff_view, tambah_staff_proses, pecat_staff_proses, user_dashboard, edit_profil_view
 
 urlpatterns = [
@@ -61,6 +61,7 @@ urlpatterns = [
     path('dashboard/banner/', kelola_banner, name='kelola_banner'),
     path('dashboard/banner/toggle/<int:banner_id>/', toggle_status_banner, name='toggle_status_banner'),
     path('dashboard/banner/hapus/<int:banner_id>/', hapus_banner, name='hapus_banner'),
+    path('api/create-resi/', create_shipping_order, name='create_shipping_order'),
 ]
 
 if settings.DEBUG:

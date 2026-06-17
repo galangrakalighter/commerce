@@ -1,0 +1,270 @@
+[
+  {
+    "model": "admin.logentry",
+    "pk": 1,
+    "fields": {"action_time": "2026-05-19T02:59:07.794Z", "user": 1, "content_type": 12, "object_id": "4", "object_repr": "Baru Lagi 123", "action_flag": 2, "change_message": "[{\"changed\": {\"fields\": [\"Flash sale end\"]}}]"}},
+  {
+    "model": "admin.logentry",
+    "pk": 2,
+    "fields": {"action_time": "2026-05-19T02:59:39.587Z", "user": 1, "content_type": 12, "object_id": "4", "object_repr": "Baru Lagi 123", "action_flag": 2, "change_message": "[{\"changed\": {\"fields\": [\"Flash sale end\"]}}]"}},
+  {
+    "model": "admin.logentry",
+    "pk": 3,
+    "fields": {"action_time": "2026-05-19T03:08:06.614Z", "user": 1, "content_type": 12, "object_id": "4", "object_repr": "Baru Lagi 123", "action_flag": 2, "change_message": "[{\"changed\": {\"fields\": [\"Flash sale end\"]}}]"}},
+  {
+    "model": "admin.logentry",
+    "pk": 4,
+    "fields": {"action_time": "2026-05-19T04:22:41.946Z", "user": 3, "content_type": 4, "object_id": "3", "object_repr": "admin_commerce", "action_flag": 2, "change_message": "[{\"changed\": {\"fields\": [\"Username\"]}}]"}},
+  {
+    "model": "admin.logentry",
+    "pk": 5,
+    "fields": {"action_time": "2026-05-19T04:22:56.292Z", "user": 3, "content_type": 4, "object_id": "3", "object_repr": "admin_commerce", "action_flag": 2, "change_message": "[]"}},
+  {
+    "model": "auth.user",
+    "pk": 1,
+    "fields": {"password": "pbkdf2_sha256$1200000$q03canrC5ZpwVgEm3K2hZY$EI9SIZZs6DGAoa2erLzEAbHDA6cmeg5/RxjWJu5LJTo=", "last_login": "2026-06-02T07:36:52.218Z", "is_superuser": true, "username": "galang", "first_name": "", "last_name": "", "email": "galang@gmail.com", "is_staff": true, "is_active": true, "date_joined": "2026-05-19T01:27:25.970Z", "groups": [], "user_permissions": []}},
+  {
+    "model": "auth.user",
+    "pk": 2,
+    "fields": {"password": "pbkdf2_sha256$1200000$zoTvubKvwk2jBtYCDrFBt9$eEmcTVUvzASWcKKxvP+2Z4dYxOva80nfQ3seb1nZJP8=", "last_login": "2026-05-19T08:32:54.575Z", "is_superuser": false, "username": "cust1", "first_name": "customer", "last_name": "", "email": "cust1@gmail.com", "is_staff": false, "is_active": true, "date_joined": "2026-05-19T01:31:30.699Z", "groups": [], "user_permissions": []}},
+  {
+    "model": "auth.user",
+    "pk": 3,
+    "fields": {"password": "pbkdf2_sha256$1200000$uV2beI4oNbxDFlPDDsBuDz$FQwSjYlvRDLfQvPVOaYgWGCqsiHyNd+dlspIkYuf3xk=", "last_login": "2026-06-02T07:37:36.630Z", "is_superuser": true, "username": "admin_commerce", "first_name": "", "last_name": "", "email": "admin@gmail.com", "is_staff": true, "is_active": true, "date_joined": "2026-05-19T04:21:56Z", "groups": [], "user_permissions": []}},
+  {
+    "model": "auth.user",
+    "pk": 4,
+    "fields": {"password": "pbkdf2_sha256$1200000$pRYlJtx5tIlgRU0ZyV3xTR$8rjs1WoDvuY9X3Tv9vR2lJ6j/W9oF7q7sRJyN1GYpG0=", "last_login": "2026-05-21T09:29:19.602Z", "is_superuser": false, "username": "customer", "first_name": "Customer", "last_name": "", "email": "cust@gmail.com", "is_staff": false, "is_active": true, "date_joined": "2026-05-21T09:29:18.305Z", "groups": [], "user_permissions": []}},
+  {
+    "model": "auth.user",
+    "pk": 5,
+    "fields": {"password": "pbkdf2_sha256$1200000$1rL3ggS7NrvikeUGE2fbcB$92Jh4pgvyRuvylfVpfEo6ew3Bp500LNYJY4npVDcA1U=", "last_login": "2026-06-17T01:23:49.807Z", "is_superuser": false, "username": "barulagi", "first_name": "Pelanggan", "last_name": "Baru", "email": "barulagi2@gmail.com", "is_staff": false, "is_active": true, "date_joined": "2026-06-17T01:23:48.677Z", "groups": [], "user_permissions": []}},
+  {
+    "model": "sessions.session",
+    "pk": "7p87he65qo501fvafkv46svjky715t5m",
+    "fields": {"session_data": ".eJxdzDsOgzAQBNC7bG1ZXuyF4DJ9zoCWNcYQAhKfCnH3CImCpJli3mh2qHhbU7UtzVx1ATxkoO5dzfJuxhNCz2M7aZnGde5qfU70pYt-TaEZntf25yDxksCDjcQ1RkIqMnGOTCQSKiW3QlQ6JMe2EBJE4QzzEDgGibmIk_rhpAEFwvMKfgd3Rr99Bk7gUUHiuWXwaIwxhwK8s_3j4_gCSSFMvA:1wPYzz:vWlTiuzyridO1_vbw0j3W0dam7Do7HkslUFY5KL8Yk8", "expire_date": "2026-06-03T04:57:39.732Z"}},
+  {
+    "model": "sessions.session",
+    "pk": "b4tx75y1let5ja7tm4rwosd4277jsyun",
+    "fields": {"session_data": ".eJxVjDsOgzAQBe-yNULr7IJjl-lzBrT-YUgCkoEKcfcIiYbmFTOjt4OXsoLdgc8Zt99XMlhVQZbSC1iFiHgcFXSyrbnblli6IYAFghtz4j9xOkUYZern2s_TWgZXn0l92aV-zyF-X1d7O8iyZLAgnoT1U7eRkLWh4JhTaiV41KnRifSDSSikJmmHopmNRCKDyiQVooLjD79HQ58:1wPDDX:65yF192utP_yIE24J6msFvjAu1kVSh7gEjoyU_IVYxk", "expire_date": "2026-06-02T05:42:11.604Z"}},
+  {
+    "model": "sessions.session",
+    "pk": "k0qoh3winv5w3uppp71bzfib8e3okwa3",
+    "fields": {"session_data": ".eJxVjMsOgjAQAP9lz6bpYyuUo3e-oVl2W0FNm1A4Gf_dkHDQ68xk3hBp3-a4t7TGRWAAA5dfNhE_UzmEPKjcq-JatnWZ1JGo0zY1Vkmv29n-DWZqMwyAHrOxXW-FO7TUcSKvtc5BfCDHaHp_NZ5N74yzGGx2XktmR1NADCjw-QK81jbb:1wP9JB:R9PLrh0K19p56xLD4O4UBKuR2JMyx7pw1nHu9BgR8iA", "expire_date": "2026-06-02T01:31:45.194Z"}},
+  {
+    "model": "sessions.session",
+    "pk": "nifwzyeppdnsdezeko4pcnome127kdm1",
+    "fields": {"session_data": ".eJxVjEsOgjAUAO_y1qahvFIoS_ecoXk_BTUl4bMy3t2QsNDtzGTekGnfxryvtuRJoQeEyy9jkqeVQ-iDyn12MpdtmdgdiTvt6oZZ7XU927_BSOsIPaSaY2utsghhMvRWSWANQh67JKzJR24sEaH3gr5jquqIGDQ0tzoyfL4EADhM:1wUJgu:L9-e56WqS1IOmqJXvkvIvyrOxr_bR9Erhdb-fXeSxx8", "expire_date": "2026-06-16T07:37:36.633Z"}},
+  {
+    "model": "sessions.session",
+    "pk": "upejbg6xgehvgg64cuu8pgiwwu89e3ug",
+    "fields": {"session_data": ".eJxVjMsKgzAQRf9l1iIZzWjNsvt-g0wmidFaAz4oRfz3IrhoN3dxzuHu0PK2xnZb_Nz2DgwUkP0yy_L00yncwFOXcknTOvc2P5P8skv-SM6P96v9O4i8RDBQBmKLgZDqQrQmFYiEGqlKIWo0kuayFhJE4QIr5zg4CZWIFnvT4iEDu33aKb3B7IDnDNtr5AgGM4g8dwwGlVLqOI4vbFNFbw:1wPGMv:LXnbMJ9jYe_feHGWmsUCC3ZVMlkGY5tsuIVaicHIMrA", "expire_date": "2026-06-02T09:04:05.432Z"}},
+  {
+    "model": "sessions.session",
+    "pk": "xa1mjmb121jr6lf4wdn0q5o0aegzhoz4",
+    "fields": {"session_data": ".eJxVjjsOgzAQBe-ydWSBP9hLmT5nQPbuEkgiLNlQIe4eIVEk7ZvR6O0wxG2dhq1KGWaGHhzcfrcU6S3LCfgVl2dWlJe1zEmdirpoVY_M8rlf7l9ginWCHqRBYzShTtZ0ISBR57XTjcPOMAdkL9xqK20wXpInbMfUsBM7ekyjPV9RLCv0-3F8AflmOrQ:1wZf1p:eVWDNS88kpoPmZRIEFzhAih0RUFqtbC5UDrsw5v7i90", "expire_date": "2026-07-01T01:25:17.919Z"}},
+  {
+    "model": "akun.profile",
+    "pk": 1,
+    "fields": {"user": 2, "foto": "profile_pics/kopisusu-coconut.jpg"}},
+  {
+    "model": "toko.kategori",
+    "pk": 1,
+    "fields": {"nama": "Serum Baru", "slug": "serum-baru"}},
+  {
+    "model": "toko.kategori",
+    "pk": 2,
+    "fields": {"nama": "Air", "slug": "air"}},
+  {
+    "model": "toko.produk",
+    "pk": 1,
+    "fields": {"kategori": 1, "nama": "asd", "slug": "asd", "gambar": "produk/thumbnails/pexels-anastasia-shuraeva-4989501.jpg", "video_produk": "produk/videos/2026-05-19_08-33-41_FDBAK01.mp4", "deskripsi": "", "harga": 10000, "stok": 86, "is_flash_sale": false, "dibuat_pada": "2026-05-19T01:32:20.965Z", "flash_sale_end": null}},
+  {
+    "model": "toko.produk",
+    "pk": 4,
+    "fields": {"kategori": 1, "nama": "Baru Lagi 123", "slug": "baru-lagi-123", "gambar": "produk/thumbnails/pexels-anastasia-shuraeva-4989501_9Ho7ALg.jpg", "video_produk": "produk/videos/2026-05-19_08-33-41_fNwwHL7.mp4", "deskripsi": "tester", "harga": 10000, "stok": 97, "is_flash_sale": true, "dibuat_pada": "2026-05-19T02:44:15.451Z", "flash_sale_end": "2026-05-19T04:05:00Z"}},
+  {
+    "model": "toko.like",
+    "pk": 1,
+    "fields": {"user": 2, "produk": 1, "created_at": "2026-05-19T01:48:54.808Z"}},
+  {
+    "model": "toko.like",
+    "pk": 2,
+    "fields": {"user": 2, "produk": 4, "created_at": "2026-05-19T06:36:10.065Z"}},
+  {
+    "model": "toko.wishlist",
+    "pk": 2,
+    "fields": {"user": 2, "produk": 4, "created_at": "2026-05-19T06:36:10.747Z"}},
+  {
+    "model": "toko.wishlist",
+    "pk": 3,
+    "fields": {"user": 2, "produk": 1, "created_at": "2026-05-19T07:01:06.739Z"}},
+  {
+    "model": "toko.produkgambar",
+    "pk": 7,
+    "fields": {"produk": 1, "gambar": "produk/galeri/pexels-abdoo-31834469.jpg", "alt_text": null}},
+  {
+    "model": "toko.produkgambar",
+    "pk": 8,
+    "fields": {"produk": 1, "gambar": "produk/galeri/portrait-smiling-beautiful-girl-her-handsome-boyfriend-laughing_1.png", "alt_text": null}},
+  {
+    "model": "toko.produkgambar",
+    "pk": 9,
+    "fields": {"produk": 1, "gambar": "produk/galeri/Sect4-Denim_vYXAWOn.png", "alt_text": null}},
+  {
+    "model": "toko.produkgambar",
+    "pk": 17,
+    "fields": {"produk": 4, "gambar": "produk/galeri/portrait-smiling-beautiful-girl-her-handsome-boyfriend-laughing_3_MUlGlA1.png", "alt_text": null}},
+  {
+    "model": "toko.produkgambar",
+    "pk": 18,
+    "fields": {"produk": 4, "gambar": "produk/galeri/portrait-handsome-confident-stylish-hipster-lambersexual-model-with-curly-_Cgbrupo.png", "alt_text": null}},
+  {
+    "model": "toko.produkgambar",
+    "pk": 19,
+    "fields": {"produk": 4, "gambar": "produk/galeri/modern-man-urban-environment_9_pXZ2YMH.png", "alt_text": null}},
+  {
+    "model": "toko.review",
+    "pk": 1,
+    "fields": {"produk": 4, "user": 2, "rating": 5, "komentar": "sdadas", "tanggal": "2026-05-19T06:35:44.308Z"}},
+  {
+    "model": "toko.pesanan",
+    "pk": 1,
+    "fields": {"user": 2, "total_harga": 10000, "status": "MENUNGGU", "catatan": "asd", "nama_penerima": "asd", "telepon": "asd", "alamat_lengkap": "asd", "status_kurir": "gudang", "kurir_lat": null, "kurir_lon": null, "no_resi": null, "kurir": null, "tanggal_dibuat": "2026-05-19T01:54:16.867Z", "tanggal_diperbarui": "2026-05-19T01:54:16.867Z"}},
+  {
+    "model": "toko.pesanan",
+    "pk": 2,
+    "fields": {"user": 2, "total_harga": 10000, "status": "SELESAI", "catatan": "asd", "nama_penerima": "asd", "telepon": "asd", "alamat_lengkap": "asd", "status_kurir": "gudang", "kurir_lat": null, "kurir_lon": null, "no_resi": null, "kurir": null, "tanggal_dibuat": "2026-05-19T01:55:42.515Z", "tanggal_diperbarui": "2026-05-19T02:15:22.063Z"}},
+  {
+    "model": "toko.pesanan",
+    "pk": 3,
+    "fields": {"user": 2, "total_harga": 50000, "status": "SELESAI", "catatan": "asd", "nama_penerima": "asd", "telepon": "asd", "alamat_lengkap": "asd", "status_kurir": "gudang", "kurir_lat": null, "kurir_lon": null, "no_resi": null, "kurir": null, "tanggal_dibuat": "2026-05-19T02:19:37.724Z", "tanggal_diperbarui": "2026-05-19T02:19:51.305Z"}},
+  {
+    "model": "toko.pesanan",
+    "pk": 4,
+    "fields": {"user": 3, "total_harga": 10000, "status": "MENUNGGU", "catatan": "", "nama_penerima": "lighter media group", "telepon": "08812431684", "alamat_lengkap": "Jl. Soekarno-Hatta No.399A, Karasak, Kec. Astanaanyar", "status_kurir": "gudang", "kurir_lat": null, "kurir_lon": null, "no_resi": null, "kurir": null, "tanggal_dibuat": "2026-05-19T05:27:13.754Z", "tanggal_diperbarui": "2026-05-19T05:27:13.754Z"}},
+  {
+    "model": "toko.pesanan",
+    "pk": 5,
+    "fields": {"user": 3, "total_harga": 10000, "status": "MENUNGGU", "catatan": "", "nama_penerima": "lighter media group", "telepon": "08812431684", "alamat_lengkap": "Jl. Soekarno-Hatta No.399A, Karasak, Kec. Astanaanyar", "status_kurir": "gudang", "kurir_lat": null, "kurir_lon": null, "no_resi": null, "kurir": null, "tanggal_dibuat": "2026-05-19T05:42:11.147Z", "tanggal_diperbarui": "2026-05-19T05:42:11.147Z"}},
+  {
+    "model": "toko.pesanan",
+    "pk": 6,
+    "fields": {"user": 2, "total_harga": 10000, "status": "MENUNGGU", "catatan": "asd", "nama_penerima": "asd", "telepon": "asd", "alamat_lengkap": "asd", "status_kurir": "gudang", "kurir_lat": null, "kurir_lon": null, "no_resi": null, "kurir": null, "tanggal_dibuat": "2026-05-19T06:06:09.806Z", "tanggal_diperbarui": "2026-05-19T06:06:09.806Z"}},
+  {
+    "model": "toko.pesanan",
+    "pk": 7,
+    "fields": {"user": 2, "total_harga": 10000, "status": "SELESAI", "catatan": "", "nama_penerima": "Ramma fajar", "telepon": "0882001950056", "alamat_lengkap": "Jl. Soekarno-Hatta No.399A", "status_kurir": "gudang", "kurir_lat": null, "kurir_lon": null, "no_resi": null, "kurir": null, "tanggal_dibuat": "2026-05-19T06:36:30.078Z", "tanggal_diperbarui": "2026-05-19T07:18:12.015Z"}},
+  {
+    "model": "toko.pesanan",
+    "pk": 8,
+    "fields": {"user": 2, "total_harga": 10000, "status": "SELESAI", "catatan": "asd", "nama_penerima": "asd", "telepon": "asd", "alamat_lengkap": "asd", "status_kurir": "gudang", "kurir_lat": null, "kurir_lon": null, "no_resi": null, "kurir": null, "tanggal_dibuat": "2026-05-20T02:36:50.283Z", "tanggal_diperbarui": "2026-05-20T02:37:08.110Z"}},
+  {
+    "model": "toko.pesanan",
+    "pk": 9,
+    "fields": {"user": 2, "total_harga": 10000, "status": "SELESAI", "catatan": "asd", "nama_penerima": "asd", "telepon": "asd", "alamat_lengkap": "asd", "status_kurir": "gudang", "kurir_lat": null, "kurir_lon": null, "no_resi": "260506P9RF9FN0", "kurir": "spx", "tanggal_dibuat": "2026-05-20T03:42:11.817Z", "tanggal_diperbarui": "2026-05-20T03:42:27.151Z"}},
+  {
+    "model": "toko.pesanan",
+    "pk": 10,
+    "fields": {"user": 2, "total_harga": 10000, "status": "SELESAI", "catatan": "", "nama_penerima": "asd", "telepon": "asd", "alamat_lengkap": "jl raden ganda 2 no.132", "status_kurir": "gudang", "kurir_lat": null, "kurir_lon": null, "no_resi": "260506P9RF9FN0", "kurir": "spx", "tanggal_dibuat": "2026-05-20T03:47:55.372Z", "tanggal_diperbarui": "2026-05-20T03:48:13.720Z"}},
+  {
+    "model": "toko.pesanan",
+    "pk": 11,
+    "fields": {"user": 2, "total_harga": 10000, "status": "SELESAI", "catatan": "", "nama_penerima": "asd", "telepon": "asd", "alamat_lengkap": "Cimindi, Jalan Karya, Campaka, Andir, Kota Bandung, Jawa Barat, Jawa, 40184, Indonesia", "status_kurir": "gudang", "kurir_lat": null, "kurir_lon": null, "no_resi": "260506P9RF9FN0", "kurir": "spx", "tanggal_dibuat": "2026-05-20T03:51:29.641Z", "tanggal_diperbarui": "2026-05-20T03:51:54.055Z"}},
+  {
+    "model": "toko.pesanan",
+    "pk": 12,
+    "fields": {"user": 2, "total_harga": 20000, "status": "SELESAI", "catatan": "", "nama_penerima": "asd", "telepon": "asd", "alamat_lengkap": "Cimahi, Jawa Barat, Jawa, Indonesia", "status_kurir": "gudang", "kurir_lat": null, "kurir_lon": null, "no_resi": "260506P9RF9FN0", "kurir": "spx", "tanggal_dibuat": "2026-05-20T04:39:15.147Z", "tanggal_diperbarui": "2026-05-20T04:39:29.534Z"}},
+  {
+    "model": "toko.pesanan",
+    "pk": 13,
+    "fields": {"user": 2, "total_harga": 10000, "status": "SELESAI", "catatan": "", "nama_penerima": "asd", "telepon": "asd", "alamat_lengkap": "Jalan Gunung Batu, Klaster Gunung Batu 117, Sukaraja, Cicendo, Kota Bandung, Jawa Barat, Jawa, 40175, Indonesia", "status_kurir": "gudang", "kurir_lat": null, "kurir_lon": null, "no_resi": "260506P9RF9FN0", "kurir": "spx", "tanggal_dibuat": "2026-05-20T04:47:04.564Z", "tanggal_diperbarui": "2026-05-20T04:47:20.838Z"}},
+  {
+    "model": "toko.pesanan",
+    "pk": 14,
+    "fields": {"user": 2, "total_harga": 10000, "status": "SELESAI", "catatan": "", "nama_penerima": "asd", "telepon": "asd", "alamat_lengkap": "Jalan Gunung Batu, Klaster Gunung Batu 117, Sukaraja, Cicendo, Kota Bandung, Jawa Barat, Jawa, 40514, Indonesia", "status_kurir": "gudang", "kurir_lat": null, "kurir_lon": null, "no_resi": "260506P9RF9FN0", "kurir": "spx", "tanggal_dibuat": "2026-05-20T04:55:07.047Z", "tanggal_diperbarui": "2026-05-20T04:55:21.170Z"}},
+  {
+    "model": "toko.pesanan",
+    "pk": 15,
+    "fields": {"user": 2, "total_harga": 10000, "status": "SELESAI", "catatan": "", "nama_penerima": "asd", "telepon": "asd", "alamat_lengkap": "Jalan Gunung Batu, Klaster Gunung Batu 117, Sukaraja, Cicendo, Kota Bandung, Jawa Barat, Jawa, 40514, Indonesia", "status_kurir": "gudang", "kurir_lat": null, "kurir_lon": null, "no_resi": "260506P9RF9FN0", "kurir": "spx", "tanggal_dibuat": "2026-05-20T04:56:43.178Z", "tanggal_diperbarui": "2026-05-20T04:56:57.440Z"}},
+  {
+    "model": "toko.pesanan",
+    "pk": 16,
+    "fields": {"user": 4, "total_harga": 10000, "status": "SELESAI", "catatan": "", "nama_penerima": "asd", "telepon": "asd", "alamat_lengkap": "Cimindi, Jalan Karya, Campaka, Andir, Kota Bandung, Jawa Barat, Jawa, 40184, Indonesia", "status_kurir": "gudang", "kurir_lat": null, "kurir_lon": null, "no_resi": "260506P9RF9FN0", "kurir": "spx", "tanggal_dibuat": "2026-05-21T09:29:48.134Z", "tanggal_diperbarui": "2026-05-21T09:30:18.943Z"}},
+  {
+    "model": "toko.pesanan",
+    "pk": 17,
+    "fields": {"user": 5, "total_harga": 10000, "status": "SELESAI", "catatan": "asdawd", "nama_penerima": "Baru Lagi", "telepon": "0895428171038", "alamat_lengkap": "GG Suka Asih", "status_kurir": "gudang", "kurir_lat": null, "kurir_lon": null, "no_resi": "260506P9RF9FN0", "kurir": "spx", "tanggal_dibuat": "2026-06-17T01:24:54.854Z", "tanggal_diperbarui": "2026-06-17T01:25:17.912Z"}},
+  {
+    "model": "toko.detailpesanan",
+    "pk": 1,
+    "fields": {"pesanan": 1, "produk": 1, "jumlah": 1, "harga_saat_beli": 10000}},
+  {
+    "model": "toko.detailpesanan",
+    "pk": 2,
+    "fields": {"pesanan": 2, "produk": 1, "jumlah": 1, "harga_saat_beli": 10000}},
+  {
+    "model": "toko.detailpesanan",
+    "pk": 3,
+    "fields": {"pesanan": 3, "produk": 1, "jumlah": 5, "harga_saat_beli": 10000}},
+  {
+    "model": "toko.detailpesanan",
+    "pk": 4,
+    "fields": {"pesanan": 4, "produk": 4, "jumlah": 1, "harga_saat_beli": 10000}},
+  {
+    "model": "toko.detailpesanan",
+    "pk": 5,
+    "fields": {"pesanan": 5, "produk": 4, "jumlah": 1, "harga_saat_beli": 10000}},
+  {
+    "model": "toko.detailpesanan",
+    "pk": 6,
+    "fields": {"pesanan": 6, "produk": 4, "jumlah": 1, "harga_saat_beli": 10000}},
+  {
+    "model": "toko.detailpesanan",
+    "pk": 7,
+    "fields": {"pesanan": 7, "produk": 4, "jumlah": 1, "harga_saat_beli": 10000}},
+  {
+    "model": "toko.detailpesanan",
+    "pk": 8,
+    "fields": {"pesanan": 8, "produk": 1, "jumlah": 1, "harga_saat_beli": 10000}},
+  {
+    "model": "toko.detailpesanan",
+    "pk": 9,
+    "fields": {"pesanan": 9, "produk": 1, "jumlah": 1, "harga_saat_beli": 10000}},
+  {
+    "model": "toko.detailpesanan",
+    "pk": 10,
+    "fields": {"pesanan": 10, "produk": 1, "jumlah": 1, "harga_saat_beli": 10000}},
+  {
+    "model": "toko.detailpesanan",
+    "pk": 11,
+    "fields": {"pesanan": 11, "produk": 1, "jumlah": 1, "harga_saat_beli": 10000}},
+  {
+    "model": "toko.detailpesanan",
+    "pk": 12,
+    "fields": {"pesanan": 12, "produk": 1, "jumlah": 2, "harga_saat_beli": 10000}},
+  {
+    "model": "toko.detailpesanan",
+    "pk": 13,
+    "fields": {"pesanan": 13, "produk": 4, "jumlah": 1, "harga_saat_beli": 10000}},
+  {
+    "model": "toko.detailpesanan",
+    "pk": 14,
+    "fields": {"pesanan": 14, "produk": 1, "jumlah": 1, "harga_saat_beli": 10000}},
+  {
+    "model": "toko.detailpesanan",
+    "pk": 15,
+    "fields": {"pesanan": 15, "produk": 1, "jumlah": 1, "harga_saat_beli": 10000}},
+  {
+    "model": "toko.detailpesanan",
+    "pk": 16,
+    "fields": {"pesanan": 16, "produk": 1, "jumlah": 1, "harga_saat_beli": 10000}},
+  {
+    "model": "toko.detailpesanan",
+    "pk": 17,
+    "fields": {"pesanan": 17, "produk": 4, "jumlah": 1, "harga_saat_beli": 10000}},
+  {
+    "model": "toko.bannerpromo",
+    "pk": 3,
+    "fields": {"judul": "tesASDASD", "gambar": "banners/Screenshot_116.png", "url_tujuan": null, "is_aktif": true, "diperbarui_pada": "2026-06-02T08:48:57.098Z"}}
+]

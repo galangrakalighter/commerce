@@ -88,144 +88,98 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // Ambil data alamat lengkap dari database Django
+        const pesananId = {{ pesanan.id }};
         const alamatTujuan = "{{ pesanan.alamat_lengkap|escapejs }}"; 
-        console.log("Alamat Tujuan:", alamatTujuan);
+        const alamatTujuanEncoded = encodeURIComponent(alamatTujuan);
+        
+        const startLat = parseFloat("{{ origin_lat|default:-6.9175|stringformat:'.4f' }}".replace(',', '.'));
+        const startLon = parseFloat("{{ origin_lon|default:107.6191|stringformat:'.4f' }}".replace(',', '.'));
+        
+        const lokasiLat = parseFloat("{{ pesanan.lokasi_lat|default:-6.9175|stringformat:'.4f' }}".replace(',', '.'));
+        const lokasiLon = parseFloat("{{ pesanan.lokasi_lon|default:107.6191|stringformat:'.4f' }}".replace(',', '.'));
 
-        // Koordinat Awal Toko/Gudang Gafistore (Titik keberangkatan kurir)
-        const startLat = -6.9175;
-        const startLon = 107.6191;
 
-        // Inisialisasi awal peta (Fokus awal ke area kota di sekitar toko)
+        
+        const mapContainer = document.getElementById('map');
         const map = L.map('map').setView([startLat, startLon], 13); 
 
-        // Muat ubin peta gratis dari OpenStreetMap
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-            attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            attribution: '&copy; OpenStreetMap'
         }).addTo(map);
 
-        // Custom Icon untuk Kurir Motor memakai Emoji
         const kurirIcon = L.divIcon({
-            html: '<span class="text-3xl" style="display:block; transform: scaleX(-1); text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">🏽‍♂️🏍️</span>',
+            html: '<span class="text-3xl" style="display:block; transform: scaleX(-1);">🏍️</span>',
             iconSize: [30, 30],
             className: 'border-0'
         });
 
-        // Pasang Marker Kurir di lokasi awal (Akan bergeser real-time sesuai data database)
         const markerKurir = L.marker([startLat, startLon], { icon: kurirIcon }).addTo(map);
         markerKurir.bindPopup("<b>Kurir sedang memproses paket</b>").openPopup();
 
-        // Cari koordinat rumah pembeli berdasarkan string alamat lengkap
-        const queryGeocoding = alamatTujuan;
+        // 1. Geocoding Alamat Tujuan
+        const geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${alamatTujuanEncoded}&limit=1&addressdetails=1`;
 
-        fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(queryGeocoding)}&limit=1`)
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(data) {
+        fetch(geocodeUrl)
+            .then(res => res.json())
+            .then(data => {
                 if (data && data.length > 0) {
-                    const targetLat = parseFloat(data[0].lat);
-                    const targetLon = parseFloat(data[0].lon);
-
-                    inisialisasiRuteDanPelacakan(targetLat, targetLon, alamatTujuan);
-                } else {
-                    // Fallback ke kota besar jika alamat terlalu spesifik dan gagal di-geocoding
-                    const kotaBesar = "{{ summary_data.destination|default:'Jakarta' }}";
-                    return fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(kotaBesar)}&limit=1`);
-                }
-            })
-            .then(function(response) {
-                return response ? response.json() : null;
-            })
-            .then(function(fallbackData) {
-                if (fallbackData && fallbackData.length > 0) {
-                    const targetLat = parseFloat(fallbackData[0].lat);
-                    const targetLon = parseFloat(fallbackData[0].lon);
+                    const destLat = lokasiLat
+                    const destLon = lokasiLon
+                    inisialisasiRuteDanPelacakan(destLat, destLon, alamatTujuan);
                     
-                    const areaNama = "{{ summary_data.destination }}";
-                    inisialisasiRuteDanPelacakan(targetLat, targetLon, `Area ${areaNama}`);
+                    const bounds = L.latLngBounds([startLat, startLon], [destLat, destLon]);
+                    map.fitBounds(bounds, { padding: [50, 50] });
+                } else {
+                    // --- FALLBACK KE GOOGLE MAPS ---
+                    console.warn("Alamat tidak ditemukan, menampilkan link Google Maps.");
+                    mapContainer.innerHTML = `
+                        <div class="flex flex-col items-center justify-center h-full bg-gray-50 text-center p-6">
+                            <svg class="w-12 h-12 text-red-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <p class="text-sm text-gray-600 mb-4 font-medium">Lokasi tujuan tidak dapat dimuat otomatis.</p>
+                            <a href="https://www.google.com/maps/search/?api=1&query=${alamatTujuanEncoded}" 
+                               target="_blank" 
+                               class="bg-blue-600 text-white px-5 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors">
+                               Buka di Google Maps
+                            </a>
+                        </div>
+                    `;
                 }
             })
-            .catch(function(error) {
-                console.error("Gagal memuat koordinat peta:", error);
+            .catch(err => {
+                console.error("Geocoding Error:", err);
             });
 
-        // ========================================================
-        // FUNGSI MENGGAMBAR JALUR UTAMA (DIJALANKAN SEKALI DI AWAL)
-        // ========================================================
+        // 2. Fungsi Rute OSRM
         function inisialisasiRuteDanPelacakan(destLat, destLon, textAlamat) {
-            // Pasang Penanda tetap di lokasi rumah pembeli
-            L.marker([destLat, destLon]).addTo(map)
-                .bindPopup(`
-                    <div class="text-sm font-sans">
-                        <span class="text-xs text-emerald-600 block font-semibold uppercase tracking-wider">Alamat Pengiriman:</span>
-                        <strong class="text-stone-800 block mt-0.5">${textAlamat}</strong>
-                    </div>
-                `);
+            L.marker([destLat, destLon]).addTo(map).bindPopup("Tujuan: " + textAlamat);
 
-            // Panggil API Rute OSRM gratis untuk menggambar perkiraan jalan raya yang dilewati
             const urlRouting = `https://router.project-osrm.org/route/v1/driving/${startLon},${startLat};${destLon},${destLat}?overview=full&geometries=geojson`;
 
             fetch(urlRouting)
-                .then(response => response.json())
+                .then(res => res.json())
                 .then(routingData => {
                     if (routingData.routes && routingData.routes.length > 0) {
-                        const koordinatJalan = routingData.routes[0].geometry.coordinates;
-                        const ruteSesuaiJalan = koordinatJalan.map(coord => [coord[1], coord[0]]);
-
-                        // Gambar garis biru penunjuk rute jalan asli di peta pembeli
-                        L.polyline(ruteSesuaiJalan, { color: '#3b82f6', weight: 4, opacity: 0.7 }).addTo(map);
+                        const coords = routingData.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+                        L.polyline(coords, { color: '#3b82f6', weight: 4, opacity: 0.7 }).addTo(map);
                     }
-                    
-                    // Setelah rute digambar, mulai jalankan pemantauan posisi asli kurir
-                    mulaiSinkronisasiDatabaseKurir(destLat, destLon);
+                    mulaiSinkronisasiDatabaseKurir();
                 })
-                .catch(err => {
-                    console.error("Eror memuat rute OSRM:", err);
-                    // Jika rute gagal digambar, pelacakan koordinat real tetap diaktifkan
-                    mulaiSinkronisasiDatabaseKurir(destLat, destLon);
-                });
+                .catch(() => mulaiSinkronisasiDatabaseKurir());
         }
 
-        // =============================================================
-        // LOGIKA UTAMA SINKRONISASI KOORDINAT ASLI (AJAX POLLING)
-        // =============================================================
-        function mulaiSinkronisasiDatabaseKurir(destLat, destLon) {
-            console.log("Sistem pelacakan real-time aktif. Memantau perubahan database...");
-
-            // Jalankan fungsi hit ke server Django setiap 10 detik secara terus-menerus
-            const intervalPelacakanAsli = setInterval(function() {
-                
-                // Minta data koordinat ter-update kurir ke endpoint Django yang kita buat
-                fetch(`/api/cek-status-pesanan/{{ pesanan.id }}/`)
+        // 3. Polling Koordinat
+        function mulaiSinkronisasiDatabaseKurir() {
+            setInterval(function() {
+                fetch(`/api/cek-status-pesanan/${pesananId}/`)
                     .then(response => response.json())
                     .then(data => {
-                        // Jika kurir sudah mulai jalan dan datanya ada di database
                         if (data.kurir_lat && data.kurir_lon) {
-                            const kLat = parseFloat(data.kurir_lat);
-                            const kLon = parseFloat(data.kurir_lon);
-
-                            // Geser posisi ikon motor ke tempat baru sesuai lokasi kurir sesungguhnya
-                            markerKurir.setLatLng([kLat, kLon]);
-
-                            // Kontrol kamera bebas total sesuai keinginanmu (tidak ditarik paksa ke kurir).
-                            // Pembeli bisa bebas menggeser peta tanpa memantul kembali.
-
-                            // Hitung sisa jarak koordinat ke lokasi tujuan akhir rumah pembeli
-                            const selisihLat = destLat - kLat;
-                            const selisihLon = destLon - kLon;
-
-                            // Jika posisi kurir sudah sangat dekat/berhimpitan dengan titik rumah pembeli
-                            if (Math.abs(selisihLat) < 0.00015 && Math.abs(selisihLon) < 0.00015) {
-                                clearInterval(intervalPelacakanAsli); // Matikan request pooling
-                                markerKurir.bindPopup("<div class='text-sm'><b>🏍️ Kurir:</b><br>Paket telah sampai secara nyata di lokasi Anda!</div>").openPopup();
-                            }
+                            markerKurir.setLatLng([data.kurir_lat, data.kurir_lon]);
                         }
                     })
-                    .catch(err => console.error("Gagal melakukan sinkronisasi lokasi kurir:", err));
-
-            }, 10000); // 10000 milidetik = Cek database setiap 10 detik sekali
+                    .catch(err => console.log("Menunggu update koordinat..."));
+            }, 60000); 
         }
     });
 </script>

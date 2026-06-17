@@ -106,6 +106,10 @@ class Pesanan(models.Model):
     kurir_lon = models.FloatField(null=True, blank=True)
     no_resi = models.CharField(max_length=100, blank=True, null=True, verbose_name="Nomor Resi")
     kurir = models.CharField(max_length=20, choices=KURIR_CHOICES, blank=True, null=True, help_text="Pilih ekspedisi pengiriman")
+    kode_pos = models.IntegerField(null=True, blank=True)
+    
+    lokasi_lat = models.FloatField(blank=True, null=True)
+    lokasi_lon = models.FloatField(blank=True, null=True)
     
     # Tracking otomatis waktu
     tanggal_dibuat = models.DateTimeField(auto_now_add=True)

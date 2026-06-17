@@ -43,10 +43,27 @@
     payButton.addEventListener('click', function () {
         window.snap.pay('{{ snap_token }}', {
             onSuccess: function (result) {
-                alert("Pembayaran berhasil!");
-                let targetUrl = "{% url 'user_dashboard' username=request.user.username %}";
-                // Kirim ID pesanan ke fungsi di sini
-                kosongkanKeranjangBackend(targetUrl, "{{ pesanan.id }}");
+                let pesananId = "{{ pesanan.id }}";
+                
+                fetch("{% url 'create_shipping_order' %}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded",
+                        "X-CSRFToken": "{{ csrf_token }}" 
+                    },
+                    body: "pesanan_id=" + pesananId
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        alert("Resi berhasil didapatkan: " + data.resi);
+                        let targetUrl = "{% url 'user_dashboard' username=request.user.username %}";
+                        kosongkanKeranjangBackend(targetUrl, pesananId);
+                    } else {
+                        console.log(data);
+                        alert("Gagal buat resi: " + data.message);
+                    }
+                });
             },
             onPending: function (result) {
                 alert("Menunggu pembayaran Anda.");
