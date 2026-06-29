@@ -20,6 +20,7 @@ return new class extends Migration
             $table->json('gambar')->nullable();
             $table->json('spec_produk');
             $table->text('detail_produk');
+            $table->boolean('status_produk');
             $table->timestamps();
         });
     }

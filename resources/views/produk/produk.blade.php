@@ -3,7 +3,7 @@
 @section('content')
 <div class="bg-gray-50 min-h-screen pb-12 antialiased">
 
-    <div class="bg-[#F2B705] py-4 px-4 md:px-6 shadow-sm">
+    <div class="bg-[#24420A] py-4 px-4 md:px-6 shadow-sm">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
             <div class="flex items-center space-x-3 w-full sm:w-auto text-white">
                 <span class="text-2xl">📦</span>
@@ -13,7 +13,7 @@
                 </div>
             </div>
             
-            <button onclick="openProdukModal()" class="w-full sm:w-auto bg-[#24420A] text-white px-5 py-2 rounded font-bold text-xs md:text-sm hover:bg-opacity-90 transition shrink-0 flex items-center justify-center space-x-2 shadow-md">
+            <button onclick="openProdukModal()" class="w-full sm:w-auto bg-[#F2B705] text-white px-5 py-2 rounded font-bold text-xs md:text-sm hover:bg-opacity-90 transition shrink-0 flex items-center justify-center space-x-2 shadow-md">
                 <span>Tambah Produk Baru</span>
             </button>
         </div>
@@ -97,10 +97,20 @@
                         </div>
                 </div>
 
-                <div>
-                    <label class="block font-bold mb-1">Upload Gambar Produk (Bisa Multi File)</label>
-                    <input type="file" name="images[]" multiple accept="image/*" class="w-full px-2 py-1.5 border rounded bg-white">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block font-bold mb-1">Upload Gambar Produk (Bisa Multi File)</label>
+                        <input type="file" name="images[]" multiple accept="image/*" class="w-full px-2 py-1.5 border rounded bg-white">
+                    </div>
+                    <div>
+                        <label class="block font-bold mb-1">Status Produk</label>
+                        <select id="input-status_produk" name="status_produk" required class="w-full px-3 py-2 border rounded bg-white">
+                            <option value="ada">Tersedia</option>
+                            <option value="habis">Habis</option>
+                        </select>
+                    </div>
                 </div>
+
 
                 <div>
                     <label class="block font-bold mb-1">Detail Deskripsi Produk *</label>
@@ -177,6 +187,7 @@
             document.getElementById('input-harga').value = data.harga;
             document.getElementById('input-tipe').value = data.tipe;
             document.getElementById('input-detail_produk').value = data.detail_produk;
+            document.getElementById('input-status_produk').value = data.detail_produk;
 
             if (data.spec_produk) {
                 Object.entries(data.spec_produk).forEach(([k, v]) => addSpecRow(k, v));

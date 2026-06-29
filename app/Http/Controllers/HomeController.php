@@ -3,56 +3,54 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-
+use App\Models\Produk;
+use App\Models\Kategori;
+use App\Models\Voucher;
+use App\Models\Banner;
 class HomeController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $rekomendasi = [
-            ['title' => 'BUMBU TABUR RASA HONEY BUTTER 1KG', 'image' => 'honey_butter.jpg', 'price' => 100000, 'rating' => '4.9', 'sold' => '120'],
-            ['title' => 'BUMBU TABUR MANIS GREEN TEA PREMIUM', 'image' => 'green_tea.jpg', 'price' => 200000, 'rating' => '5.0', 'sold' => '155'],
-            ['title' => 'SPESIAL BUMBU ASIN GURIH NAGIH TANPA MSG', 'image' => 'keju_asin.jpg', 'price' => 125000, 'rating' => '4.9', 'sold' => '94'],
-            ['title' => 'BUBUK KECAP ASIN 1 KG BEST SELLER ASLI', 'image' => 'kecap_asin.jpg', 'price' => 137000, 'rating' => '4.9', 'sold' => '100'],
-            ['title' => '1KG BUMBU TABUR PEDAS MANIS COCOK SNACK', 'image' => 'pedas_manis.jpg', 'price' => 80000, 'rating' => '4.9', 'sold' => '120'],
-            ['title' => 'ANGGUR MANIS ENAK WANGI BUMBU TABUR', 'image' => 'anggur.jpg', 'price' => 100000, 'rating' => '4.9', 'sold' => '120'],
-        ];
+        $query = Produk::query();
 
-        // Data Dummy untuk Katalog Utama Bawah - 5 Item
-        $katalog = [
-            ['title' => 'NON MSG TABURAN KEJU ASIN KUNING 1KG', 'image' => 'keju_asin.jpg', 'price' => 100000, 'rating' => '4.9', 'sold' => '120'],
-            ['title' => 'CHEDDAR KEJU 1KG COCOK UNTUK BUMBU', 'image' => 'cheddar.jpg', 'price' => 120000, 'rating' => '4.9', 'sold' => '120'],
-            ['title' => 'KEJU MANIS ORANGE JERUK TABURAN BUMBU', 'image' => 'keju_orange.jpg', 'price' => 85000, 'rating' => '4.9', 'sold' => '120'],
-            ['title' => 'BUMBU TABUR COCOK CIMOL RASA BBQ KOREA', 'image' => 'korean_bbq.jpg', 'price' => 115000, 'rating' => '4.9', 'sold' => '120'],
-            ['title' => 'PRAKTIS BUMBU NASI GORENG LEZAT 1KG', 'image' => 'nasi_goreng.jpg', 'price' => 100000, 'rating' => '4.9', 'sold' => '120'],
-        ];
+        // Filter Kategori
+        if ($request->has('kategori_id')) {
+            $query->where('id_kategori', $request->kategori_id);
+        }
 
-        return view('home', compact('rekomendasi', 'katalog'));
+        // Sortir
+        if ($request->has('sort')) {
+            switch ($request->sort) {
+                case 'terbaru': $query->latest(); break;
+                case 'terlaris': $query->orderBy('sold', 'desc'); break;
+                case 'termurah': $query->orderBy('harga', 'asc'); break;
+            }
+        }
+
+        // Gunakan withQueryString() agar parameter filter/sort terbawa ke halaman berikutnya
+        $katalog = $query->paginate(20)->withQueryString();
+        $kategoriList = Kategori::all();
+        $banner_home = Banner::where('is_active', true)->where('tipe', 'home')->orderBy('urutan', 'asc')->get();
+        $banners = Banner::where('is_active', true)->where('tipe', 'keduanya')->orderBy('urutan', 'asc')->get();
+        $rekomendasi = Produk::latest()->take(6)->get();
+
+        return view('home', compact('katalog', 'kategoriList', 'rekomendasi', 'banners', 'request', 'banner_home'));
     }
 
-    public function toko()
+    // pu\blic function filter($kategori_id = null) {
+    //     $produk = Produk::when($kategori_id, function($query) use ($kategori_id) {
+    //         return $query->where('id_kategori', $kategori_id);
+    //     })->get();
+
+    //     return view('home', compact('produk'))->render();
+    // }
+
+    public function beranda()
     {
-        $rekomendasi = [
-            ['title' => 'BUMBU TABUR RASA HONEY BUTTER 1KG', 'image' => 'honey_butter.jpg', 'price' => 100000, 'rating' => '4.9', 'sold' => '120'],
-            ['title' => 'BUMBU TABUR MANIS GREEN TEA PREMIUM', 'image' => 'green_tea.jpg', 'price' => 200000, 'rating' => '5.0', 'sold' => '155'],
-            ['title' => 'SPESIAL BUMBU ASIN GURIH NAGIH TANPA MSG', 'image' => 'keju_asin.jpg', 'price' => 125000, 'rating' => '4.9', 'sold' => '94'],
-            ['title' => 'BUBUK KECAP ASIN 1 KG BEST SELLER ASLI', 'image' => 'kecap_asin.jpg', 'price' => 137000, 'rating' => '4.9', 'sold' => '100'],
-            ['title' => '1KG BUMBU TABUR PEDAS MANIS COCOK SNACK', 'image' => 'pedas_manis.jpg', 'price' => 80000, 'rating' => '4.9', 'sold' => '120'],
-            ['title' => 'ANGGUR MANIS ENAK WANGI BUMBU TABUR', 'image' => 'anggur.jpg', 'price' => 100000, 'rating' => '4.9', 'sold' => '120'],
-        ];
-
-        // Data Dummy untuk Katalog Utama Bawah - 5 Item
-        $katalog = [
-            ['title' => 'NON MSG TABURAN KEJU ASIN KUNING 1KG', 'image' => 'keju_asin.jpg', 'price' => 100000, 'rating' => '4.9', 'sold' => '120'],
-            ['title' => 'CHEDDAR KEJU 1KG COCOK UNTUK BUMBU', 'image' => 'cheddar.jpg', 'price' => 120000, 'rating' => '4.9', 'sold' => '120'],
-            ['title' => 'KEJU MANIS ORANGE JERUK TABURAN BUMBU', 'image' => 'keju_orange.jpg', 'price' => 85000, 'rating' => '4.9', 'sold' => '120'],
-            ['title' => 'BUMBU TABUR COCOK CIMOL RASA BBQ KOREA', 'image' => 'korean_bbq.jpg', 'price' => 115000, 'rating' => '4.9', 'sold' => '120'],
-            ['title' => 'PRAKTIS BUMBU NASI GORENG LEZAT 1KG', 'image' => 'nasi_goreng.jpg', 'price' => 100000, 'rating' => '4.9', 'sold' => '120'],
-        ];
-
-        return view('home', compact('rekomendasi', 'katalog'));
+        return view('beranda');
     }
 
     /**

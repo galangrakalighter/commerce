@@ -1,0 +1,8 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Atap Toko -->
+  <path d="M4 16L20 4L36 16H4Z" stroke="#24420A" stroke-width="3" stroke-linejoin="round"/>
+  <!-- Badan Toko -->
+  <path d="M8 16H32V36H8V16Z" stroke="#24420A" stroke-width="3" stroke-linejoin="round"/>
+  <!-- Pintu Toko -->
+  <path d="M16 24H24V36H16V24Z" stroke="#24420A" stroke-width="3" stroke-linejoin="round"/>
+</svg>

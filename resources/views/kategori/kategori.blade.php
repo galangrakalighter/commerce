@@ -3,7 +3,7 @@
 @section('content')
 <div class="bg-gray-50 min-h-screen pb-12 antialiased">
 
-    <div class="bg-[#F2B705] py-4 px-4 md:px-6 shadow-sm">
+    <div class="bg-[#24420A] py-4 px-4 md:px-6 shadow-sm">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
             <div class="flex items-center space-x-3 w-full sm:w-auto text-white">
                 <span class="text-2xl">🗂️</span>
@@ -13,7 +13,7 @@
                 </div>
             </div>
             
-            <button onclick="openKategoriModal()" class="w-full sm:w-auto bg-[#24420A] text-white px-5 py-2 rounded font-bold text-xs md:text-sm hover:bg-opacity-90 transition shrink-0 flex items-center justify-center space-x-2 shadow-md">
+            <button onclick="openKategoriModal()" class="w-full sm:w-auto bg-[#F2B705] text-white px-5 py-2 rounded font-bold text-xs md:text-sm hover:bg-opacity-90 transition shrink-0 flex items-center justify-center space-x-2 shadow-md">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                 </svg>

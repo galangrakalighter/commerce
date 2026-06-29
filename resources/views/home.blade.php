@@ -3,45 +3,6 @@
 @section('content')
 <div class="bg-gray-50 min-h-screen pb-12 antialiased">
 
-    <!-- SUB-NAVBAR: PENCARIAN & FITUR BELANJA (Responsif) -->
-    <div class="bg-[#F2B705] py-3 px-4 md:px-6 shadow-sm">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 md:gap-4">
-            
-            <!-- Form Cari Produk -->
-            <form action="#" method="GET" class="w-full md:w-2/3 flex bg-white rounded overflow-hidden shadow-sm">
-                <input type="text" placeholder="Cari di toko..." class="w-full px-4 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none">
-                <select class="bg-gray-100 text-xs px-3 border-l border-gray-200 text-gray-600 focus:outline-none hidden sm:block">
-                    <option>Kategori</option>
-                </select>
-                <button type="submit" class="bg-[#24420A] text-white px-5 flex items-center justify-center hover:bg-opacity-90 transition shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.602 10.602Z" />
-                    </svg>
-                </button>
-            </form>
-
-            <!-- Ikon Navigasi Belanja -->
-            <div class="flex items-center justify-center space-x-8 md:space-x-6 text-[#24420A] w-full md:w-auto pt-1 md:pt-0 border-t border-[#dcb43c] md:border-none">
-                <a href="#" class="relative hover:text-white transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-                    </svg>
-                    <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">2</span>
-                </a>
-                <a href="#" class="hover:text-white transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" />
-                    </svg>
-                </a>
-                <a href="#" class="hover:text-white transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75 2.75 0 1 1-1.5 0 .75 2.75 0 0 1 1.5 0Zm12.75 0a.75 2.75 0 1 1-1.5 0 .75 2.75 0 0 1 1.5 0Z" />
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </div>
-
     <!-- WRAPPER KONTEN UTAMA -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 mt-6">
 
@@ -65,45 +26,131 @@
         @endif
         
         <!-- Banner 1: Bumbu Tabur -->
-        <div class="w-full rounded-lg overflow-hidden shadow-sm mb-6 bg-gray-200">
-            <img src="{{ asset('images/banner-bumbu-tabur.jpg') }}" alt="Banner Aneka Bumbu Tabur" class="w-full h-auto min-h-[120px] object-cover">
-        </div>
+        <div class="relative w-full mb-6 overflow-hidden group">
+            <div id="banner-carousel-home" class="flex overflow-x-hidden rounded-lg w-full min-h-[120px] h-auto" style="scroll-behavior: smooth;">
+                
+                @forelse($banner_home as $banner)
+                    <div class="min-w-full snap-center">
+                        <a href="{{ $banner->link_tujuan ?? '#' }}" class="block w-full h-full">
+                            <img src="{{ asset('storage/' . $banner->image_path) }}" 
+                                alt="{{ $banner->judul }}" 
+                                class="w-full h-auto min-h-[120px] object-cover">
+                        </a>
+                    </div>
+                @empty
+                    <div class="min-w-full snap-center">
+                        <img src="{{ asset('images/banner.png') }}" 
+                            alt="Banner Default" 
+                            class="w-full h-auto min-h-[120px] object-cover">
+                    </div>
+                @endforelse
 
-        <!-- Menu Tab Kategori (Bisa di-swipe/scroll horizontal pada layar HP) -->
-        <div class="border-b border-gray-200 mb-6 overflow-x-auto scrollbar-none whitespace-nowrap">
-            <ul class="flex space-x-6 md:space-x-8 text-sm font-semibold text-gray-600 pb-2">
-                <li class="border-b-2 border-[#24420A] text-[#24420A] pb-2 cursor-pointer shrink-0">Halaman utama</li>
-                <li class="hover:text-[#24420A] pb-2 cursor-pointer transition shrink-0">Produk</li>
-                <li class="hover:text-[#24420A] pb-2 cursor-pointer transition shrink-0">PAYDAY SALE</li>
-                <li class="hover:text-[#24420A] pb-2 cursor-pointer transition shrink-0">PRODUK TERBARU</li>
-                <li class="hover:text-[#24420A] pb-2 cursor-pointer transition shrink-0">POT BUNGA</li>
-                <li class="hover:text-[#24420A] pb-2 cursor-pointer transition shrink-0">Lainnya <span class="text-xs">▼</span></li>
-            </ul>
+            </div>
+
+            @if($banner_home->count() > 1)
+                <button onclick="scrollBannerHome(-1)" class="absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full shadow-lg hover:bg-white transition opacity-0 group-hover:opacity-100">
+                    &larr;
+                </button>
+                <button onclick="scrollBannerHome(1)" class="absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 p-2 rounded-full shadow-lg hover:bg-white transition opacity-0 group-hover:opacity-100">
+                    &rarr;
+                </button>
+            @endif
         </div>
 
         <!-- REKOMENDASI PRODUK GRID (Ganti md:grid-cols-4, lg:grid-cols-6 agar proporsional) -->
         <div class="mb-10">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xs md:text-sm font-bold text-gray-800 tracking-wider uppercase">Mungkin Kamu Cari</h2>
-                <a href="#" class="text-xs text-gray-500 hover:text-[#24420A] flex items-center transition">Lihat Semua <span class="ml-1">></span></a>
+                <a href="#allProduct" class="text-xs text-gray-500 hover:text-[#24420A] flex items-center transition">Lihat Semua <span class="ml-1">></span></a>
             </div>
             
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 md:gap-4">
-                @foreach($rekomendasi as $item)
-                    <x-product-card 
-                        :title="$item['title']" 
-                        :image="$item['image']" 
-                        :price="$item['price']" 
-                        :rating="$item['rating']" 
-                        :sold="$item['sold']" 
-                    />
-                @endforeach
+            {{-- Bungkus grid produk agar pesan tidak masuk ke dalam grid --}}
+            <div id="product-grid-container">
+                <div id="product-grid-rekomendasi" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
+                    @foreach($katalog as $item)
+                        <div class="product-item" data-kategori="{{ $item->id_kategori }}">
+                            <div class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition relative">
+                                
+                                <div class="aspect-square w-full overflow-hidden bg-gray-100 relative">
+                                    <img src="{{ !empty($item->gambar) ? asset('storage/' . $item->gambar[0]) : asset('images/default.jpg') }}" 
+                                        alt="{{ $item->nama_produk }}" 
+                                        class="w-full h-full object-cover">
+                                    
+                                    @if(!$item->status_product)
+                                        <div class="absolute inset-0 bg-white/60 flex items-center justify-center backdrop-blur-[1px]">
+                                            <span class="text-[#FF7017] px-4 py-2 font-bold text-lg rounded-lg">
+                                                Habis
+                                            </span>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                <div class="p-3">
+                                    <h3 class="product-name text-xs md:text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.5rem]">
+                                        {{ $item->nama_produk }}
+                                    </h3>
+
+                                    <div class="mt-2 flex justify-center">
+                                        <a href="{{ route('produk.detail', $item->id) }}" class="text-[#F2B705] text-xs font-bold hover:underline">
+                                            Lihat Produk
+                                        </a>
+                                    </div>
+
+                                    <div class="flex items-center justify-between mt-3 text-[10px] md:text-xs text-gray-500">
+                                        <div class="flex items-center bg-orange-100 px-1.5 py-0.5 rounded text-orange-600 font-bold">
+                                            ★ {{ number_format($item->averageRating, 1) }}
+                                        </div>
+                                        <span>{{ $item->sold ?? 0 }} terjual</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                {{-- Pesan ditempatkan di luar grid agar tidak merusak layout --}}
+                <div id="no-product-message" class="hidden flex flex-col items-center justify-center py-20 text-center px-4">
+                    <div class="bg-gray-100 p-6 rounded-full mb-6">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-700 mb-2">Oops! Produk Tidak Ditemukan</h3>
+                    <p class="text-gray-500 max-w-sm">Maaf, saat ini belum ada produk yang tersedia untuk kategori yang Anda pilih.</p>
+                    <button onclick="filterProduk(null, this, '.product-item')" class="mt-6 px-6 py-2 bg-[#24420A] text-white rounded-full hover:bg-[#3a5a1f] transition">
+                        Lihat Semua Produk
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- Banner 2: Tepung Marinasi -->
-        <div class="w-full rounded-lg overflow-hidden shadow-sm mb-10 bg-gray-200">
-            <img src="{{ asset('images/banner-tepung-marinasi.jpg') }}" alt="Banner Tepung Marinasi" class="w-full h-auto min-h-[120px] object-cover">
+        <div class="relative w-full mb-10 overflow-hidden group">
+            <div id="banner-carousel" class="flex gap-x-4 overflow-x-auto rounded-lg aspect-[21/9] sm:aspect-[3/1] md:aspect-[4/1]">
+                
+                @forelse($banners as $banner)
+                    <div class="w-full flex-shrink-0">
+                        <a href="{{ $banner->link_tujuan ?? '#' }}" class="block w-full h-full">
+                            <img src="{{ asset('storage/' . $banner->image_path) }}" 
+                                alt="{{ $banner->judul }}" 
+                                class="w-full h-full object-cover rounded-lg">
+                        </a>
+                    </div>
+                @empty
+                <div class="min-w-full snap-center">
+                    <img src="{{ asset('images/Banner_baru.png') }}" alt="Default" class="w-full h-full object-cover">
+                </div>
+                @endforelse
+
+                @foreach($banners as $banner)
+                    <div class="w-full flex-shrink-0">
+                        <a href="{{ $banner->link_tujuan ?? '#' }}" class="block w-full h-full">
+                            <img src="{{ asset('storage/' . $banner->image_path) }}" 
+                                alt="{{ $banner->judul }}" 
+                                class="w-full h-full object-cover rounded-lg">
+                        </a>
+                    </div>
+                @endforeach
+            </div>
         </div>
 
         <!-- DUA KOLOM UTAMA (Sidebar Kategori & Katalog Katalog Utama) -->
@@ -116,17 +163,20 @@
                         <span class="mr-2 text-[#24420A]">■</span> Kategori
                     </h3>
                     <ul class="text-xs space-y-2.5 font-medium text-gray-600">
-                        <li class="text-[#24420A] font-bold flex items-center">
-                            <span class="mr-1">></span> Semua Produk
+                        <li>
+                            <button onclick="filterProduk(null, this, '.product-item-all')" class="w-full text-left text-[#24420A] font-bold flex items-center hover:underline">
+                                <span class="mr-1">></span> Semua Produk
+                            </button>
                         </li>
-                        <li class="pl-3 hover:text-[#24420A] cursor-pointer font-semibold transition">PAYDAY SALE</li>
-                        <li class="pl-6 text-gray-400 hover:text-[#24420A] cursor-pointer transition">DISC UP TO 60%</li>
-                        <li class="pl-6 text-gray-400 hover:text-[#24420A] cursor-pointer transition">CLEARANCE SALE</li>
-                        <li class="pl-3 hover:text-[#24420A] cursor-pointer transition">PRODUK TERBARU</li>
-                        <li class="pl-3 hover:text-[#24420A] cursor-pointer transition">RASA BUAH</li>
-                        <li class="pl-3 hover:text-[#24420A] cursor-pointer transition">RASA DUNIA</li>
-                        <li class="pl-6 text-gray-400 hover:text-[#24420A] cursor-pointer transition">KOREA</li>
-                        <li class="pl-6 text-gray-400 hover:text-[#24420A] cursor-pointer transition">INDIA</li>
+                        
+                        @foreach($kategoriList as $kategori)
+                            <li>
+                                <button onclick="filterProduk({{ $kategori->id }}, this, '.product-item-all')" 
+                                        class="w-full text-left pl-3 hover:text-[#24420A] cursor-pointer font-semibold transition hover:underline">
+                                    {{ $kategori->nama_kategori }}
+                                </button>
+                            </li>
+                        @endforeach
                     </ul>
                 </div>
             </aside>
@@ -138,34 +188,56 @@
                 <div class="bg-[#EAEFD6] p-2 rounded flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-6 text-xs">
                     <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
                         <span class="text-gray-600 font-medium pl-1 sm:pl-2 w-full sm:w-auto mb-1 sm:mb-0">Urutkan</span>
-                        <button class="bg-[#24420A] text-white px-3 sm:px-4 py-1.5 rounded font-semibold text-center flex-1 sm:flex-none">Populer</button>
-                        <button class="bg-white text-gray-700 px-3 sm:px-4 py-1.5 rounded border border-gray-200 hover:bg-gray-50 text-center flex-1 sm:flex-none">Terbaru</button>
-                        <button class="bg-white text-gray-700 px-3 sm:px-4 py-1.5 rounded border border-gray-200 hover:bg-gray-50 text-center flex-1 sm:flex-none">Terlaris</button>
-                        <select class="bg-white text-gray-700 px-3 py-1.5 rounded border border-gray-200 focus:outline-none w-full sm:w-auto">
-                            <option>Harga</option>
-                        </select>
+                        
+                        <button onclick="sortProducts('populer', this)" class="sort-btn px-3 py-1.5 rounded font-semibold bg-[#24420A] text-white">Populer</button>
+                        <button onclick="sortProducts('terbaru', this)" class="sort-btn px-3 py-1.5 rounded font-semibold bg-gray-200 text-gray-700">Terbaru</button>
+                        <button onclick="sortProducts('terlaris', this)" class="sort-btn px-3 py-1.5 rounded font-semibold bg-gray-200 text-gray-700">Terlaris</button>
                     </div>
                     
-                    <!-- Indikator Pagination Atas -->
-                    <div class="flex items-center justify-between sm:justify-end space-x-3 text-gray-600 px-1 sm:pr-2 border-t sm:border-none pt-2 sm:pt-0">
-                        <span><strong class="text-gray-800">1</strong>/33</span>
-                        <div class="flex space-x-1">
-                            <button class="p-1 px-2.5 bg-gray-100 rounded text-gray-400 cursor-not-allowed" disabled>&lt;</button>
-                            <button class="p-1 px-2.5 bg-white rounded border border-gray-200 hover:bg-gray-50">&gt;</button>
-                        </div>
+                    <div id="pagination-links">
+                        {{ $katalog->links() }}
                     </div>
                 </div>
 
                 <!-- MAIN PRODUCTS GRID -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
+                <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
                     @foreach($katalog as $item)
-                        <x-product-card 
-                            :title="$item['title']" 
-                            :image="$item['image']" 
-                            :price="$item['price']" 
-                            :rating="$item['rating']" 
-                            :sold="$item['sold']" 
-                        />
+                        {{-- Kita tambahkan class 'product-item' dan atribut 'data-kategori' --}}
+                        <div class="product-item-all" data-kategori="{{ $item->id_kategori }}" data-created="{{ $item->created_at }}" data-terjual="{{ $item->jumlah_terjual }}" data-rating="{{ number_format($item->ratings->avg('rating'), 1) }}">
+                            <div class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition">
+                                <div class="aspect-square w-full overflow-hidden bg-gray-100 relative"> <img src="{{ isset($item->gambar[0]) ? asset('storage/' . $item->gambar[0]) : asset('images/default.jpg') }}" 
+                                        alt="{{ $item->nama_produk }}" 
+                                        class="w-full h-full object-cover">
+                                        
+                                    @if(!$item->status_product)
+                                        <div class="absolute inset-0 bg-white/60 flex items-center justify-center backdrop-blur-[1px]">
+                                            <span class="text-[#FF7017] px-4 py-2 font-bold text-lg rounded-lg">
+                                                Habis
+                                            </span>
+                                        </div>
+                                    @endif
+                                </div>
+
+                                <div class="p-3">
+                                    <h3 class="text-xs md:text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.5rem]">
+                                        {{ $item->nama_produk }}
+                                    </h3>
+
+                                    <div class="mt-2 flex justify-center">
+                                        <a href="{{ route('produk.detail', $item->id) }}" class="text-[#F2B705] text-xs font-bold hover:underline">
+                                            Lihat Produk
+                                        </a>
+                                    </div>
+
+                                    <div class="flex items-center justify-between mt-3 text-[10px] md:text-xs text-gray-500">
+                                        <div class="flex items-center bg-orange-100 px-1.5 py-0.5 rounded text-orange-600 font-bold">
+                                            ★ {{ number_format($item->ratings->avg('rating'), 1) }}
+                                        </div>
+                                        <span>120 terjual</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     @endforeach
                 </div>
 
@@ -174,4 +246,85 @@
 
     </div>
 </div>
+
+<script>
+    function sortProducts(type, btn) {
+        // 1. Update UI Button
+        document.querySelectorAll('.sort-btn').forEach(b => {
+            b.classList.remove('bg-[#24420A]', 'text-white');
+            b.classList.add('bg-gray-200', 'text-gray-700');
+        });
+        btn.classList.add('bg-[#24420A]', 'text-white');
+        btn.classList.remove('bg-gray-200', 'text-gray-700');
+
+        // 2. Kirim Request ke Controller (Atau sort array lokal)
+        // Jika data tidak terlalu banyak, kita bisa sort lokal:
+        const grid = document.getElementById('product-grid');
+        let items = Array.from(grid.getElementsByClassName('product-item-all'));
+
+        items.sort((a, b) => {
+            if (type === 'terbaru') {
+                // Asumsi ada atribut data-created_at
+                return new Date(b.dataset.created) - new Date(a.dataset.created);
+            } else if (type === 'terlaris') {
+                return b.dataset.terjual - a.dataset.terjual;
+            } else { // Populer (berdasarkan rating)
+                return b.dataset.rating - a.dataset.rating;
+            }
+        });
+
+        // 3. Masukkan kembali ke grid
+        grid.innerHTML = '';
+        items.forEach(item => grid.appendChild(item));
+    }
+
+    const carousel = document.getElementById('banner-carousel');
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+    let isAutoScrolling = true;
+
+    // --- LOGIKA DRAG ---
+    carousel.addEventListener('mousedown', (e) => {
+        isDown = true;
+        isAutoScrolling = false; // Hentikan marquee saat ditarik
+        startX = e.pageX - carousel.offsetLeft;
+        scrollLeft = carousel.scrollLeft;
+    });
+
+    carousel.addEventListener('mouseleave', () => { isDown = false; });
+    
+    carousel.addEventListener('mouseup', () => { 
+        isDown = false; 
+        isAutoScrolling = true; // Lanjutkan marquee setelah dilepas
+    });
+
+    carousel.addEventListener('mousemove', (e) => {
+        if (!isDown) return;
+        e.preventDefault();
+        const x = e.pageX - carousel.offsetLeft;
+        const walk = (x - startX) * 2; // Kecepatan drag (x2)
+        carousel.scrollLeft = scrollLeft - walk;
+    });
+
+    // --- LOGIKA MARQUEE ---
+    function marquee() {
+        if (isAutoScrolling) {
+            carousel.scrollLeft += 0.8; // Kecepatan geser otomatis
+            if (carousel.scrollLeft >= (carousel.scrollWidth / 2)) {
+                carousel.scrollLeft = 0;
+            }
+        }
+        requestAnimationFrame(marquee);
+    }
+
+    // Fungsi Navigasi Tombol
+    function scrollBanner(direction) {
+        const gap = 16; 
+        const slideWidth = carousel.clientWidth + gap;
+        carousel.scrollBy({ left: direction * slideWidth, behavior: 'smooth' });
+    }
+
+    marquee(); 
+</script>
 @endsection
