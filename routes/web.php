@@ -12,6 +12,8 @@ use App\Http\Controllers\ArticleController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/beranda', [HomeController::class, 'beranda'])->name('beranda');
+Route::get('/tentang-kami', [HomeController::class, 'tentangKami'])->name('tentang');
+Route::get('/promo-dashboard', [HomeController::class, 'promo'])->name('promo.home');
 Route::get('/articles-all', [ArticleController::class, 'indexArtikel'])->name('articles.all');
 
 Route::middleware('guest')->group(function () {
@@ -22,19 +24,22 @@ Route::middleware('guest')->group(function () {
 Route::middleware('auth')->group(function () {
     
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
+    Route::get('/filter-produk/{kategori_id?}', [HomeController::class, 'filter'])->name('produk.filter');
+    Route::get('/produk/detail/{id}', [ProdukController::class, 'detail_produk'])->name('produk.detail');
+    Route::post('/produk/{id}/review', [ProdukController::class, 'storeReview'])->name('produk.review');
+    Route::get('/articles/fetch', [ArticleController::class, 'fetch'])->name('articles.fetch');
+    Route::post('/categories', [ArticleController::class, 'storeCategory'])->name('articles.category');
+    Route::post('/product/{product}/toggle-favorite', [ProdukController::class, 'toggleFavorite'])->name('produk.favorit');
+    Route::post('/product/{product}/toggle-wishlist', [ProdukController::class, 'toggleWishlist'])->name('produk.wishlist');
+    Route::get('/product-favorit', [ProdukController::class, 'indexFavorit'])->name('produk.favorit_view');
+    Route::get('/keranjang', [ProdukController::class, 'indexKeranjang'])->name('produk.keranjang');
+    Route::delete('/keranjang/{id}/delete', [ProdukController::class, 'hapusKeranjang'])->name('keranjang.destroy');
+    Route::post('/keranjang/delete-batch', [ProdukController::class, 'hapusSemuaKeranjang'])->name('keranjang.destroy_all');
+    Route::get('/articles/detail/{slug}', [ArticleController::class, 'detailArtikel'])->name('articles.detailArtikel');
+    Route::post('/artikel/upload-image', [ArticleController::class, 'uploadImage'])->name('article.upload_image');
+    Route::get('/search', [HomeController::class, 'search'])->name('search');
+    
     Route::middleware(['auth', 'admin'])->group(function () {
-        Route::get('/filter-produk/{kategori_id?}', [HomeController::class, 'filter'])->name('produk.filter');
-        Route::get('/produk/detail/{id}', [ProdukController::class, 'detail_produk'])->name('produk.detail');
-        Route::post('/produk/{id}/review', [ProdukController::class, 'storeReview'])->name('produk.review');
-        Route::get('/articles/fetch', [ArticleController::class, 'fetch'])->name('articles.fetch');
-        Route::post('/categories', [ArticleController::class, 'storeCategory'])->name('articles.category');
-        Route::post('/product/{product}/toggle-favorite', [ProdukController::class, 'toggleFavorite'])->name('produk.favorit');
-        Route::post('/product/{product}/toggle-wishlist', [ProdukController::class, 'toggleWishlist'])->name('produk.wishlist');
-        Route::get('/product-favorit', [ProdukController::class, 'indexFavorit'])->name('produk.favorit_view');
-        Route::get('/keranjang', [ProdukController::class, 'indexKeranjang'])->name('produk.keranjang');
-        Route::delete('/keranjang/{id}/delete', [ProdukController::class, 'hapusKeranjang'])->name('keranjang.destroy');
-        Route::post('/keranjang/delete-batch', [ProdukController::class, 'hapusSemuaKeranjang'])->name('keranjang.destroy_all');
         Route::resource('promo', PromoController::class);
         Route::resource('kategori', KategoriController::class);
         Route::resource('produk', ProdukController::class);

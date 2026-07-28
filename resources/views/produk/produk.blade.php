@@ -20,11 +20,10 @@
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 mt-6">
-        
+        <!-- Filter Live Search -->
         <div class="bg-[#EAEFD6] p-2 rounded flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-4 text-xs">
             <div class="flex items-center gap-1.5 sm:gap-2 flex-1">
                 <input type="text" id="el-search" placeholder="Cari nama produk..." class="px-3 py-1.5 rounded border border-gray-200 focus:outline-none flex-1 sm:flex-none sm:w-64 text-gray-700 bg-white">
-                <button onclick="fetchProdukList()" class="bg-[#24420A] text-white px-3 py-1.5 rounded font-semibold hover:bg-opacity-90">Terapkan</button>
             </div>
         </div>
 
@@ -237,6 +236,7 @@
         })
         .then(async res => {
             const data = await res.json();
+            console.log(data); 
             if (!res.ok) throw data;
             showToast(data.message);
             closeProdukModal();
@@ -264,5 +264,58 @@
             fetchProdukList();
         });
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput = document.getElementById('el-search');
+        const tableBody = document.getElementById('produk-table-body');
+        let debounceTimer;
+        let currentController = null;
+
+        if (searchInput && tableBody) {
+            searchInput.addEventListener('input', function () {
+                clearTimeout(debounceTimer);
+                
+                debounceTimer = setTimeout(() => {
+                    const keyword = searchInput.value.trim();
+                    fetchProdukList(keyword);
+                }, 300);
+            });
+        }
+
+        function fetchProdukList(keyword) {
+            if (currentController) {
+                currentController.abort();
+            }
+            currentController = new AbortController();
+
+            tableBody.style.opacity = '0.5';
+
+            const url = new URL(window.location.href);
+            if (keyword !== '') {
+                url.searchParams.set('search', keyword);
+            } else {
+                url.searchParams.delete('search');
+            }
+
+            fetch(url, {
+                signal: currentController.signal,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                tableBody.innerHTML = data.html;
+                tableBody.style.opacity = '1';
+            })
+            .catch(error => {
+                if (error.name !== 'AbortError') {
+                    console.error('Terjadi kesalahan:', error);
+                    tableBody.style.opacity = '1';
+                }
+            });
+        }
+    });
 </script>
 @endsection

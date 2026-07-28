@@ -61,7 +61,6 @@
         <div class="mb-10">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="text-xs md:text-sm font-bold text-gray-800 tracking-wider uppercase">Mungkin Kamu Cari</h2>
-                <a href="#allProduct" class="text-xs text-gray-500 hover:text-[#24420A] flex items-center transition">Lihat Semua <span class="ml-1">></span></a>
             </div>
             
             {{-- Bungkus grid produk agar pesan tidak masuk ke dalam grid --}}
@@ -76,7 +75,7 @@
                                         alt="{{ $item->nama_produk }}" 
                                         class="w-full h-full object-cover">
                                     
-                                    @if(!$item->status_product)
+                                    @if(isset($item->status_produk) && $item->status_produk == false)
                                         <div class="absolute inset-0 bg-white/60 flex items-center justify-center backdrop-blur-[1px]">
                                             <span class="text-[#FF7017] px-4 py-2 font-bold text-lg rounded-lg">
                                                 Habis
@@ -92,7 +91,7 @@
 
                                     <div class="mt-2 flex justify-center">
                                         <a href="{{ route('produk.detail', $item->id) }}" class="text-[#F2B705] text-xs font-bold hover:underline">
-                                            Lihat Produk
+                                            Lihat Produk 
                                         </a>
                                     </div>
 
@@ -209,7 +208,7 @@
                                         alt="{{ $item->nama_produk }}" 
                                         class="w-full h-full object-cover">
                                         
-                                    @if(!$item->status_product)
+                                    @if(isset($item->status_produk) && $item->status_product == false)
                                         <div class="absolute inset-0 bg-white/60 flex items-center justify-center backdrop-blur-[1px]">
                                             <span class="text-[#FF7017] px-4 py-2 font-bold text-lg rounded-lg">
                                                 Habis

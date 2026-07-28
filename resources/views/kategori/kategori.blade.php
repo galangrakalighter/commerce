@@ -42,11 +42,12 @@
         </div>
 
         <div class="w-full">
+            <!-- Filter Live Search Kategori -->
             <div class="bg-[#EAEFD6] p-2 rounded flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-4 text-xs">
                 <div class="flex items-center gap-1.5 sm:gap-2 flex-1">
                     <span class="text-gray-600 font-medium pl-1 sm:pl-2 hidden sm:inline">Filter</span>
-                    <input type="text" id="el-search" placeholder="Cari nama kategori..." class="px-3 py-1.5 rounded border border-gray-200 focus:outline-none flex-1 sm:flex-none sm:w-48 text-gray-700 bg-white">
-                    <button onclick="fetchKategoriList()" class="bg-[#24420A] text-white px-3 py-1.5 rounded font-semibold hover:bg-opacity-90">Terapkan</button>
+                    <!-- ID diubah menjadi kategori-search & tombol terapkan dihapus -->
+                    <input type="text" id="kategori-search" placeholder="Cari nama kategori..." class="px-3 py-1.5 rounded border border-gray-200 focus:outline-none flex-1 sm:flex-none sm:w-48 text-gray-700 bg-white">
                 </div>
             </div>
 
@@ -252,5 +253,58 @@
         })
         .catch(err => showToast(err.message || 'Gagal menghapus kategori.', 'error'));
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const kategoriSearchInput = document.getElementById('kategori-search');
+        const kategoriTableBody = document.getElementById('kategori-table-body');
+        let kategoriDebounceTimer;
+        let kategoriController = null;
+
+        if (kategoriSearchInput && kategoriTableBody) {
+            kategoriSearchInput.addEventListener('input', function () {
+                clearTimeout(kategoriDebounceTimer);
+                
+                kategoriDebounceTimer = setTimeout(() => {
+                    const keyword = kategoriSearchInput.value.trim();
+                    fetchKategoriList(keyword);
+                }, 300);
+            });
+        }
+
+        function fetchKategoriList(keyword) {
+            if (kategoriController) {
+                kategoriController.abort();
+            }
+            kategoriController = new AbortController();
+
+            kategoriTableBody.style.opacity = '0.5';
+
+            const url = new URL(window.location.href);
+            if (keyword !== '') {
+                url.searchParams.set('search', keyword); // Menggunakan parameter khusus kategori agar tidak bentrok jika dalam 1 halaman
+            } else {
+                url.searchParams.delete('search');
+            }
+
+            fetch(url, {
+                signal: kategoriController.signal,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                kategoriTableBody.innerHTML = data.html;
+                kategoriTableBody.style.opacity = '1';
+            })
+            .catch(error => {
+                if (error.name !== 'AbortError') {
+                    console.error('Terjadi kesalahan:', error);
+                    kategoriTableBody.style.opacity = '1';
+                }
+            });
+        }
+    });
 </script>
 @endsection

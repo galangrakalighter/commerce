@@ -3,7 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GAFI - Golden Aroma Food Indonesia</title>
+    
+    {{-- SEO DYNAMIC --}}
+    <title>@yield('meta_title', 'GAFI - Golden Aroma Food Indonesia')</title>
+    <meta name="description" content="@yield('meta_description', 'Pusat seasoning powder dan beverage powder terbaik di Indonesia.')">
+    <meta name="keywords" content="@yield('meta_keywords', 'GAFI, seasoning powder, bumbu tabur, minuman serbuk')">
+
+    {{-- Open Graph (Social Media Preview) --}}
+    <meta property="og:title" content="@yield('meta_title', 'GAFI - Golden Aroma Food Indonesia')">
+    <meta property="og:description" content="@yield('meta_description', 'Pusat seasoning powder dan beverage powder terbaik di Indonesia.')">
+    <meta property="og:image" content="@yield('og_image', asset('img/default-logo.png'))">
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -22,7 +32,22 @@
             pointer-events: none;
             user-select: none;
         }
+        .ck-editor__editable_inline {
+            min-height: 300px;
+        }
+
+        .ck-editor__editable {
+            min-height: 200px !important;
+        }
+
+        /* Memastikan gambar di dalam editor responsif */
+        .ck-content img {
+            max-width: 100% !important;
+            height: auto !important;
+        }
     </style>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
 <body class="bg-gray-50 antialiased">
 
@@ -52,30 +77,33 @@
                                     <a href="{{ route('produk.index') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#24420A] transition">Kelola Produk</a>
                                     <a href="{{ route('promo.index') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#24420A] transition">Kelola Promo</a>
                                     <a href="{{ route('voucher.index') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#24420A] transition">Kelola Voucher</a>
-                                    <a href="{{ route('banner.index') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#24420A] transition">Kelola Banner</a>
+                                    <a href="{{ route('banner.index') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#24420A] transition">Kelola Gambar</a>
                                     <a href="{{ route('articles.index') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#24420A] transition">Kelola Artikel</a>
                                 </div>
                             </li>
                             <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'text-[#E0A226]' : 'text-white hover:text-[#E0A226]' }} transition">Toko</a></li>
                             <li><a href="{{ route('beranda') }}" class="{{ request()->routeIs('beranda') ? 'text-[#E0A226]' : 'text-white hover:text-[#E0A226]' }} transition">Beranda</a></li>
-                            <li><a href="{{ route('articles.all') }}" class="text-white hover:text-[#E0A226] transition">Artikel</a></li>
-                            <li><a href="#" class="text-white hover:text-[#E0A226] transition">Promo</a></li>
-                            <li><a href="#" class="text-white hover:text-[#E0A226] transition">Kontak</a></li>
+                            <li><a href="{{ route('articles.all') }}" class="{{ request()->routeIs('articles.all') ? 'text-[#E0A226]' : 'text-white hover:text-[#E0A226]' }}">Artikel</a></li>
+                            <li><a href="{{ route('promo.home') }}" class="{{ request()->routeIs('promo.home') ? 'text-[#E0A226]' : 'text-white hover:text-[#E0A226]' }} transition">Promo</a></li>
+                            <li><a href="{{ route('tentang') }}" class="{{ request()->routeIs('tentang') ? 'text-[#E0A226]' : 'text-white hover:text-[#E0A226]' }} transition">Tentang</a></li>
+                            <li><a href="#footer" class="text-white hover:text-[#E0A226] transition">Kontak</a></li>
                         @else
                             <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'text-[#E0A226]' : 'text-white hover:text-[#E0A226]' }} transition">Toko</a></li>
                             <li><a href="{{ route('beranda') }}" class="{{ request()->routeIs('beranda') ? 'text-[#E0A226]' : 'text-white hover:text-[#E0A226]' }} transition">Beranda</a></li>
-                            <li><a href="{{ route('articles.all') }}" class="text-white hover:text-[#E0A226] transition">Artikel</a></li>
-                            <li><a href="#" class="text-white hover:text-[#E0A226] transition">Promo</a></li>
-                            <li><a href="#" class="text-white hover:text-[#E0A226] transition">Kontak</a></li>
+                            <li><a href="{{ route('articles.all') }}" class="{{ request()->routeIs('articles.all') ? 'text-[#E0A226]' : 'text-white hover:text-[#E0A226]' }}">Artikel</a></li>
+                            <li><a href="{{ route('promo.home') }}" class="{{ request()->routeIs('promo.home') ? 'text-[#E0A226]' : 'text-white hover:text-[#E0A226]' }} transition">Promo</a></li>
+                            <li><a href="{{ route('tentang') }}" class="{{ request()->routeIs('tentang') ? 'text-[#E0A226]' : 'text-white hover:text-[#E0A226]' }} transition">Tentang</a></li>
+                            <li><a href="#footer" class="text-white hover:text-[#E0A226] transition">Kontak</a></li>
                         @endif
                     @endauth
 
                     @guest
                         <li><a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'text-[#E0A226]' : 'text-white hover:text-[#E0A226]' }} transition">Toko</a></li>
                         <li><a href="{{ route('beranda') }}" class="{{ request()->routeIs('beranda') ? 'text-[#E0A226]' : 'text-white hover:text-[#E0A226]' }} transition">Beranda</a></li>
-                        <li><a href="{{ route('articles.all') }}" class="text-white hover:text-[#E0A226] transition">Artikel</a></li>
-                        <li><a href="#" class="text-white hover:text-[#E0A226] transition">Promo</a></li>
-                        <li><a href="#" class="text-white hover:text-[#E0A226] transition">Kontak</a></li>
+                        <li><a href="{{ route('articles.all') }}" class="{{ request()->routeIs('articles.all') ? 'text-[#E0A226]' : 'text-white hover:text-[#E0A226]' }}">Artikel</a></li>
+                        <li><a href="{{ route('promo.home') }}" class="{{ request()->routeIs('promo.home') ? 'text-[#E0A226]' : 'text-white hover:text-[#E0A226]' }} transition">Promo</a></li>
+                        <li><a href="{{ route('tentang') }}" class="{{ request()->routeIs('tentang') ? 'text-[#E0A226]' : 'text-white hover:text-[#E0A226]' }} transition">Tentang Kami</a></li>
+                        <li><a href="#footer" class="text-white hover:text-[#E0A226] transition">Kontak</a></li>
                     @endguest
                 </ul>
 
@@ -140,30 +168,30 @@
                                 <a href="{{ route('produk.index') }}" class="block py-2 px-2 text-sm text-gray-200 hover:text-white hover:bg-green-900/50 rounded transition">Kelola Produk</a>
                                 <a href="{{ route('promo.index') }}" class="block py-2 px-2 text-sm text-gray-200 hover:text-white hover:bg-green-900/50 rounded transition">Kelola Promo</a>
                                 <a href="{{ route('voucher.index') }}" class="block py-2 px-2 text-sm text-gray-200 hover:text-white hover:bg-green-900/50 rounded transition">Kelola Voucher</a>
-                                <a href="{{ route('banner.index') }}" class="block py-2 px-2 text-sm text-gray-200 hover:text-white hover:bg-green-900/50 rounded transition">Kelola Banner</a>
+                                <a href="{{ route('banner.index') }}" class="block py-2 px-2 text-sm text-gray-200 hover:text-white hover:bg-green-900/50 rounded transition">Kelola Gambar</a>
                                 <a href="{{ route('articles.index') }}" class="block py-2 px-2 text-sm text-gray-200 hover:text-white hover:bg-green-900/50 rounded transition">Kelola Artikel</a>
                             </div>
                         </li>
                         <li><a href="{{ route('home') }}" class="block py-2 px-2 rounded {{ request()->routeIs('home') ? 'bg-green-900 text-[#E0A226]' : 'text-white hover:bg-green-900' }} transition">Toko</a></li>
                         <li><a href="{{ route('beranda') }}" class="block py-2 px-2 rounded {{ request()->routeIs('beranda') ? 'bg-green-900 text-[#E0A226]' : 'text-white hover:bg-green-900' }} transition">Beranda</a></li>
-                        <li><a href="{{ route('articles.all') }}" class="block py-2 px-2 rounded text-white hover:bg-green-900 transition">Artikel</a></li>
-                        <li><a href="#" class="block py-2 px-2 rounded text-white hover:bg-green-900 transition">Promo</a></li>
-                        <li><a href="#" class="block py-2 px-2 rounded text-white hover:bg-green-900 transition">Kontak</a></li>
+                        <li><a href="{{ route('articles.all') }}" class="block py-2 px-2 rounded {{ request()->routeIs('articles.all') ? 'bg-green-900 text-[#E0A226]' : 'text-white hover:bg-green-900' }}">Artikel</a></li>
+                        <li><a href="{{ route('promo.home') }}" class="block py-2 px-2 rounded {{ request()->routeIs('promo.home') ? 'bg-green-900 text-[#E0A226]' : 'text-white hover:bg-green-900' }} transition">Promo</a></li>
+                        <li><a href="#footer" class="block py-2 px-2 rounded text-white hover:bg-green-900 transition">Kontak</a></li>
                     @else
                         <li><a href="{{ route('home') }}" class="block py-2 px-2 rounded {{ request()->routeIs('home') ? 'bg-green-900 text-[#E0A226]' : 'text-white hover:bg-green-900' }} transition">Toko</a></li>
                         <li><a href="{{ route('beranda') }}" class="block py-2 px-2 rounded {{ request()->routeIs('beranda') ? 'bg-green-900 text-[#E0A226]' : 'text-white hover:bg-green-900' }} transition">Beranda</a></li>
-                        <li><a href="{{ route('articles.all') }}" class="block py-2 px-2 rounded text-white hover:bg-green-900 transition">Artikel</a></li>
-                        <li><a href="#" class="block py-2 px-2 rounded text-white hover:bg-green-900 transition">Promo</a></li>
-                        <li><a href="#" class="block py-2 px-2 rounded text-white hover:bg-green-900 transition">Kontak</a></li>
+                        <li><a href="{{ route('articles.all') }}" class="block py-2 px-2 rounded {{ request()->routeIs('articles.all') ? 'bg-green-900 text-[#E0A226]' : 'text-white hover:bg-green-900' }}">Artikel</a></li>
+                        <li><a href="{{ route('promo.home') }}" class="block py-2 px-2 rounded {{ request()->routeIs('promo.home') ? 'bg-green-900 text-[#E0A226]' : 'text-white hover:bg-green-900' }} transition">Promo</a></li>
+                        <li><a href="#footer" class="block py-2 px-2 rounded text-white hover:bg-green-900 transition">Kontak</a></li>
                     @endif
                 @endauth
 
                 @guest
                     <li><a href="{{ route('home') }}" class="block py-2 px-2 rounded {{ request()->routeIs('home') ? 'bg-green-900 text-[#E0A226]' : 'text-white hover:bg-green-900' }} transition">Toko</a></li>
                     <li><a href="{{ route('beranda') }}" class="block py-2 px-2 rounded {{ request()->routeIs('beranda') ? 'bg-green-900 text-[#E0A226]' : 'text-white hover:bg-green-900' }} transition">Beranda</a></li>
-                    <li><a href="{{ route('articles.all') }}" class="block py-2 px-2 rounded text-white hover:bg-green-900 transition">Artikel</a></li>
-                    <li><a href="#" class="block py-2 px-2 rounded text-white hover:bg-green-900 transition">Promo</a></li>
-                    <li><a href="#" class="block py-2 px-2 rounded text-white hover:bg-green-900 transition">Kontak</a></li>
+                    <li><a href="{{ route('articles.all') }}" class="block py-2 px-2 rounded {{ request()->routeIs('articles.all') ? 'bg-green-900 text-[#E0A226]' : 'text-white hover:bg-green-900' }}">Artikel</a></li>
+                    <li><a href="{{ route('promo.home') }}" class="block py-2 px-2 rounded {{ request()->routeIs('promo.home') ? 'bg-green-900 text-[#E0A226]' : 'text-white hover:bg-green-900' }} transition">Promo</a></li>
+                    <li><a href="#footer" class="block py-2 px-2 rounded text-white hover:bg-green-900 transition">Kontak</a></li>
                 @endguest
             </ul>
 
@@ -203,11 +231,16 @@
                 </h1>
             @endif
             
-            <form action="#" method="GET" class="flex-grow flex bg-white rounded overflow-hidden shadow-sm">
+            <form action="{{ route('search') }}" method="GET" class="flex-grow flex bg-white rounded overflow-hidden shadow-sm">
                 <input type="text" placeholder="Cari di toko" class="w-full px-4 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none">
                 <div class="border-l border-gray-200"></div>
-                <select class="text-xs px-2 text-gray-500 focus:outline-none hidden sm:block bg-transparent">
-                    <option>Kategori</option>
+                <select name="category" class="text-xs px-2 text-gray-500 focus:outline-none hidden sm:block bg-transparent">
+                    <option value="">Kategori</option>
+                    @foreach($categories as $category)
+                        <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+                            {{ $category->nama_kategori }}
+                        </option>
+                    @endforeach
                 </select>
                 <button type="submit" class="bg-[#24420A] text-white px-4 flex items-center justify-center hover:bg-opacity-90 transition">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5">
@@ -216,8 +249,9 @@
                 </button>
             </form>
 
-            <div class="flex items-center space-x-5 text-[#24420A] shrink-0">
-                <a href="{{ route('produk.favorit_view') }}" class="hover:text-green-900 transition">
+            <div class="flex items-center space-x-5 text-[#24420A] shrink-0" x-data="{ openMessage: false }">
+                <!-- Tombol Favorit -->
+                <a href="{{ route('produk.favorit_view') }}" class="need-login hover:text-green-900 transition">
                     @if(Route::is('produk.favorit_view'))
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6">
                             <path d="m11.645 20.91-.007-.003-.022-.012a15.247 15.247 0 0 1-.383-.218 25.18 25.18 0 0 1-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0 1 12 5.052 5.5 5.5 0 0 1 16.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 0 1-4.244 3.17 15.247 15.247 0 0 1-.383.219l-.022.012-.007.004-.003.001a.752.752 0 0 1-.704 0l-.003-.001Z" />
@@ -228,18 +262,80 @@
                         </svg>
                     @endif
                 </a>
-                <a href="{{ route('produk.keranjang') }}" class="hover:text-white transition">
+
+                <!-- Tombol Keranjang -->
+                <a href="{{ route('produk.keranjang') }}" class="need-login hover:text-white transition">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75 2.75 0 1 1-1.5 0 .75 2.75 0 0 1 1.5 0Zm12.75 0a.75 2.75 0 1 1-1.5 0 .75 2.75 0 0 1 1.5 0Z" />
                     </svg>
                 </a>
-                <a href="#" class="relative hover:text-white transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
-                    </svg>
-                    <span class="absolute -top-1.5 -right-1.5 bg-green-900 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold border border-white">2</span>
-                </a>
+
+                <!-- Tombol Pesan / Notifikasi (3 Hari Terakhir) -->
+                <div class="relative">
+                    <button @click="openMessage = !openMessage" class="relative hover:text-white transition focus:outline-none flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-6 h-6">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 0 1-2.25 2.25h-15a2.25 2.25 0 0 1-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0 0 19.5 4.5h-15a2.25 2.25 0 0 0-2.25 2.25m19.5 0v.243a2.25 2.25 0 0 1-1.07 1.916l-7.5 4.615a2.25 2.25 0 0 1-2.36 0L3.32 8.91a2.25 2.25 0 0 1-1.07-1.916V6.75" />
+                        </svg>
+                        @if($totalNotifications > 0)
+                            <span class="absolute -top-1.5 -right-1.5 bg-green-900 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold border border-white">
+                                {{ $totalNotifications }}
+                            </span>
+                        @endif
+                    </button>
+
+                    <!-- Dropdown Box Notifikasi -->
+                    <div x-show="openMessage" @click.away="openMessage = false" 
+                        class="absolute right-0 mt-3 w-80 bg-white rounded-xl shadow-lg border border-gray-100 py-3 z-50 text-gray-700 text-xs" 
+                        style="display: none;">
+                        
+                        <div class="px-4 pb-2 border-b border-gray-100 font-bold text-gray-800 flex justify-between items-center">
+                            <span>Informasi Terbaru (3 Hari Terakhir)</span>
+                            <span class="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-[10px]">{{ $totalNotifications }}</span>
+                        </div>
+
+                        <div class="max-h-72 overflow-y-auto divide-y divide-gray-50">
+                            @forelse($newProducts as $prod)
+                                <a href="{{ route('produk.detail', $prod->id) }}" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition">
+                                    <span class="bg-blue-100 text-blue-600 p-2 rounded-lg text-lg">📦</span>
+                                    <div class="overflow-hidden">
+                                        <p class="font-semibold text-gray-800 truncate">Produk Baru: {{ $prod->nama_produk ?? $prod->name }}</p>
+                                        <p class="text-[10px] text-gray-400">Tersedia di katalog toko</p>
+                                    </div>
+                                </a>
+                            @empty
+                            @endforelse
+
+                            @forelse($newPromos as $promo)
+                                <a href="#" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition">
+                                    <span class="bg-orange-100 text-orange-600 p-2 rounded-lg text-lg">🔥</span>
+                                    <div class="overflow-hidden">
+                                        <p class="font-semibold text-gray-800 truncate">Promo: {{ $promo->title ?? $promo->nama_promo }}</p>
+                                        <p class="text-[10px] text-gray-400">Jangan lewatkan penawarannya!</p>
+                                    </div>
+                                </a>
+                            @empty
+                            @endforelse
+
+                            @forelse($newArticles as $article)
+                                <a href="#" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition">
+                                    <span class="bg-green-100 text-green-600 p-2 rounded-lg text-lg">📰</span>
+                                    <div class="overflow-hidden">
+                                        <p class="font-semibold text-gray-800 truncate">Artikel: {{ $article->title ?? $article->judul }}</p>
+                                        <p class="text-[10px] text-gray-400">Baca informasi menarik hari ini</p>
+                                    </div>
+                                </a>
+                            @empty
+                            @endforelse
+
+                            @if($totalNotifications == 0)
+                                <div class="py-8 text-center text-gray-400">
+                                    <p>Tidak ada informasi baru dalam 3 hari terakhir.</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
                 </div>
+            </div>
         </div>
     </div>
 
@@ -345,11 +441,11 @@
                         <h4 class="text-[#24420A] font-bold mb-6 uppercase text-sm">Navigasi</h4>
                         <ul class="space-y-3 text-gray-600 text-sm">
                             <li><a href="{{ route('beranda') }}" class="hover:text-[#24420A]">Beranda</a></li>
-                            <li><a href="{{ route('beranda') }}" class="hover:text-[#24420A]">Tentang Kami</a></li>
+                            <li><a href="{{ route('tentang') }}" class="hover:text-[#24420A]">Tentang Kami</a></li>
                             <li><a href="{{ route('home') }}" class="hover:text-[#24420A]">Produk</a></li>
                             <li><a href="#" class="hover:text-[#24420A]">Custom Bumbu</a></li>
                             <li><a href="{{ route('articles.all') }}" class="hover:text-[#24420A]">Artikel</a></li>
-                            <li><a href="#" class="hover:text-[#24420A]">Kontak Kami</a></li>
+                            <li><a href="#footer" class="hover:text-[#24420A]">Kontak Kami</a></li>
                         </ul>
                     </div>
                     <div>
@@ -381,14 +477,36 @@
                 <h4 class="text-[#24420A] font-bold mb-4 uppercase text-sm">Kontak</h4>
                 <p class="text-gray-600 mb-6 text-sm max-w-lg">Gerbang Kuning Gudang Bumbu, Jalan Ceuri no 51 Kampung Sindang Asih, Sebelah Sawah, Jl. Raya Kopo, Katapang, Pamentasan, Kabupaten Bandung, Jawa Barat 40921</p>
                 <div class="flex flex-wrap gap-8 items-center text-sm text-[#24420A] font-medium">
-                    <span class="flex items-center gap-2">WhatsApp: 0813-2270-0999</span>
-                    <span class="flex items-center gap-2">Email: goldenaromafood@gmail.com</span>
-                    <div class="flex gap-4 ml-auto">
-                        <!-- Social Icons Placeholder -->
-                        <a href="#" class="hover:opacity-75">IG</a>
-                        <a href="#" class="hover:opacity-75">IN</a>
-                        <a href="#" class="hover:opacity-75">FB</a>
-                        <a href="#" class="hover:opacity-75">YT</a>
+                    <span class="flex items-center gap-2">WhatsApp: 0896-1282-1257</span>
+                    <span class="flex items-center gap-2">Email: gafi.bdg.adm@gmail.com</span>
+                    <div class="flex items-center gap-4 ml-auto">
+                        <!-- Instagram -->
+                        <a href="https://www.instagram.com/goldenaromafood_gafi.official?igsh=MXB1dXhhbGR4NDE4ag==" target="_blank" class="text-gray-600 hover:text-[#E1306C] transition-colors duration-200" aria-label="Instagram">
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                            </svg>
+                        </a>
+
+                        <!-- LinkedIn (IN) -->
+                        <a href="#" class="text-gray-600 hover:text-[#0A66C2] transition-colors duration-200" aria-label="LinkedIn">
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                            </svg>
+                        </a>
+
+                        <!-- Facebook -->
+                        <a href="https://www.facebook.com/share/1Bcndmmckw/" target="_blank" class="text-gray-600 hover:text-[#1877F2] transition-colors duration-200" aria-label="Facebook">
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
+                            </svg>
+                        </a>
+
+                        <!-- YouTube -->
+                        <a href="https://youtube.com/@dapur_cuan_gafi?si=Jf6iuoZnCyzBYGgp" target="_blank" class="text-gray-600 hover:text-[#FF0000] transition-colors duration-200" aria-label="YouTube">
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
+                            </svg>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -404,7 +522,7 @@
             <!-- Baris Terakhir -->
             <div class="mt-8 flex flex-col md:flex-row justify-between items-center gap-4">
                 <p class="font-bold text-[#24420A]">Butuh supplier bumbu Halal untuk bisnis Anda?</p>
-                <a href="#" class="bg-[#24420A] text-white px-8 py-3 rounded-lg font-bold flex items-center gap-2 hover:bg-[#3a5a1f]">
+                <a href="https://wa.me/6289612821257" target="_blank" class="bg-[#24420A] text-white px-8 py-3 rounded-lg font-bold flex items-center gap-2 hover:bg-[#3a5a1f]">
                     Hubungi Kami
                 </a>
             </div>
@@ -466,33 +584,33 @@
         });
     </script>
     <script>
-        const slider = document.getElementById('banner-carousel');
-        let isDown = false;
-        let startX;
-        let scrollLeft;
+        // const slider = document.getElementById('banner-carousel');
+        // let isDown = false;
+        // let startX;
+        // let scrollLeft;
 
-        slider.addEventListener('mousedown', (e) => {
-            isDown = true;
-            slider.classList.add('active');
-            startX = e.pageX - slider.offsetLeft;
-            scrollLeft = slider.scrollLeft;
-        });
+        // slider.addEventListener('mousedown', (e) => {
+        //     isDown = true;
+        //     slider.classList.add('active');
+        //     startX = e.pageX - slider.offsetLeft;
+        //     scrollLeft = slider.scrollLeft;
+        // });
 
-        slider.addEventListener('mouseleave', () => {
-            isDown = false;
-        });
+        // slider.addEventListener('mouseleave', () => {
+        //     isDown = false;
+        // });
 
-        slider.addEventListener('mouseup', () => {
-            isDown = false;
-        });
+        // slider.addEventListener('mouseup', () => {
+        //     isDown = false;
+        // });
 
-        slider.addEventListener('mousemove', (e) => {
-            if (!isDown) return;
-            e.preventDefault();
-            const x = e.pageX - slider.offsetLeft;
-            const walk = (x - startX) * 2; // Kecepatan geser
-            slider.scrollLeft = scrollLeft - walk;
-        });
+        // slider.addEventListener('mousemove', (e) => {
+        //     if (!isDown) return;
+        //     e.preventDefault();
+        //     const x = e.pageX - slider.offsetLeft;
+        //     const walk = (x - startX) * 2; // Kecepatan geser
+        //     slider.scrollLeft = scrollLeft - walk;
+        // });
 
         function loadProduk(kategoriId) {
             const items = document.querySelectorAll('.product-item');
@@ -579,6 +697,40 @@
                 }
             });
         }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Fungsi untuk membuat animasi section
+        const animateSection = (el, direction) => {
+            gsap.fromTo(el, 
+            { 
+                x: direction === 'left' ? -100 : 100, 
+                opacity: 0 
+            },
+            { 
+                x: 0, 
+                opacity: 1, 
+                duration: 0.6,
+                scrollTrigger: {
+                trigger: el,
+                start: "top 95%", // Animasi mulai saat 80% layar
+                end: "top 10%",
+                toggleActions: "play reverse play reverse" // Penting: reverse saat scroll ke atas
+                }
+            }
+            );
+        };
+
+        // Terapkan ke semua section yang punya class 'animate-section'
+        document.querySelectorAll('.animate-section').forEach((section, index) => {
+            // Selang-seling arah: genap ke kiri, ganjil ke kanan
+            animateSection(section, index % 2 === 0 ? 'left' : 'right');
+        });
+        const isLoggedIn = @json(auth()->check());
     </script>
     <script src="{{ asset('script.js') }}"></script>
 </body>

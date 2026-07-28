@@ -11,14 +11,20 @@ class PromoController extends Controller
     {
         $query = Promo::query();
 
-        if ($request->has('search') && $request->search != '') {
-            $query->where('nama_promo', 'like', '%' . $request->search . '%');
+        if ($request->filled('search')) {
+            $search = strtolower($request->input('search'));
+
+            $query->whereRaw(
+                'LOWER(nama_promo) LIKE ?',
+                ["%{$search}%"]
+            );
         }
 
         $promos = $query->latest()->get();
 
         if ($request->ajax() || $request->wantsJson()) {
             $today = now()->format('Y-m-d');
+
             return response()->json([
                 'html' => view('promo.table_rows', compact('promos'))->render(),
                 'stats' => [

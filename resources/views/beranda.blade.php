@@ -236,7 +236,7 @@
             </div>
             
             <!-- Tombol -->
-            <a href="#" 
+            <a href="{{ route('tentang') }}" 
             class="inline-block bg-[#24420A] text-white px-8 py-3 rounded-xl font-bold hover:bg-[#3a5a1f] transition-all duration-300">
                 Selengkapnya <br> Tentang Kami
             </a>

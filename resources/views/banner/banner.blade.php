@@ -8,13 +8,13 @@
             <div class="flex items-center space-x-3 w-full sm:w-auto text-white">
                 <span class="text-2xl">🖼️</span>
                 <div>
-                    <h1 class="text-md md:text-lg font-bold uppercase tracking-wide">Kelola Banner</h1>
-                    <p class="text-xs text-white/80 font-medium">Atur tampilan banner utama di halaman depan</p>
+                    <h1 class="text-md md:text-lg font-bold uppercase tracking-wide">Kelola gambar</h1>
+                    <p class="text-xs text-white/80 font-medium">Atur tampilan gambar utama di halaman depan</p>
                 </div>
             </div>
             
             <button onclick="openBannerModal()" class="w-full sm:w-auto bg-[#F2B705] text-white px-5 py-2 rounded font-bold text-xs md:text-sm hover:bg-opacity-90 transition shadow-md">
-                Tambah Banner Baru
+                Tambah Gambar Baru
             </button>
         </div>
     </div>
@@ -44,7 +44,7 @@
     <div class="flex min-h-full items-center justify-center p-4">
         <div class="relative bg-white rounded-lg shadow-xl w-full sm:max-w-md text-xs">
             <div class="bg-[#24420A] px-4 py-3.5 text-white flex justify-between">
-                <h3 class="font-bold uppercase tracking-wider">Tambah Banner Baru</h3>
+                <h3 class="font-bold uppercase tracking-wider">Tambah Gambar Baru</h3>
                 <button onclick="closeBannerModal()" class="text-lg font-bold">&times;</button>
             </div>
 
@@ -52,16 +52,17 @@
                 @csrf
                 
                 <div>
-                    <label class="block font-bold mb-1">Judul Banner *</label>
+                    <label class="block font-bold mb-1">Judul Gambar *</label>
                     <input type="text" name="judul" required class="w-full px-3 py-2 border rounded">
                 </div>
 
                 <div>
-                    <label class="block font-bold mb-1">Tipe Banner *</label>
+                    <label class="block font-bold mb-1">Tipe Gambar *</label>
                     <select name="tipe" onchange="gantiTipe(this.value)" required class="w-full px-3 py-2 border rounded">
                         <option value="home">Halaman Home</option>
                         <option value="artikel">Halaman Artikel</option>
-                        <option value="keduanya">Kedua Halaman</option>
+                        <option value="keduanya">Halaman Home Dan Artikel</option>
+                        <option value="promo">Halaman Promo</option>
                     </select>
                 </div>
 
@@ -89,7 +90,7 @@
                     <input type="file" name="image" accept="image/png, image/jpeg, image/webp" 
                         class="w-full px-3 py-2 border rounded file:mr-4 file:py-1 file:px-3 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-[#EAEFD6] file:text-[#24420A] hover:file:bg-[#d5dcb8]">
                     
-                    <p class="text-[10px] text-gray-500 mt-1 italic">
+                    <p class="text-[10px] text-gray-500 mt-1 italic" id="teks_spek">
                         Format: JPG, PNG, WEBP. Ukuran disarankan: 1200 x 300px. 
                         <span class="text-red-500">*Biarkan kosong jika tidak ingin mengganti gambar.</span>
                     </p>
@@ -105,13 +106,30 @@
 </div>
 
 <script>
-    function gantiTipe(value){
-        switch(value){
+    function gantiTipe(value) {
+        const teksSpek = document.getElementById('teks_spek');
+        const urutanId = document.getElementById('urutan_id');
+
+        // Teks default standar
+        const teksDefault = `Format: JPG, PNG, WEBP. Ukuran disarankan: 1200 x 300px. <span class="text-red-500">*Biarkan kosong jika tidak ingin mengganti gambar.</span>`;
+
+        // Teks khusus saat 'promo' dipilih
+        const teksPromo = `Format: JPG, PNG, WEBP. Ukuran disarankan: 800 x 600px (Rasio 4:3). <span class="text-red-500">*Biarkan kosong jika tidak ingin mengganti gambar.</span>`;
+
+        switch(value) {
             case "keduanya":
-                document.getElementById('urutan_id').readOnly = false;
+                urutanId.readOnly = false;
+                teksSpek.innerHTML = teksDefault;
                 break;
+                
+            case "promo":
+                urutanId.readOnly = true;
+                teksSpek.innerHTML = teksPromo; // Berubah saat promo dipilih
+                break;
+                
             default:
-                document.getElementById('urutan_id').readOnly = true;
+                urutanId.readOnly = true;
+                teksSpek.innerHTML = teksDefault; // Kembali ke teks awal untuk opsi lain
         }
     }
     function editBanner(id) {
@@ -153,7 +171,7 @@
         // CARA AMAN: Cari h3 di dalam modal, bukan di dalam form
         const titleElement = modal.querySelector('h3'); 
         if (titleElement) {
-            titleElement.innerText = "Tambah Banner Baru";
+            titleElement.innerText = "Tambah Gambar Baru";
         }
 
         form.action = "{{ route('banner.store') }}";

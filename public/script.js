@@ -1,9 +1,7 @@
 document.addEventListener('DOMContentLoaded', function () {
-    
     // =========================================================================
     // 1. REGISTRASI ELEMEN DOM
     // =========================================================================
-    
     // Elemen Dropdown Profil (Hanya ada jika user sudah login)
     const dropdownBtn = document.getElementById('dropdown-btn');
     const dropdownMenu = document.getElementById('dropdown-menu');
@@ -96,19 +94,6 @@ document.addEventListener('DOMContentLoaded', function () {
             switchToLoginBtn.addEventListener('click', showLoginForm);
         }
 
-        // FUNGSI ANIMASI: Menampilkan Form Login (Menyembunyikan Register)
-        function showLoginForm() {
-            if (errorBox) errorBox.classList.add('hidden');
-
-            // Form Login Aktif (Masuk dari kiri atas)
-            formLogin.classList.remove('opacity-0', 'scale-95', '-translate-y-4', 'pointer-events-none', 'invisible');
-            formLogin.classList.add('opacity-100', 'scale-100', 'translate-y-0', 'pointer-events-auto');
-
-            // Form Register Non-Aktif (Keluar bergeser ke bawah & mengecil halus)
-            formRegister.classList.remove('opacity-100', 'scale-100', 'translate-y-0', 'pointer-events-auto');
-            formRegister.classList.add('opacity-0', 'scale-105', 'translate-y-4', 'pointer-events-none', 'invisible');
-        }
-
         // FUNGSI ANIMASI: Menampilkan Form Register (Menyembunyikan Login)
         function showRegisterForm() {
             if (errorBox) errorBox.classList.add('hidden');
@@ -122,6 +107,32 @@ document.addEventListener('DOMContentLoaded', function () {
             formRegister.classList.add('opacity-100', 'scale-100', 'translate-y-0', 'pointer-events-auto');
         }
     }
+
+    // FUNGSI ANIMASI: Menampilkan Form Login (Menyembunyikan Register)
+    function showLoginForm() {
+        console.log("masuk show login");
+        if (errorBox) errorBox.classList.add('hidden');
+
+        // Form Login Aktif (Masuk dari kiri atas)
+        formLogin.classList.remove('opacity-0', 'scale-95', '-translate-y-4', 'pointer-events-none', 'invisible');
+        formLogin.classList.add('opacity-100', 'scale-100', 'translate-y-0', 'pointer-events-auto');
+
+        // Form Register Non-Aktif (Keluar bergeser ke bawah & mengecil halus)
+        formRegister.classList.remove('opacity-100', 'scale-100', 'translate-y-0', 'pointer-events-auto');
+        formRegister.classList.add('opacity-0', 'scale-105', 'translate-y-4', 'pointer-events-none', 'invisible');
+    }
+
+    document.querySelectorAll('.need-login').forEach(function(item) {
+
+        item.addEventListener('click', function(e) {
+            if (!isLoggedIn) {
+                e.preventDefault();
+                openModalBtn.click();
+            }
+
+        });
+
+    });
 
     // =========================================================================
     // 4. PROSES SUBMIT FORM VIA AJAX (FETCH API)

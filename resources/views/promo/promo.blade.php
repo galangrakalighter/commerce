@@ -59,8 +59,12 @@
             <div class="bg-[#EAEFD6] p-2 rounded flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 mb-4 text-xs">
                 <div class="flex items-center gap-1.5 sm:gap-2 flex-1">
                     <span class="text-gray-600 font-medium pl-1 sm:pl-2 hidden sm:inline">Filter</span>
-                    <input type="text" id="el-search" placeholder="Cari nama promo..." class="px-3 py-1.5 rounded border border-gray-200 focus:outline-none flex-1 sm:flex-none sm:w-48 text-gray-700 bg-white">
-                    <button onclick="fetchPromoList()" class="bg-[#24420A] text-white px-3 py-1.5 rounded font-semibold hover:bg-opacity-90">Terapkan</button>
+
+                    <input
+                        type="text"
+                        id="promo-search"
+                        placeholder="Cari nama promo..."
+                        class="px-3 py-1.5 rounded border border-gray-200 focus:outline-none flex-1 sm:flex-none sm:w-48 text-gray-700 bg-white">
                 </div>
             </div>
 
@@ -76,6 +80,7 @@
                                 <th class="py-3.5 px-4 text-center">Aksi</th>
                             </tr>
                         </thead>
+
                         <tbody id="promo-table-body" class="divide-y divide-gray-100 font-medium text-gray-700">
                             @include('promo.table_rows', ['promos' => $promos])
                         </tbody>
@@ -276,5 +281,65 @@
         })
         .catch(err => showToast(err.message || 'Gagal menghapus data.', 'error'));
     }
+
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const promoSearchInput = document.getElementById('promo-search');
+        const promoTableBody = document.getElementById('promo-table-body');
+
+        let promoDebounceTimer;
+        let promoController = null;
+
+        if (promoSearchInput && promoTableBody) {
+            promoSearchInput.addEventListener('input', function () {
+
+                clearTimeout(promoDebounceTimer);
+
+                promoDebounceTimer = setTimeout(() => {
+                    fetchPromoList(promoSearchInput.value.trim());
+                }, 300);
+
+            });
+        }
+
+        function fetchPromoList(keyword = '') {
+
+            if (promoController) {
+                promoController.abort();
+            }
+
+            promoController = new AbortController();
+
+            promoTableBody.style.opacity = '0.5';
+
+            const url = new URL(window.location.href);
+
+            if (keyword !== '') {
+                url.searchParams.set('search', keyword);
+            } else {
+                url.searchParams.delete('search');
+            }
+
+            fetch(url, {
+                signal: promoController.signal,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                promoTableBody.innerHTML = data.html;
+                promoTableBody.style.opacity = '1';
+            })
+            .catch(error => {
+                if (error.name !== 'AbortError') {
+                    console.error(error);
+                    promoTableBody.style.opacity = '1';
+                }
+            });
+        }
+
+    });
 </script>
 @endsection

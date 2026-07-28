@@ -40,6 +40,11 @@ class HomeController extends Controller
         return view('home', compact('katalog', 'kategoriList', 'rekomendasi', 'banners', 'request', 'banner_home'));
     }
 
+    public function promo(){
+        $gambar_promo = Banner::where('is_active', true)->where('tipe', 'promo')->first();
+        return view('promo', compact('gambar_promo'));
+    }
+
     // pu\blic function filter($kategori_id = null) {
     //     $produk = Produk::when($kategori_id, function($query) use ($kategori_id) {
     //         return $query->where('id_kategori', $kategori_id);
@@ -51,6 +56,37 @@ class HomeController extends Controller
     public function beranda()
     {
         return view('beranda');
+    }
+
+    public function tentangKami(){
+        return view('tentang');
+    }
+
+    public function search(Request $request)
+    {
+        $keyword = $request->input('keyword');
+        $categoryId = $request->input('category');
+
+        // Mulai query produk
+        $query = Produk::query();
+
+        // Jika user memasukkan keyword pencarian
+        if (!empty($keyword)) {
+            $query->where('nama_produk', 'LIKE', '%' . $keyword . '%');
+            // Tambahkan orWhere jika ingin mencari berdasarkan deskripsi juga:
+            // ->orWhere('description', 'LIKE', '%' . $keyword . '%');
+        }
+
+        // Jika user memilih kategori (tidak kosong)
+        if (!empty($categoryId)) {
+            $query->where('id_kategori', $categoryId);
+        }
+
+        // Ambil data dengan pagination (misal 12 data per halaman)
+        $products = $query->paginate(12)->appends($request->all());
+
+        // Kembalikan ke view hasil pencarian
+        return view('search_result', compact('products', 'keyword', 'categoryId'));
     }
 
     /**

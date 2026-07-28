@@ -12,8 +12,10 @@ class KategoriController extends Controller
     {
         $query = Kategori::with('promo');
 
-        if ($request->has('search') && $request->search != '') {
-            $query->where('nama_kategori', 'like', '%' . $request->search . '%');
+        // Pencarian dengan otomatis mengubah input & database menjadi huruf kecil
+        if ($request->filled('search')) {
+            $search = strtolower($request->input('search'));
+            $query->whereRaw('LOWER(nama_kategori) like ?', ['%' . $search . '%']);
         }
 
         $categories = $query->latest()->get();

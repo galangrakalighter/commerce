@@ -13,10 +13,28 @@ class ArticleController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-       $articles = Article::with('category')->latest()->get();
-        $categories = ArticleCategory::all(); // Tambahkan ini
+        $query = Article::with('category');
+
+        if ($request->filled('search')) {
+            $search = strtolower($request->input('search'));
+
+            $query->whereRaw(
+                'LOWER(title) LIKE ?',
+                ["%{$search}%"]
+            );
+        }
+
+        $articles = $query->latest()->get();
+        $categories = ArticleCategory::all();
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'html' => view('articles.table_rows', compact('articles'))->render()
+            ]);
+        }
+
         return view('articles.articles', compact('articles', 'categories'));
     }
 
@@ -99,6 +117,37 @@ class ArticleController extends Controller
 
         // 3. Kembalikan respons JSON
         return response()->json(['message' => 'Kategori berhasil ditambahkan!'], 200);
+    }
+
+    public function detailArtikel($slug){
+        $article = Article::where('slug', $slug)->firstOrFail();
+        $relatedArticles = Article::where('id', '!=', $article->id) // Jangan tampilkan artikel yang sedang dibaca
+                    ->latest()
+                    ->take(4)
+                    ->get();
+    
+        return view('articles.details', compact('article', 'relatedArticles'));
+    }
+
+    public function uploadImage(Request $request)
+    {
+        if ($request->hasFile('upload')) {
+            $file = $request->file('upload');
+            
+            // Simpan file
+            $path = $file->store('articles', 'public');
+            
+            // FORMAT JSON INI WAJIB SESUAI DOKUMENTASI CKEDITOR
+            return response()->json([
+                'uploaded' => true,
+                'url' => asset('storage/' . $path)
+            ]);
+        }
+
+        return response()->json([
+            'uploaded' => false,
+            'error' => ['message' => 'Upload gagal']
+        ]);
     }
 
     /**

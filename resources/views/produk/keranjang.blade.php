@@ -12,23 +12,44 @@
 
     <div class="space-y-4 mb-6" id="cartList">
         @forelse($keranjangItems as $item)
-            <div class="cart-item bg-white p-5 rounded-xl border border-gray-100 shadow-sm transition-all duration-200 hover:border-[#24420A]/20" data-id="{{ $item->product_id }}">
-                <div class="flex items-center gap-6">
-                    <input type="checkbox" class="item-checkbox w-5 h-5 accent-[#24420A] cursor-pointer" 
+            @php
+                $isHabis = isset($item->product->status_produk) && !$item->product->status_produk;
+            @endphp
+            
+            <div class="cart-item bg-white p-5 rounded-xl border {{ $isHabis ? 'border-red-200 bg-red-50/30' : 'border-gray-100' }} shadow-sm transition-all duration-200 hover:border-[#24420A]/20 relative overflow-hidden" data-id="{{ $item->product_id }}">
+                
+                <div class="flex items-center gap-6 {{ $isHabis ? 'opacity-60' : '' }}">
+                    <!-- Checkbox dinonaktifkan jika produk habis -->
+                    <input type="checkbox" class="item-checkbox w-5 h-5 accent-[#24420A] {{ $isHabis ? 'cursor-not-allowed' : 'cursor-pointer' }}" 
                         data-name="{{ $item->product->nama_produk }}" 
                         data-varian="{{ $item->varian }}" 
-                        data-qty="1">
+                        data-qty="1"
+                        {{ $isHabis ? 'disabled' : '' }}>
                     
-                    <img src="{{ !empty($item->product->gambar) ? asset('storage/' . $item->product->gambar[0]) : asset('images/default.jpg') }}" 
-                        class="w-20 h-20 object-cover rounded-lg border border-gray-200">
+                    <div class="relative w-20 h-20 flex-shrink-0">
+                        <img src="{{ !empty($item->product->gambar) ? asset('storage/' . $item->product->gambar[0]) : asset('images/default.jpg') }}" 
+                            class="w-full h-full object-cover rounded-lg border border-gray-200">
+                        
+                        @if($isHabis)
+                            <div class="absolute inset-0 bg-black/40 rounded-lg flex items-center justify-center">
+                                <span class="text-white font-bold text-xs uppercase tracking-wider">Habis</span>
+                            </div>
+                        @endif
+                    </div>
                     
                     <div class="flex-grow min-w-0">
                         <h3 class="font-bold text-gray-800 truncate pr-4">{{ $item->product->nama_produk }}</h3>
+                        @if($isHabis)
+                            <span class="inline-block mt-1 text-[11px] font-semibold text-red-600 bg-red-100 px-2 py-0.5 rounded">
+                                Produk ini sedang habis
+                            </span>
+                        @endif
                     </div>
 
                     <div class="flex items-center gap-6">
                         <div class="w-32 flex flex-col justify-end">
-                            <select class="variant-select text-sm border border-gray-200 rounded-lg p-2 outline-none cursor-pointer w-full focus:ring-1 focus:ring-[#24420A] focus:border-[#24420A]">
+                            <!-- Select Varian dinonaktifkan jika produk habis -->
+                            <select class="variant-select text-sm border border-gray-200 rounded-lg p-2 outline-none {{ $isHabis ? 'cursor-not-allowed bg-gray-100 text-gray-400' : 'cursor-pointer' }}" {{ $isHabis ? 'disabled' : '' }}>
                                 @foreach(['1KG', '2KG', '3KG', '5KG', 'BUNDLE'] as $v)
                                     <option value="{{ $v }}" {{ ($item->varian == $v) ? 'selected' : '' }}>{{ $v }}</option>
                                 @endforeach
@@ -36,10 +57,10 @@
                         </div>
 
                         <div class="flex items-center gap-6">
-                            <div class="flex items-center border border-gray-200 rounded-lg bg-gray-50 overflow-hidden">
-                                <button class="btn-minus px-4 py-2 hover:bg-gray-200 transition-colors border-r border-gray-200">-</button>
+                            <div class="flex items-center border border-gray-200 rounded-lg bg-gray-50 overflow-hidden {{ $isHabis ? 'opacity-50 pointer-events-none' : '' }}">
+                                <button class="btn-minus px-4 py-2 hover:bg-gray-200 transition-colors border-r border-gray-200" {{ $isHabis ? 'disabled' : '' }}>-</button>
                                 <input type="number" value="1" class="qty-input w-12 bg-transparent text-center text-sm font-semibold outline-none" readonly>
-                                <button class="btn-plus px-4 py-2 hover:bg-gray-200 transition-colors border-l border-gray-200">+</button>
+                                <button class="btn-plus px-4 py-2 hover:bg-gray-200 transition-colors border-l border-gray-200" {{ $isHabis ? 'disabled' : '' }}>+</button>
                             </div>
                             
                             <button onclick="deleteFromCart('{{ $item->product_id }}', '{{ $item->id }}')" 

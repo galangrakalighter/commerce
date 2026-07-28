@@ -16,12 +16,13 @@ class ProdukController extends Controller
     {
         $query = Produk::with('kategori');
 
-        if ($request->has('search') && $request->search != '') {
-            $query->where('nama_produk', 'like', '%' . $request->search . '%');
+        if ($request->filled('search')) {
+            $search = strtolower($request->input('search'));
+            $query->whereRaw('LOWER(nama_produk) like ?', ['%' . $search . '%']);
         }
 
         $products = $query->latest()->get();
-        $categories = Kategori::latest()->get(); // Untuk dropdown di modal
+        $categories = Kategori::latest()->get();
 
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
@@ -256,7 +257,7 @@ class ProdukController extends Controller
         }
 
         $produk->update($data);
-        return response()->json(['message' => 'Produk berhasil diupdate!']);
+        return response()->json(['message' => 'Produk berhasil diupdate!', 'data' => $data]);
     }
 
     public function destroy($id)

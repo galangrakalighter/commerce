@@ -24,12 +24,12 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 mt-8">
         <div class="bg-[#F8F9F5] p-4 rounded-xl border border-[#EAEFD6] flex flex-col sm:flex-row items-center gap-3 mb-6 shadow-sm">
             <div class="relative flex-1 w-full">
-                <input type="text" id="el-search" placeholder="Cari judul artikel..." 
+                <input
+                    type="text"
+                    id="artikel-search"
+                    placeholder="Cari judul artikel..."
                     class="w-full pl-4 pr-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-[#24420A] focus:border-transparent outline-none text-sm transition">
             </div>
-            <button onclick="fetchArtikelList()" class="w-full sm:w-auto bg-[#24420A] text-white px-6 py-2 rounded-lg font-semibold hover:bg-[#355e0e] transition shadow-md">
-                Cari Artikel
-            </button>
         </div>
 
         <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
@@ -42,6 +42,7 @@
                             <th class="py-4 px-6 text-center">Aksi</th>
                         </tr>
                     </thead>
+
                     <tbody id="artikel-table-body" class="divide-y divide-gray-50">
                         @include('articles.table_rows', ['articles' => $articles])
                     </tbody>
@@ -90,11 +91,18 @@
                     </div>
                     <div>
                         <label class="block font-bold mb-1">Gambar Cover</label>
-                        <input type="file" name="image" accept="image/*" class="w-full px-2 py-1.5 border rounded">
+                        
+                        <div id="image-preview-container" class="mb-2 hidden">
+                            <p class="text-[10px] text-gray-500 italic">Gambar saat ini:</p>
+                            <img id="current-image" src="" class="w-20 h-20 object-cover rounded shadow-sm border">
+                        </div>
+
+                        <input type="file" id="input-image" name="image" accept="image/*" class="w-full px-2 py-1.5 border rounded">
                     </div>
                     <div class="md:col-span-2">
-                        <label class="block font-bold mb-1">Konten Artikel *</label>
-                        <textarea id="input-content" name="content" rows="6" required class="w-full px-3 py-2 border rounded focus:ring-2 focus:ring-[#24420A] outline-none"></textarea>
+                        <label class="block font-bold mb-1.5 text-[#24420A]">Isi Konten *</label>
+                        
+                        <textarea id="editor" name="content" class="w-full"></textarea>
                     </div>
                 </div>
 
@@ -124,8 +132,26 @@
         </div>
     </div>
 </div>
+<script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/ckeditor.js"></script>
 <script>
     let currentEditId = null;
+
+    let myEditor;
+
+    ClassicEditor
+        .create(document.querySelector('#editor'), {
+            ckfinder: {
+                uploadUrl: '{{ route('article.upload_image') . '?_token=' . csrf_token() }}'
+            },
+            toolbar: [
+                'heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|',
+                'blockQuote', 'insertTable', 'undo', 'redo', '|', 'imageUpload'
+            ]
+        })
+        .then(editor => {
+            myEditor = editor;
+        })
+        .catch(error => { console.error(error); });
 
     function openCategoryModal() { document.getElementById('category-modal').classList.remove('hidden'); }
     function closeCategoryModal() { document.getElementById('category-modal').classList.add('hidden'); }
@@ -184,7 +210,9 @@
         const form = document.getElementById('artikel-form');
         const formData = new FormData(form);
         const url = document.getElementById('form-method').value === "PUT" ? `/articles/${currentEditId}` : '/articles';
-        
+        if (myEditor) {
+            document.getElementById('editor').value = myEditor.getData();
+        }
         fetch(url, {
             method: 'POST',
             body: formData,
@@ -250,18 +278,104 @@
     function openArtikelModal(data = null) {
         const modal = document.getElementById('artikel-modal');
         const form = document.getElementById('artikel-form');
+        const previewContainer = document.getElementById('image-preview-container');
+        const currentImage = document.getElementById('current-image');
         modal.classList.remove('hidden');
         
         if (data) {
-            currentEditId = data.id;
+            // MODE EDIT
+            document.getElementById('modal-title-text').innerText = "Edit Artikel";
             document.getElementById('form-method').value = "PUT";
             document.getElementById('input-title').value = data.title;
-            document.getElementById('input-content').value = data.content;
-            document.getElementById('input-category').value = data.category_id || "";
+            document.getElementById('input-category').value = data.category_id;
+            document.getElementById('input-status').value = data.status;
+            if (data.image) {
+                previewContainer.classList.remove('hidden'); // Tampilkan container
+                currentImage.src = "/storage/" + data.image; // Path ke folder storage
+            } else {
+                previewContainer.classList.add('hidden'); // Sembunyikan jika tidak ada gambar
+            }
+            console.log(data.content);
+            console.log(myEditor);
+            if (myEditor) {
+                console.log("Isi konten:", data.content);
+                myEditor.setData(data.content || '');
+            }
+            // Masukkan konten ke CKEditor
+            if (myEditor) myEditor.setData(data.content);
+
         } else {
+            previewContainer.classList.add('hidden');
+            // MODE TAMBAH
+            document.getElementById('modal-title-text').innerText = "Buat Artikel Baru";
             document.getElementById('form-method').value = "POST";
             form.reset();
+            
+            // Kosongkan editor
+            if (myEditor) myEditor.setData('');
         }
     }
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const artikelSearchInput = document.getElementById('artikel-search');
+        const artikelTableBody = document.getElementById('artikel-table-body');
+
+        let artikelDebounceTimer;
+        let artikelController = null;
+
+        if (artikelSearchInput && artikelTableBody) {
+
+            artikelSearchInput.addEventListener('input', function () {
+
+                clearTimeout(artikelDebounceTimer);
+
+                artikelDebounceTimer = setTimeout(() => {
+                    fetchArtikelList(artikelSearchInput.value.trim());
+                }, 300);
+
+            });
+
+        }
+
+        function fetchArtikelList(keyword = '') {
+
+            if (artikelController) {
+                artikelController.abort();
+            }
+
+            artikelController = new AbortController();
+
+            artikelTableBody.style.opacity = '0.5';
+
+            const url = new URL(window.location.href);
+
+            if (keyword !== '') {
+                url.searchParams.set('search', keyword);
+            } else {
+                url.searchParams.delete('search');
+            }
+
+            fetch(url, {
+                signal: artikelController.signal,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                artikelTableBody.innerHTML = data.html;
+                artikelTableBody.style.opacity = '1';
+            })
+            .catch(error => {
+                if (error.name !== 'AbortError') {
+                    console.error(error);
+                    artikelTableBody.style.opacity = '1';
+                }
+            });
+
+        }
+
+    });
 </script>
 @endsection
