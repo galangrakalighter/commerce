@@ -111,17 +111,6 @@
 
         </div>
     </div>
-
-    {{-- Tombol Utama di Bawah Banner --}}
-    <div class="mt-6 flex justify-center">
-        <a 
-            href="https://wa.me/628xxxxxxxxxx" 
-            target="_blank" 
-            class="w-full sm:w-auto bg-[#ffbb00] hover:bg-[#e0a800] text-gray-900 font-bold text-base md:text-lg px-8 py-4 rounded-xl shadow-md transition duration-200 text-center flex items-center justify-center gap-2"
-        >
-            <span>Hubungi Untuk Promo Terbaru</span>
-        </a>
-    </div>
 </section>
 
 @endsection

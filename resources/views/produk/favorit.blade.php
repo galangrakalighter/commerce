@@ -34,7 +34,11 @@
         @forelse($favorites as $item)
             @php $produk = $item->product; @endphp
 
-            <div class="product-item" data-kategori="{{ $produk->id_kategori }}" data-status="{{ $produk->status_produk == true ? 'available' : 'out' }}">
+            <div class="product-item cursor-pointer" 
+                data-kategori="{{ $produk->id_kategori }}" 
+                data-status="{{ $produk->status_produk == true ? 'available' : 'out' }}"
+                onclick="window.location.href='{{ route('produk.detail', $produk->id) }}'">
+                
                 <div class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition relative">
                     
                     <div class="aspect-square w-full overflow-hidden bg-gray-100 relative">
@@ -57,7 +61,10 @@
                         </h3>
 
                         <div class="mt-2 flex justify-center">
-                            <a href="{{ route('produk.detail', $produk->id) }}" class="text-[#F2B705] text-xs font-bold hover:underline">
+                            {{-- Tombol Lihat Produk tetap ada, menggunakan e.stopPropagation() agar tidak memicu double redirect --}}
+                            <a href="{{ route('produk.detail', $produk->id) }}" 
+                            onclick="event.stopPropagation();" 
+                            class="text-[#F2B705] text-xs font-bold hover:underline">
                                 Lihat Produk
                             </a>
                         </div>

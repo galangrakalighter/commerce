@@ -33,7 +33,6 @@
                     <thead>
                         <tr class="bg-gray-50 text-gray-500 font-bold uppercase tracking-wider border-b border-gray-200">
                             <th class="py-3.5 px-4 w-1/3">Produk & Kategori</th>
-                            <th class="py-3.5 px-4">Harga Jual</th>
                             <th class="py-3.5 px-4">Spesifikasi (JSON)</th>
                             <th class="py-3.5 px-4 text-center">Aksi</th>
                         </tr>
@@ -77,10 +76,6 @@
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block font-bold mb-1">Harga Jali (Rp) *</label>
-                        <input type="number" id="input-harga" name="harga" required class="w-full px-3 py-2 border rounded">
-                    </div>
                     <div>
                         <label class="block font-bold mb-1">Satuan Tipe Kemasan *</label>
                         <input type="text" id="input-tipe" name="tipe" required placeholder="Contoh: Kilogram, Pack, Bal" class="w-full px-3 py-2 border rounded">

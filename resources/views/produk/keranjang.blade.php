@@ -16,14 +16,11 @@
                 $isHabis = isset($item->product->status_produk) && !$item->product->status_produk;
             @endphp
             
-            <div class="cart-item bg-white p-5 rounded-xl border {{ $isHabis ? 'border-red-200 bg-red-50/30' : 'border-gray-100' }} shadow-sm transition-all duration-200 hover:border-[#24420A]/20 relative overflow-hidden" data-id="{{ $item->product_id }}">
+            <div class="cart-item bg-white p-5 rounded-xl border {{ $isHabis ? 'border-red-200 bg-red-50/30' : 'border-gray-100' }} shadow-sm transition-all duration-200 hover:border-[#24420A]/20 relative overflow-hidden" data-id="{{ $item->id }}">
                 
                 <div class="flex items-center gap-6 {{ $isHabis ? 'opacity-60' : '' }}">
                     <!-- Checkbox dinonaktifkan jika produk habis -->
-                    <input type="checkbox" class="item-checkbox w-5 h-5 accent-[#24420A] {{ $isHabis ? 'cursor-not-allowed' : 'cursor-pointer' }}" 
-                        data-name="{{ $item->product->nama_produk }}" 
-                        data-varian="{{ $item->varian }}" 
-                        data-qty="1"
+                    <input type="checkbox" class="item-checkbox w-5 h-5 accent-[#24420A] {{ $isHabis ? 'cursor-not-allowed' : 'cursor-pointer' }}" data-name="{{ $item->product->nama_produk }}" data-varian="{{ $item->varian }}" data-qty="1"
                         {{ $isHabis ? 'disabled' : '' }}>
                     
                     <div class="relative w-20 h-20 flex-shrink-0">
@@ -38,7 +35,7 @@
                     </div>
                     
                     <div class="flex-grow min-w-0">
-                        <h3 class="font-bold text-gray-800 truncate pr-4">{{ $item->product->nama_produk }}</h3>
+                        <h3 id="text-delete-{{ $item->id }}" class="font-bold text-gray-800 truncate pr-4">{{ $item->product->nama_produk }}</h3>
                         @if($isHabis)
                             <span class="inline-block mt-1 text-[11px] font-semibold text-red-600 bg-red-100 px-2 py-0.5 rounded">
                                 Produk ini sedang habis
@@ -63,8 +60,7 @@
                                 <button class="btn-plus px-4 py-2 hover:bg-gray-200 transition-colors border-l border-gray-200" {{ $isHabis ? 'disabled' : '' }}>+</button>
                             </div>
                             
-                            <button onclick="deleteFromCart('{{ $item->product_id }}', '{{ $item->id }}')" 
-                                    class="text-gray-400 hover:text-red-600 transition-colors text-sm font-medium w-16 text-right">
+                            <button id="btn-delete-{{ $item->id }}" onclick="deleteFromCart('{{ $item->product_id }}', '{{ $item->id }}')" class="text-gray-400 hover:text-red-600 transition-colors text-sm font-medium w-16 text-right">
                                 Hapus
                             </button>
                         </div>
@@ -174,30 +170,47 @@ document.getElementById('selectBottomAll').addEventListener('change', function()
 async function deleteFromCart(cartId, id) {
     const btn = document.getElementById(`btn-delete-${id}`);
     const textSpan = document.getElementById(`text-delete-${id}`);
+    
+    // Pastikan selector ini sesuai dengan struktur HTML Anda
     const cartItem = document.querySelector(`.cart-item[data-id="${id}"]`);
 
-    btn.disabled = true;
-    textSpan.innerText = "Menghapus...";
+    // Pengaman: Jika elemen cartItem tidak ditemukan, hentikan fungsi dan beri peringatan di console
+    if (!cartItem) {
+        console.error(`Elemen dengan selector .cart-item[data-id="${id}"] tidak ditemukan di DOM!`);
+        alert('Gagal menemukan elemen keranjang di halaman.');
+        return;
+    }
+
+    // Pengaman jika tombol tidak sengaja tidak ada
+    if (btn) btn.disabled = true;
+    if (textSpan) textSpan.innerText = "Menghapus...";
 
     try {
         const response = await fetch(`/keranjang/${cartId}/delete`, {
             method: 'DELETE',
-            headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Content-Type': 'application/json' }
+            headers: { 
+                'X-CSRF-TOKEN': '{{ csrf_token() }}', 
+                'Content-Type': 'application/json' 
+            }
         });
 
-        if ((await response.json()).success) {
-            cartItem.style.opacity = "0";
+        const data = await response.json();
+
+        if (data.success) {
             setTimeout(() => { 
                 cartItem.remove(); 
-                if(document.querySelectorAll('.cart-item').length === 0) location.reload(); 
+                if (document.querySelectorAll('.cart-item').length === 0) {
+                    location.reload(); 
+                }
             }, 300);
         } else {
-            throw new Error();
+            throw new Error(data.message || 'Gagal dari server');
         }
     } catch (err) { 
+        console.error(err);
         alert('Gagal menghapus'); 
-        btn.disabled = false; 
-        textSpan.innerText = "Hapus"; 
+        if (btn) btn.disabled = false; 
+        if (textSpan) textSpan.innerText = "Hapus"; 
     }
 }
 

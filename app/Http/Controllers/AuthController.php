@@ -78,12 +78,33 @@ class AuthController extends Controller
 
     public function logout(Request $request)
     {
+        // 1. Ambil nama route atau URL halaman sebelumnya (asal user sebelum klik logout)
+        $previousRouteName = app('router')->getRoutes()->match(app('request')->create(url()->previous()))->getName();
+
+        // 2. Daftar route yang jika di-logout harus diarahkan ke home (/)
+        $redirectRoutes = [
+            'promo.index',
+            'kategori.index',
+            'produk.index',
+            'voucher.index',
+            'banner.index',
+            'produk.favorit_view',
+            'produk.keranjang',
+            'articles.index'
+        ];
+
         Auth::logout();
 
         // Bersihkan dan invalidate session
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/')->with('success', 'Anda telah berhasil keluar.');
+        // 3. Cek apakah route sebelumnya ada di dalam daftar khusus tersebut
+        if (in_array($previousRouteName, $redirectRoutes)) {
+            return redirect('/')->with('success', 'Anda telah berhasil keluar.');
+        }
+
+        // Jika bukan dari daftar di atas, kembalikan ke halaman sebelumnya
+        return back()->with('success', 'Anda telah berhasil keluar.');
     }
 }

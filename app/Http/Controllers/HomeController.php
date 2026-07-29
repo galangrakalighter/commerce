@@ -7,6 +7,9 @@ use App\Models\Produk;
 use App\Models\Kategori;
 use App\Models\Voucher;
 use App\Models\Banner;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 class HomeController extends Controller
 {
     /**
@@ -87,6 +90,21 @@ class HomeController extends Controller
 
         // Kembalikan ke view hasil pencarian
         return view('search_result', compact('products', 'keyword', 'categoryId'));
+    }
+
+    public function markAsRead(Request $request)
+    {
+        $user = Auth::user();
+
+        if ($user) {
+            // Update atau buat data kapan terakhir user ini membuka notifikasi
+            DB::table('user_notification_reads')->updateOrInsert(
+                ['user_id' => $user->id],
+                ['last_read_at' => Carbon::now()]
+            );
+        }
+
+        return response()->json(['success' => true]);
     }
 
     /**

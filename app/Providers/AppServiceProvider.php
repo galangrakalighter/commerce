@@ -5,6 +5,8 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use App\Models\Kategori;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Models\Article;
 use App\Models\Promo;
@@ -26,18 +28,41 @@ class AppServiceProvider extends ServiceProvider
     {
         View::composer('app', function ($view) {
             $threeDaysAgo = Carbon::now()->subDays(3);
+            $user = Auth::user();
 
-            // Ambil data produk baru (3 hari terakhir)
+            // Tentukan batas waktu awal berdasarkan kapan user terakhir membaca
+            $lastReadAt = null;
+            if ($user) {
+                $readRecord = DB::table('user_notification_reads')->where('user_id', $user->id)->first();
+                if ($readRecord && $readRecord->last_read_at) {
+                    $lastReadAt = Carbon::parse($readRecord->last_read_at);
+                }
+            }
+
+            // 1. DAFTAR ISI: Selalu ambil semua data 3 hari terakhir agar tetap muncul di dropdown
             $newProducts = Produk::where('created_at', '>=', $threeDaysAgo)->get();
-
-            // Ambil data promo baru (3 hari terakhir)
-            $newPromos = Promo::where('created_at', '>=', $threeDaysAgo)->get();
-
-            // Ambil data artikel baru (3 hari terakhir)
+            $newPromos   = Promo::where('created_at', '>=', $threeDaysAgo)->get();
             $newArticles = Article::where('created_at', '>=', $threeDaysAgo)->get();
 
-            // Hitung total notifikasi
-            $totalNotifications = $newProducts->count() + $newPromos->count() + $newArticles->count();
+            // 2. HITUNG ANGKA NOTIFIKASI: Hanya hitung item yang dibuat SETELAH terakhir dibaca
+            if ($lastReadAt) {
+                $unreadProductsCount = Produk::where('created_at', '>=', $threeDaysAgo)
+                                            ->where('created_at', '>', $lastReadAt)
+                                            ->count();
+
+                $unreadPromosCount   = Promo::where('created_at', '>=', $threeDaysAgo)
+                                            ->where('created_at', '>', $lastReadAt)
+                                            ->count();
+
+                $unreadArticlesCount = Article::where('created_at', '>=', $threeDaysAgo)
+                                            ->where('created_at', '>', $lastReadAt)
+                                            ->count();
+
+                $totalNotifications = $unreadProductsCount + $unreadPromosCount + $unreadArticlesCount;
+            } else {
+                // Jika belum pernah baca, total notifikasi adalah semua item dalam 3 hari terakhir
+                $totalNotifications = $newProducts->count() + $newPromos->count() + $newArticles->count();
+            }
             
             $categories = Kategori::all();
             $view->with(compact('newProducts', 'newPromos', 'newArticles', 'totalNotifications', 'categories'));

@@ -25,9 +25,6 @@
             </div>
         </div>
     </td>
-    <td class="py-4 px-4 font-mono font-bold text-gray-800">
-        Rp {{ number_format($produk->harga, 0, ',', '.') }} <span class="text-xs font-normal text-gray-400">/ {{ $produk->tipe }}</span>
-    </td>
     <td class="py-4 px-4">
         <div class="flex flex-wrap gap-1 max-w-xs">
             @if(!empty($specs) && is_array($specs))

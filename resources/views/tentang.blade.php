@@ -153,83 +153,80 @@
         <!-- Grid 4 Kartu Misi -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 max-w-5xl mx-auto">
             
-            <!-- Kartu 1: Customer Value (Background Hijau Muda) -->
-            <div class="bg-[#E7F7DA] p-8 md:p-10 rounded-3xl shadow-sm transition duration-300 hover:shadow-md relative w-full max-w-lg h-auto flex-grow md:flex-grow-0">
+            <!-- Kartu 1: Customer Value -->
+            <div class="bg-[#E7F7DA] p-6 sm:p-8 md:p-10 rounded-3xl shadow-sm transition duration-300 hover:shadow-md relative flex flex-col justify-between">
                 <!-- Logo di Atas Kanan -->
-                <!-- Mengubah w-10 h-10 menjadi w-16 h-16 -->
-                <div class="absolute top-8 right-8">
-                    <!-- GANTI 'customer-value-icon.png' DENGAN PATH GAMBAR ANDA -->
-                    <img src="{{ asset('images/User_add_alt.png') }}" alt="Customer Value" class="w-16 h-16 object-contain opacity-90">
+                <div class="absolute top-6 right-6 sm:top-8 sm:right-8">
+                    <img src="{{ asset('images/User_add_alt.png') }}" alt="Customer Value" class="w-12 h-12 sm:w-16 sm:h-16 object-contain opacity-90">
                 </div>
 
-                <!-- Konten: Judul di Bawah Logo tapi Sebelah Kiri -->
-                <div class="mt-4 mb-6 pr-12">
-                    <h3 class="text-2xl md:text-3xl font-bold font-['Inter'] text-[#1b3b2b] leading-snug">
+                <!-- Konten: Judul -->
+                <div class="mt-2 sm:mt-4 mb-4 sm:mb-6 pr-14">
+                    <h3 class="text-xl sm:text-2xl md:text-3xl font-bold font-['Inter'] text-[#1b3b2b] leading-snug">
                         Customer<br>Value
                     </h3>
                 </div>
 
-                <p class="text-[#2C4A04] font-medium text-base md:text-lg leading-relaxed font-['Inter']">
-                    Memberikan kepuasan pelanggan <br> secara berkelanjutan dengan <br> menghadirkan solusi rasa yang <br> relevan dengan kebutuhan pasar.
+                <p class="text-[#2C4A04] font-medium text-sm sm:text-base md:text-lg leading-relaxed font-['Inter']">
+                    Memberikan kepuasan pelanggan secara berkelanjutan dengan menghadirkan solusi rasa yang relevan dengan kebutuhan pasar.
                 </p>
             </div>
 
-            <!-- Kartu 2: Product Excellence (Background Kuning/Krim Muda) -->
-            <div class="bg-[#FFE9BF] p-8 md:p-10 rounded-3xl flex flex-col justify-between shadow-sm transition duration-300 hover:shadow-md relative">
+            <!-- Kartu 2: Product Excellence -->
+            <div class="bg-[#FFE9BF] p-6 sm:p-8 md:p-10 rounded-3xl shadow-sm transition duration-300 hover:shadow-md relative flex flex-col justify-between">
                 <!-- Logo di Atas Kanan -->
-                <div class="absolute top-8 right-8">
-                    <!-- GANTI 'customer-value-icon.png' DENGAN PATH GAMBAR ANDA -->
-                    <img src="{{ asset('images/Star_light.png') }}" alt="Customer Value" class="w-16 h-16 object-contain opacity-90">
+                <div class="absolute top-6 right-6 sm:top-8 sm:right-8">
+                    <img src="{{ asset('images/Star_light.png') }}" alt="Product Excellence" class="w-12 h-12 sm:w-16 sm:h-16 object-contain opacity-90">
                 </div>
 
-                <!-- Konten: Judul di Bawah Logo tapi Sebelah Kiri -->
-                <div class="mt-4 mb-6 pr-12">
-                    <h3 class="text-2xl md:text-3xl font-bold font-['Inter'] text-[#1b3b2b] leading-snug">
+                <!-- Konten: Judul -->
+                <div class="mt-2 sm:mt-4 mb-4 sm:mb-6 pr-14">
+                    <h3 class="text-xl sm:text-2xl md:text-3xl font-bold font-['Inter'] text-[#1b3b2b] leading-snug">
                         Product<br>Excellence
                     </h3>
                 </div>
 
-                <p class="text-[#2C4A04] font-medium text-base md:text-lg leading-relaxed font-['Inter']">
-                    Menghasilkan produk berkualitas tinggi <br> dengan cita rasa yang konsisten serta <br> terus mengembangkan inovasi melalui <br> riset dan pengembangan produk
+                <!-- Diperbaiki: Menambahkan tag penutup </p> yang sebelumnya kurang -->
+                <p class="text-[#2C4A04] font-medium text-sm sm:text-base md:text-lg leading-relaxed font-['Inter']">
+                    Menghasilkan produk berkualitas tinggi dengan cita rasa yang konsisten serta terus mengembangkan inovasi melalui riset dan pengembangan produk.
+                </p>
             </div>
 
-            <!-- Kartu 3: Business Sustainability (Background Kuning/Krim Muda) -->
-            <div class="bg-[#FFE9BF] p-8 md:p-10 rounded-3xl flex flex-col justify-between shadow-sm transition duration-300 hover:shadow-md relative">
+            <!-- Kartu 3: Business Sustainability -->
+            <div class="bg-[#FFE9BF] p-6 sm:p-8 md:p-10 rounded-3xl shadow-sm transition duration-300 hover:shadow-md relative flex flex-col justify-between">
                 <!-- Logo di Atas Kanan -->
-                <div class="absolute top-8 right-8">
-                    <!-- GANTI 'customer-value-icon.png' DENGAN PATH GAMBAR ANDA -->
-                    <img src="{{ asset('images/Chart_light.png') }}" alt="Customer Value" class="w-16 h-16 object-contain opacity-90">
+                <div class="absolute top-6 right-6 sm:top-8 sm:right-8">
+                    <img src="{{ asset('images/Chart_light.png') }}" alt="Business Sustainability" class="w-12 h-12 sm:w-16 sm:h-16 object-contain opacity-90">
                 </div>
 
-                <!-- Konten: Judul di Bawah Logo tapi Sebelah Kiri -->
-                <div class="mt-4 mb-6 pr-12">
-                    <h3 class="text-2xl md:text-3xl font-bold font-['Inter'] text-[#1b3b2b] leading-snug">
+                <!-- Konten: Judul -->
+                <div class="mt-2 sm:mt-4 mb-4 sm:mb-6 pr-14">
+                    <h3 class="text-xl sm:text-2xl md:text-3xl font-bold font-['Inter'] text-[#1b3b2b] leading-snug">
                         Business<br>Sustainability
                     </h3>
                 </div>
 
-                <p class="text-[#2C4A04] font-medium text-base md:text-lg leading-relaxed font-['Inter']">
-                    Menciptakan nilai terbaik melalui <br> produk yang berkualitas, harga yang <br> kompetitif, dan mendukung <br> pertumbuhan bisnis pelanggan <br> secara berkelanjutan.
+                <p class="text-[#2C4A04] font-medium text-sm sm:text-base md:text-lg leading-relaxed font-['Inter']">
+                    Menciptakan nilai terbaik melalui produk yang berkualitas, harga yang kompetitif, dan mendukung pertumbuhan bisnis pelanggan secara berkelanjutan.
                 </p>
             </div>
 
-            <!-- Kartu 4: Organizational Growth (Background Hijau Muda) -->
-            <div class="bg-[#E7F7DA] p-8 md:p-10 rounded-3xl flex flex-col justify-between shadow-sm transition duration-300 hover:shadow-md relative">
+            <!-- Kartu 4: Organizational Growth -->
+            <div class="bg-[#E7F7DA] p-6 sm:p-8 md:p-10 rounded-3xl shadow-sm transition duration-300 hover:shadow-md relative flex flex-col justify-between">
                 <!-- Logo di Atas Kanan -->
-                <div class="absolute top-8 right-8">
-                    <!-- GANTI 'customer-value-icon.png' DENGAN PATH GAMBAR ANDA -->
-                    <img src="{{ asset('images/growth.png') }}" alt="Customer Value" class="w-16 h-16 object-contain opacity-90">
+                <div class="absolute top-6 right-6 sm:top-8 sm:right-8">
+                    <img src="{{ asset('images/growth.png') }}" alt="Organizational Growth" class="w-12 h-12 sm:w-16 sm:h-16 object-contain opacity-90">
                 </div>
 
-                <!-- Konten: Judul di Bawah Logo tapi Sebelah Kiri -->
-                <div class="mt-4 mb-6 pr-12">
-                    <h3 class="text-2xl md:text-3xl font-bold font-['Inter'] text-[#1b3b2b] leading-snug">
+                <!-- Konten: Judul -->
+                <div class="mt-2 sm:mt-4 mb-4 sm:mb-6 pr-14">
+                    <h3 class="text-xl sm:text-2xl md:text-3xl font-bold font-['Inter'] text-[#1b3b2b] leading-snug">
                         Organizational<br>Growth
                     </h3>
                 </div>
 
-                <p class="text-[#2C4A04] font-medium text-base md:text-lg leading-relaxed font-['Inter']">
-                    Membangun organisasi yang sehat, <br> produktif, dan terus berkembang <br> dengan mendorong kreativitas, <br> kolaborasi, serta inovasi di setiap lini.
+                <p class="text-[#2C4A04] font-medium text-sm sm:text-base md:text-lg leading-relaxed font-['Inter']">
+                    Membangun organisasi yang sehat, produktif, dan terus berkembang dengan mendorong kreativitas, kolaborasi, serta inovasi di setiap lini.
                 </p>
             </div>
 
@@ -680,71 +677,71 @@
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-5 lg:gap-6">
 
             <!-- Kartu 1 -->
-            <div class="flex min-h-[180px] flex-col justify-between rounded-2xl bg-[#EED8A1] p-5 text-gray-900 shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:min-h-[200px] sm:p-6">
-                <p class="text-sm font-medium leading-relaxed sm:text-base">
+            <div class="flex min-h-[180px] flex-col items-center justify-center rounded-2xl bg-[#EED8A1] p-5 text-gray-900 shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:min-h-[200px] sm:justify-between sm:items-start sm:p-6">
+                <p class="text-base font-medium leading-relaxed text-center sm:text-left sm:text-base">
                     Produk berkualitas dengan rasa yang konsisten.
                 </p>
 
-                <div class="mt-6 flex justify-end">
-                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#1F3018] text-sm font-bold text-[#EED8A1] shadow">
+                <div class="mt-4 flex justify-center sm:mt-6 sm:w-full sm:justify-end">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#1F3018] text-base font-bold text-[#EED8A1] shadow sm:h-8 sm:w-8 sm:text-sm">
                         1
                     </span>
                 </div>
             </div>
 
             <!-- Kartu 2 -->
-            <div class="flex min-h-[180px] flex-col justify-between rounded-2xl bg-[#FFBE32] p-5 text-gray-900 shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:min-h-[200px] sm:p-6">
-                <p class="text-sm font-medium leading-relaxed sm:text-base">
+            <div class="flex min-h-[180px] flex-col items-center justify-center rounded-2xl bg-[#FFBE32] p-5 text-gray-900 shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:min-h-[200px] sm:justify-between sm:items-start sm:p-6">
+                <p class="text-base font-medium leading-relaxed text-center sm:text-left sm:text-base">
                     Cocok untuk kebutuhan rumah tangga, UMKM, hingga industri F&B.
                 </p>
 
-                <div class="mt-6 flex justify-end">
-                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#1F3018] text-sm font-bold text-[#EED8A1] shadow">
+                <div class="mt-4 flex justify-center sm:mt-6 sm:w-full sm:justify-end">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#1F3018] text-base font-bold text-[#EED8A1] shadow sm:h-8 sm:w-8 sm:text-sm">
                         2
                     </span>
                 </div>
             </div>
 
             <!-- Kartu 3 -->
-            <div class="flex min-h-[180px] flex-col justify-between rounded-2xl bg-[#EED8A1] p-5 text-gray-900 shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:min-h-[200px] sm:p-6">
-                <p class="text-sm font-medium leading-relaxed sm:text-base">
+            <div class="flex min-h-[180px] flex-col items-center justify-center rounded-2xl bg-[#EED8A1] p-5 text-gray-900 shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:min-h-[200px] sm:justify-between sm:items-start sm:p-6">
+                <p class="text-base font-medium leading-relaxed text-center sm:text-left sm:text-base">
                     Tersedia berbagai pilihan varian bumbu dan bubuk minuman.
                 </p>
 
-                <div class="mt-6 flex justify-end">
-                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#1F3018] text-sm font-bold text-[#EED8A1] shadow">
+                <div class="mt-4 flex justify-center sm:mt-6 sm:w-full sm:justify-end">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#1F3018] text-base font-bold text-[#EED8A1] shadow sm:h-8 sm:w-8 sm:text-sm">
                         3
                     </span>
                 </div>
             </div>
 
             <!-- Kartu 4 -->
-            <div class="flex min-h-[180px] flex-col justify-between rounded-2xl bg-[#FFBE32] p-5 text-gray-900 shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:min-h-[200px] sm:p-6">
-                <p class="text-sm font-medium leading-relaxed sm:text-base">
+            <div class="flex min-h-[180px] flex-col items-center justify-center rounded-2xl bg-[#FFBE32] p-5 text-gray-900 shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:min-h-[200px] sm:justify-between sm:items-start sm:p-6">
+                <p class="text-base font-medium leading-relaxed text-center sm:text-left sm:text-base">
                     Terus berinovasi melalui riset dan pengembangan produk.
                 </p>
 
-                <div class="mt-6 flex justify-end">
-                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#1F3018] text-sm font-bold text-[#EED8A1] shadow">
+                <div class="mt-4 flex justify-center sm:mt-6 sm:w-full sm:justify-end">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#1F3018] text-base font-bold text-[#EED8A1] shadow sm:h-8 sm:w-8 sm:text-sm">
                         4
                     </span>
                 </div>
             </div>
 
             <!-- Kartu 5 -->
-            <div class="flex min-h-[180px] flex-col justify-between rounded-2xl bg-[#EED8A1] p-5 text-gray-900 shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:min-h-[200px] sm:p-6">
-                <p class="text-sm font-medium leading-relaxed sm:text-base">
+            <div class="flex min-h-[180px] flex-col items-center justify-center rounded-2xl bg-[#EED8A1] p-5 text-gray-900 shadow-lg transition duration-300 hover:-translate-y-1 hover:shadow-xl sm:min-h-[200px] sm:justify-between sm:items-start sm:p-6">
+                <p class="text-base font-medium leading-relaxed text-center sm:text-left sm:text-base">
                     Menjadi mitra yang mendukung pertumbuhan bisnis pelanggan.
                 </p>
 
-                <div class="mt-6 flex justify-end">
-                    <span class="flex h-8 w-8 items-center justify-center rounded-full bg-[#1F3018] text-sm font-bold text-[#EED8A1] shadow">
+                <div class="mt-4 flex justify-center sm:mt-6 sm:w-full sm:justify-end">
+                    <span class="flex h-10 w-10 items-center justify-center rounded-full bg-[#1F3018] text-base font-bold text-[#EED8A1] shadow sm:h-8 sm:w-8 sm:text-sm">
                         5
                     </span>
                 </div>
             </div>
 
-        </div>
+</div>
     </div>
 </section>
 

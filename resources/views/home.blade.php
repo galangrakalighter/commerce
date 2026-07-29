@@ -76,7 +76,7 @@
                                         class="w-full h-full object-cover">
                                     
                                     @if(isset($item->status_produk) && $item->status_produk == false)
-                                        <div class="absolute inset-0 bg-white/60 flex items-center justify-center backdrop-blur-[1px]">
+                                        <div class="absolute inset-0 bg-white/60 flex items-center justify-center backdrop-blur-[1px] z-20">
                                             <span class="text-[#FF7017] px-4 py-2 font-bold text-lg rounded-lg">
                                                 Habis
                                             </span>
@@ -86,10 +86,14 @@
 
                                 <div class="p-3">
                                     <h3 class="product-name text-xs md:text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.5rem]">
-                                        {{ $item->nama_produk }}
+                                        {{-- Judul produk juga dibungkus link --}}
+                                        <a href="{{ route('produk.detail', $item->id) }}" class="focus:outline-none">
+                                            <span class="absolute inset-0 z-10" aria-hidden="true"></span>
+                                            {{ $item->nama_produk }}
+                                        </a>
                                     </h3>
 
-                                    <div class="mt-2 flex justify-center">
+                                    <div class="mt-2 flex justify-center relative z-20">
                                         <a href="{{ route('produk.detail', $item->id) }}" class="text-[#F2B705] text-xs font-bold hover:underline">
                                             Lihat Produk 
                                         </a>
@@ -201,15 +205,16 @@
                 <!-- MAIN PRODUCTS GRID -->
                 <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
                     @foreach($katalog as $item)
-                        {{-- Kita tambahkan class 'product-item' dan atribut 'data-kategori' --}}
-                        <div class="product-item-all" data-kategori="{{ $item->id_kategori }}" data-created="{{ $item->created_at }}" data-terjual="{{ $item->jumlah_terjual }}" data-rating="{{ number_format($item->ratings->avg('rating'), 1) }}">
-                            <div class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition">
-                                <div class="aspect-square w-full overflow-hidden bg-gray-100 relative"> <img src="{{ isset($item->gambar[0]) ? asset('storage/' . $item->gambar[0]) : asset('images/default.jpg') }}" 
+                        <div class="product-item" data-kategori="{{ $item->id_kategori }}">
+                            <div class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition relative">
+                                
+                                <div class="aspect-square w-full overflow-hidden bg-gray-100 relative">
+                                    <img src="{{ !empty($item->gambar) ? asset('storage/' . $item->gambar[0]) : asset('images/default.jpg') }}" 
                                         alt="{{ $item->nama_produk }}" 
                                         class="w-full h-full object-cover">
-                                        
-                                    @if(isset($item->status_produk) && $item->status_product == false)
-                                        <div class="absolute inset-0 bg-white/60 flex items-center justify-center backdrop-blur-[1px]">
+                                    
+                                    @if(isset($item->status_produk) && $item->status_produk == false)
+                                        <div class="absolute inset-0 bg-white/60 flex items-center justify-center backdrop-blur-[1px] z-20">
                                             <span class="text-[#FF7017] px-4 py-2 font-bold text-lg rounded-lg">
                                                 Habis
                                             </span>
@@ -218,21 +223,25 @@
                                 </div>
 
                                 <div class="p-3">
-                                    <h3 class="text-xs md:text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.5rem]">
-                                        {{ $item->nama_produk }}
+                                    <h3 class="product-name text-xs md:text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.5rem]">
+                                        {{-- Judul produk juga dibungkus link --}}
+                                        <a href="{{ route('produk.detail', $item->id) }}" class="focus:outline-none">
+                                            <span class="absolute inset-0 z-10" aria-hidden="true"></span>
+                                            {{ $item->nama_produk }}
+                                        </a>
                                     </h3>
 
-                                    <div class="mt-2 flex justify-center">
+                                    <div class="mt-2 flex justify-center relative z-20">
                                         <a href="{{ route('produk.detail', $item->id) }}" class="text-[#F2B705] text-xs font-bold hover:underline">
-                                            Lihat Produk
+                                            Lihat Produk 
                                         </a>
                                     </div>
 
                                     <div class="flex items-center justify-between mt-3 text-[10px] md:text-xs text-gray-500">
                                         <div class="flex items-center bg-orange-100 px-1.5 py-0.5 rounded text-orange-600 font-bold">
-                                            ★ {{ number_format($item->ratings->avg('rating'), 1) }}
+                                            ★ {{ number_format($item->averageRating, 1) }}
                                         </div>
-                                        <span>120 terjual</span>
+                                        <span>{{ $item->sold ?? 0 }} terjual</span>
                                     </div>
                                 </div>
                             </div>
