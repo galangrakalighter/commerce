@@ -15,7 +15,7 @@ from toko.models import Produk, Kategori, Like, Wishlist, ProdukGambar, Review, 
 from django.db.models import Avg, Count
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-from .shipping_service import BiteshipService
+from .shipping_service import BiteshipService, DokuService
 
 def halaman_utama(request):
     # 1. AMBIL DATA MASTER BANNER & KATEGORI
@@ -489,36 +489,28 @@ def checkout_view(request):
         produk_terpilih_ids = request.POST.getlist('pilihan_item')
         cart = request.session.get('cart', {})
         
-        # Saring isi cart lama, ambil yang id-nya dicentang saja
         checkout_selected = {}
         for prod_id in produk_terpilih_ids:
             if str(prod_id) in cart:
                 checkout_selected[str(prod_id)] = cart[str(prod_id)]
                 
-        # Amankan ke session temporary khusus checkout ini
         request.session['checkout_selected'] = checkout_selected
         request.session.modified = True
     
     # === STEP 2: TENTUKAN SUMBER DATA PRODUK YANG AKAN DI-CHECKOUT ===
     if source == 'buy_now':
-        # Kondisi 1: Langsung beli dari halaman katalog / detail produk
         items_to_checkout = request.session.get('buy_now', {})
     elif source == 'selected':
-        # Kondisi 2: Menggunakan produk hasil pilihan centang di keranjang
         items_to_checkout = request.session.get('checkout_selected', {})
     else:
-        # Kondisi 3: Fallback jika klik checkout biasa tanpa parameter (Beli Semua)
         items_to_checkout = request.session.get('cart', {})
         
-    # Jika tidak ada item yang siap diproses, kembalikan ke keranjang
     if not items_to_checkout:
         return redirect('detail_keranjang')
         
-    # Hitung total belanja hanya dari item yang sedang lolos seleksi checkout
     total_belanja = sum(item['jumlah'] * item['harga'] for item in items_to_checkout.values())
     
-    # === STEP 3: PROSES SUBMIT ALAMAT & INREMENT KE MIDTRANS ===
-    # Pengecekan 'nama_penerima' memastikan ini adalah POST dari form alamat checkout, bukan POST dari checkbox keranjang
+    # === STEP 3: PROSES SUBMIT ALAMAT & INTEGRASI KE DOKU ===
     if request.method == 'POST' and request.POST.get('nama_penerima'):
         nama_penerima = request.POST.get('nama_penerima')
         telepon = request.POST.get('telepon')
@@ -552,70 +544,47 @@ def checkout_view(request):
                 harga_saat_beli=item['harga']
             )
             
-        # 3. Inisialisasi Midtrans
-        snap = midtransclient.Snap(
-            is_production=settings.MIDTRANS_IS_PRODUCTION,
-            server_key=settings.MIDTRANS_SERVER_KEY
-        )
-        
-        order_id_asli = str(pesanan.id)  # atau 'LAURADERMA-102'
-        order_id_midtrans = f"{order_id_asli}-{int(time.time())}"
-        
-        # 4. Set parameter data Midtrans
-        transaction_details = {
-            'order_id': order_id_midtrans, 
-            'gross_amount': int(total_belanja)
-        }
-        customer_details = {
-            'first_name': nama_penerima,
-            'phone': telepon,
-            'email': request.user.email
-        }
-        
-        param = {
-            'transaction_details': transaction_details,
-            'customer_details': customer_details
-        }
-        
+        # 3. Inisialisasi & Generate URL DOKU Checkout (Menggantikan Midtrans Snap)
         try:
-            transaction = snap.create_transaction(param)
-            snap_token = transaction['token']
+            doku = DokuService()
+            doku_result = doku.create_checkout_url(pesanan)
+            
+            if doku_result.get('success'):
+                pesanan.doku_payment_url = doku_result.get('payment_url')
+                pesanan.doku_invoice_number = doku_result.get('invoice_number')
+                pesanan.save()
+            else:
+                raise Exception(doku_result.get('message', 'Gagal membuat transaksi DOKU'))
             
             # === STEP 4: REDISTRIBUSI & PEMBERSIHAN DATA KERANJANG ===
             if source == 'buy_now':
-                # JIKA BELI LANGSUNG: Hanya hapus session flash buy_now
                 if 'buy_now' in request.session:
                     del request.session['buy_now']
-                    
             elif source == 'selected':
-                # JIKA CHECKOUT SELEKSI:
                 cart = request.session.get('cart', {})
-                # Hapus HANYA produk yang tadi dicentang dari keranjang belanja utama
                 for produk_id in items_to_checkout.keys():
                     if produk_id in cart:
                         del cart[produk_id]
-                
-                # Simpan sisa barang yang tidak dicentang agar tetap awet di dalam cart
                 request.session['cart'] = cart
-                # Hapus data sampah temporary pilihan
                 if 'checkout_selected' in request.session:
                     del request.session['checkout_selected']
             else:
-                # JIKA CHECKOUT ALL (Tanpa Filter): Bersihkan seluruh isi keranjang biasa
                 if 'cart' in request.session:
                     del request.session['cart']
             
             request.session.modified = True
             
+            # Render ke halaman bayar dengan URL DOKU
             return render(request, 'cart/bayar.html', {
                 'pesanan': pesanan, 
-                'snap_token': snap_token,
-                'client_key': settings.MIDTRANS_CLIENT_KEY
+                'doku_payment_url': pesanan.doku_payment_url
             })
             
         except Exception as e:
-            error_msg = f"Midtrans API Error: {str(e)}"
+            error_msg = f"DOKU API Error: {str(e)}"
             print(error_msg)
+            # Hapus pesanan yang terlanjur dibuat jika gagal koneksi payment gateway
+            pesanan.delete()
             
             return render(request, 'cart/checkout.html', {
                 'total_belanja': total_belanja,
@@ -888,6 +857,8 @@ def lacak_paket(request, pesanan_id):
 
     # 1. AMBIL TRACKING DARI BINDERBYTE
     if pesanan.no_resi and pesanan.kurir:
+        print("NO RESI DATABASE:", pesanan.no_resi)
+        print("KURIR DATABASE:", pesanan.kurir)
         api_key = "062af482976fa00ed00067f4570424d53742c507a2341932dfe8b00dc1f89bbd"
         url = "https://api.binderbyte.com/v1/track"
         params = {'api_key': api_key, 'courier': pesanan.kurir.lower(), 'awb': pesanan.no_resi}
@@ -895,6 +866,7 @@ def lacak_paket(request, pesanan_id):
         try:
             response = requests.get(url, params=params, timeout=5)
             result = response.json()
+            print(f"BinderByte API Response: {result}")
             if result.get('status') == 200:
                 tracking_data = result['data']['history']
                 summary_data = result['data']['summary']

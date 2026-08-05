@@ -63,6 +63,9 @@ def register_view(request):
         
         return redirect('home')
     
+def terms_view(request):
+    return render(request, 'terms.html')
+    
 
 @login_required
 def edit_profil_view(request):
@@ -219,3 +222,6 @@ def user_dashboard(request, username):
         'user': request.user
     }
     return render(request, 'dashboard/user_dashboard.html', context)
+
+def halaman_web(request):
+    return render(request, 'home_dashboard.html')

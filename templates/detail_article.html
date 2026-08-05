@@ -1,0 +1,118 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block content %}
+
+<section class="bg-[#FCFBF7] min-h-screen pt-32 pb-20">
+
+    <div class="max-w-7xl mx-auto px-6">
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-20">
+
+            <!-- KONTEN UTAMA -->
+            <article class="lg:col-span-8">
+
+                <a href="{% url 'artikel' %}"
+                   class="text-[10px] tracking-[0.3em] uppercase text-gray-400 hover:text-black inline-flex items-center mb-8">
+
+                    ← Kembali ke Jurnal
+
+                </a>
+
+                <h1 class="text-4xl md:text-6xl font-serif leading-[1.1] text-[#1A1A1A] mb-8">
+
+                    {{ post.title.rendered|safe }}
+
+                </h1>
+
+                {% if post.image_url %}
+                <div class="rounded-[2rem] overflow-hidden mb-16 bg-[#F3F2EE] shadow-sm">
+
+                    <img src="{{ post.image_url }}" class="w-full object-cover">
+
+                </div>
+                {% endif %}
+
+                <article class="prose prose-lg max-w-none">
+
+                    {{ post.content.rendered|safe }}
+
+                </article>
+
+            </article>
+
+
+            <!-- SIDEBAR -->
+            <aside class="lg:col-span-4">
+
+                <div class="sticky top-32">
+
+                    <h3 class="font-serif text-3xl text-[#1A1A1A] mb-10 pb-4 border-b border-gray-100">
+
+                        Artikel Lainnya
+
+                    </h3>
+
+                    <div class="space-y-10">
+
+                        {% for item in artikel_lainnya %}
+
+                        <a href="{% url 'detail_artikel' item.slug %}"
+                           class="flex gap-5 group">
+
+                            <!-- Thumbnail -->
+                            <div class="w-20 h-20 rounded-2xl overflow-hidden bg-[#F3F2EE] flex-shrink-0">
+
+                                {% if item.image_url %}
+
+                                <img
+                                        src="{{ item.image_url }}"
+                                        class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+
+                                {% else %}
+
+                                <div class="w-full h-full flex items-center justify-center text-[8px] text-gray-400">
+
+                                    NO IMAGE
+
+                                </div>
+
+                                {% endif %}
+
+                            </div>
+
+
+                            <!-- Text -->
+                            <div class="flex-1">
+
+                                <h4 class="font-serif text-lg leading-snug text-[#1A1A1A]
+                                           group-hover:text-[#C5A059] transition line-clamp-2">
+
+                                    {{ item.title.rendered|safe }}
+
+                                </h4>
+
+                                <p class="text-sm text-gray-400 italic mt-2 line-clamp-2">
+
+                                    {{ item.excerpt.rendered|striptags }}
+
+                                </p>
+
+                            </div>
+
+                        </a>
+
+                        {% endfor %}
+
+                    </div>
+
+                </div>
+
+            </aside>
+
+        </div>
+
+    </div>
+
+</section>
+{% endblock %}

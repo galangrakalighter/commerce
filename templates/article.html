@@ -1,0 +1,132 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block content %}
+<section class="bg-[#FCFBF7] w-full min-h-screen">
+
+    <!-- Loading Bar -->
+    <div id="loadingBar"
+         class="fixed top-0 left-0 w-full h-1 bg-[#C5A059] z-[9999] hidden overflow-hidden">
+
+        <div class="h-full bg-white/30 animate-loading w-1/2"></div>
+
+    </div>
+
+    <div class="max-w-6xl mx-auto px-6 pt-32 pb-16 md:pt-56 md:pb-24">
+
+        <!-- Header -->
+        <div class="mb-16 md:mb-24 border-l-2 border-[#C5A059] pl-6 animate-fade-in">
+
+            <span class="text-[#C5A059] font-bold tracking-[0.3em] uppercase text-[9px] mb-2 block">
+                Laflyderm Journal — 2026
+            </span>
+
+            <h1 class="text-4xl md:text-6xl font-serif text-gray-900 leading-tight">
+
+                Cerita di Balik <br>
+
+                <span class="text-[#C5A059]">
+                    Kulit Sehat
+                </span>
+
+            </h1>
+
+        </div>
+
+        <!-- Grid Artikel -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-20">
+
+            {% for post in posts %}
+
+            <a href="{% url 'detail_artikel' post.slug %}"
+            class="group flex flex-col space-y-6 animate-fade-in article-link">
+
+                <article class="w-full">
+
+                    <div class="relative mb-6">
+
+                        <div class="overflow-hidden rounded-xl shadow-lg aspect-[16/10] bg-[#F3F2EE] border border-gray-100">
+
+                            {% if post.image_url %}
+
+                            <img
+                                src="{{ post.image_url }}"
+                                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+
+                            {% else %}
+
+                            <div class="w-full h-full flex flex-col items-center justify-center opacity-30">
+
+                                <span class="text-[10px] tracking-[0.3em] uppercase font-bold text-gray-500">
+                                    No Image Available
+                                </span>
+
+                            </div>
+
+                            {% endif %}
+
+                        </div>
+
+                    </div>
+
+                    <div class="space-y-4">
+
+                        <h2 class="text-2xl md:text-3xl font-serif text-[#1A1A1A] leading-snug group-hover:text-[#C5A059] transition-colors">
+                            {{ post.title.rendered|safe }}
+                        </h2>
+
+                        <p class="text-gray-500 text-sm md:text-base font-light">
+                            "{{ post.excerpt.rendered|striptags }}"
+                        </p>
+
+                    </div>
+
+                </article>
+
+            </a>
+
+            {% empty %}
+
+            <div class="col-span-full flex flex-col items-center justify-center py-20 text-center">
+
+                <h2 class="text-2xl md:text-3xl font-serif text-[#1A1A1A] mb-4">
+                    Belum Ada Artikel
+                </h2>
+
+                <p class="text-gray-500 text-sm md:text-base font-light">
+                    Saat ini belum ada artikel yang tersedia.
+                    Silakan kembali lagi nanti.
+                </p>
+
+            </div>
+
+            {% endfor %}
+
+        </div>
+
+        <!-- Pagination -->
+
+        <div class="mt-24 pt-12 border-t border-gray-100 flex justify-center gap-3">
+
+            {% for p in total_pages %}
+
+            <a href="?page={{ p }}"
+               class="w-10 h-10 flex items-center justify-center rounded-full text-[10px] font-bold transition-all
+               {% if p == current_page %}
+               bg-[#C5A059] text-white
+               {% else %}
+               hover:bg-gray-100 text-gray-400
+               {% endif %}">
+
+                {{ p }}
+
+            </a>
+
+            {% endfor %}
+
+        </div>
+
+    </div>
+
+</section>
+{% endblock %}

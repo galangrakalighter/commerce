@@ -1,0 +1,345 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block content %}
+<section class="relative min-h-screen flex items-center overflow-hidden bg-[#FDFBF7]">
+
+    <!-- Orb Background -->
+    <div
+        class="orb w-64 h-64 md:w-[500px] md:h-[500px] -top-20 -left-20 absolute rounded-full opacity-20"
+        style="background: radial-gradient(circle, #C5A059 0%, transparent 70%);">
+    </div>
+
+    <div class="max-w-7xl mx-auto px-6 relative z-10 w-full pt-20">
+
+        <!-- Text Container -->
+        <div class="w-full lg:w-max max-w-full">
+
+            <h1 class="text-4xl md:text-7xl font-serif text-gray-900 mb-8 leading-[1.2]">
+
+                <!-- Baris 1 -->
+                <span class="block overflow-hidden py-1">
+                    <span class="inline-block hero-title-1 font-serif">
+                        Produk dengan Formula
+                    </span>
+                </span>
+
+                <!-- Baris 2 -->
+                <span class="block overflow-hidden py-1">
+                    <span class="inline-block italic text-[#C5A059] hero-title-2 font-serif">
+                        Spesifik untuk Setiap Jenis Kulit
+                    </span>
+                </span>
+
+            </h1>
+
+            <p class="text-gray-500 text-lg md:text-xl lg:text-2xl font-light mb-12 leading-relaxed max-w-3xl hero-desc">
+                Setiap produk La Flyderm dirancang berdasarkan
+                <br class="hidden lg:block">
+                kebutuhan kulit. Fokus pada hasil nyata dan perawatan
+                <br class="hidden lg:block">
+                wajah aman.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+<section id="dry" class="py-5 pt-32 bg-white overflow-hidden text-left">
+
+    <div class="max-w-7xl mx-auto px-6">
+
+        <div class="grid md:grid-cols-2 gap-16 items-center mb-32 scroll-fade">
+
+            <!-- Text -->
+            <div class="order-2 md:order-1 text-left">
+
+                <span class="text-[#C5A059] font-bold tracking-[0.3em] uppercase text-[10px] mb-4 block">
+                    Produk Untuk Kulit Kering
+                </span>
+
+                <h2 class="text-4xl md:text-6xl font-serif font-bold text-gray-900 mb-6 italic">
+                    <span class="block overflow-hidden">
+                        <span class="block dry-title">
+                            Dry Skin Formula
+                        </span>
+                    </span>
+                </h2>
+
+                <p class="text-gray-500 text-lg font-light leading-relaxed mb-8 dry-desc">
+                    Kulit kering membutuhkan hidrasi yang konsisten dan perlindungan skin barrier.
+                    Formula ini membantu kulit terasa lebih halus dan nyaman.
+                </p>
+
+                <!-- Benefits -->
+
+                <div class="mb-10 dry-delay-1">
+
+                    <h4 class="font-bold text-gray-900 mb-4 uppercase tracking-widest text-[10px]">
+                        Manfaat Utama
+                    </h4>
+
+                    <ul class="space-y-3 text-gray-500 font-light text-base">
+
+                        <li class="flex items-center">
+                            <span class="w-1.5 h-1.5 bg-[#C5A059] rounded-full mr-3"></span>
+                            Membantu menjaga hidrasi kulit
+                        </li>
+
+                        <li class="flex items-center">
+                            <span class="w-1.5 h-1.5 bg-[#C5A059] rounded-full mr-3"></span>
+                            Membantu memperbaiki skin barrier
+                        </li>
+
+                        <li class="flex items-center">
+                            <span class="w-1.5 h-1.5 bg-[#C5A059] rounded-full mr-3"></span>
+                            Kulit terasa lebih lembut dan kenyal
+                        </li>
+
+                        <li class="flex items-center">
+                            <span class="w-1.5 h-1.5 bg-[#C5A059] rounded-full mr-3"></span>
+                            Membantu menyamarkan tampilan garis halus
+                        </li>
+
+                    </ul>
+
+                </div>
+
+                <!-- Box -->
+
+                <div class="bg-white p-8 rounded-[2.5rem] mb-12 border border-[#F5EBE0] shadow-sm dry-delay-2">
+
+                    <h4 class="font-bold text-[#C5A059] mb-2 uppercase tracking-widest text-[10px]">
+                        Cocok untuk Kamu jika
+                    </h4>
+
+                    <p class="text-gray-600 text-sm italic">
+                        "Kulit terasa ketarik. Mudah kusam. Makeup mudah crack."
+                    </p>
+
+                </div>
+
+                <!-- Button -->
+
+                <a href="https://s.shopee.co.id/9pYT2lMgwD"
+                   target="_blank"
+                   class="bg-gray-900 text-white px-12 py-6 rounded-full text-[10px] tracking-[0.2em] uppercase font-bold hover:bg-black transition-all inline-flex items-center shadow-2xl dry-delay-3">
+
+                    Lihat Produk untuk Kulit Kering
+
+                    <svg class="ml-2"
+                         width="16"
+                         height="16"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2">
+
+                        <path d="M5 12h14"/>
+                        <path d="M12 5l7 7-7 7"/>
+
+                    </svg>
+
+                </a>
+
+            </div>
+
+
+            <!-- Image -->
+
+            <div class="order-1 md:order-2 relative drift-right">
+
+                <div class="shadow-2xl rounded-[3rem] overflow-hidden antigravity-float">
+
+                    <div class="aspect-square bg-white transition-all duration-500 hover:scale-[1.05]">
+
+                        <img
+                            src="{% static 'img/DRYSERIES.webp' %}"
+                            alt="Dry Skin Package"
+                            class="w-full h-full object-cover">
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<section class="pt-20 bg-white pb-32 max-w-7xl mx-auto px-6 border-t border-gray-100 scroll-fade">
+
+    <div class="overflow-hidden mb-16">
+        <h3 class="retail-title text-2xl md:text-3xl font-serif font-bold text-gray-900 italic">
+            Eceran Satuan - Dry Skin
+        </h3>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8 items-stretch">
+
+        <!-- Card 1 -->
+        <div class="retail-card delay-1 group flex flex-col h-full p-6 bg-[#F9F8F3] rounded-[2.5rem] hover:-translate-y-3 hover:shadow-2xl hover:bg-white transition-all duration-700">
+
+            <div class="aspect-square rounded-[2rem] overflow-hidden mb-6 bg-white shadow-sm shrink-0">
+                <img src="{% static 'img/FACEWASH.webp' %}"
+                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000">
+            </div>
+
+            <div class="flex flex-col flex-grow px-1">
+
+                <h4 class="font-bold text-gray-900 text-lg mb-3 tracking-tight leading-snug">
+                    Facial Wash La-flyderm Deep Clean Niacinamide Salicylic Acid
+                </h4>
+
+                <p class="text-gray-500 text-xs font-light mb-8 leading-relaxed">
+                    Facial wash dengan Salicylic Acid & Niacinamide yang membantu membersihkan pori dan mengontrol minyak secara menyeluruh tanpa merusak skin barrier.
+                </p>
+
+                <div class="mt-auto pt-4">
+
+                    <a href="https://shopee.co.id/LA-FLYDERM-Facial-Wash-Deep-Clean-Niacinamide-Salicylic-Acid-untuk-Kulit-Berminyak-Berjerawat-i.1491283682.41478704585?extraParams=%7B%22display_model_id%22%3A320553343328%2C%22model_selection_logic%22%3A3%7D"
+                       target="_blank"
+                       class="w-full py-4 border border-gray-900 text-gray-900 text-[10px] font-black uppercase tracking-widest rounded-full hover:bg-gray-900 hover:text-white transition-all duration-300 inline-block text-center">
+
+                        Pilih Produk
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Card 2 -->
+        <div class="retail-card delay-2 group flex flex-col h-full p-6 bg-[#F9F8F3] rounded-[2.5rem] hover:-translate-y-3 hover:shadow-2xl hover:bg-white transition-all duration-700">
+
+            <div class="aspect-square rounded-[2rem] overflow-hidden mb-6 bg-white shadow-sm">
+                <img src="{% static 'img/TONER.webp' %}"
+                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000">
+            </div>
+
+            <div class="flex flex-col flex-grow px-1">
+
+                <h4 class="font-bold text-gray-900 text-lg mb-3 tracking-tight leading-snug">
+                    Toner Wajah La-flyderm Brightening Niacinamide Allantoin
+                </h4>
+
+                <p class="text-gray-500 text-xs font-light mb-8 leading-relaxed">
+                    Toner wajah dengan Niacinamide & Allantoin yang membantu mencerahkan, melembapkan, dan menyeimbangkan pH kulit normal agar siap menerima serum.
+                </p>
+
+                <div class="mt-auto pt-4">
+                    <a href="https://shopee.co.id/LA-FLYDERM-Toner-Wajah-Brightening-Niacinamide-Allantoin-untuk-Kulit-Normal-i.1491283682.45656061847?extraParams=%7B%22display_model_id%22%3A360549933483%2C%22model_selection_logic%22%3A3%7D"
+                       class="w-full py-4 border border-gray-900 text-gray-900 text-[10px] font-black uppercase tracking-widest rounded-full hover:bg-gray-900 hover:text-white transition-all duration-300 inline-block text-center">
+                        Pilih Produk
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Card 3 -->
+        <div class="retail-card delay-2 group flex flex-col h-full p-6 bg-[#F9F8F3] rounded-[2.5rem] hover:-translate-y-3 hover:shadow-2xl hover:bg-white transition-all duration-700">
+
+            <div class="aspect-square rounded-[2rem] overflow-hidden mb-6 bg-white shadow-sm">
+                <img src="{% static 'img/SERUM.webp' %}"
+                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000">
+            </div>
+
+            <div class="flex flex-col flex-grow px-1">
+
+                <h4 class="font-bold text-gray-900 text-lg mb-3 tracking-tight leading-snug">
+                    Serum Wajah La-flyderm Shining Whitening Glow DNA Salmon
+                </h4>
+
+                <p class="text-gray-500 text-xs font-light mb-8 leading-relaxed">
+                    Serum dengan Niacinamide & DNA Salmon untuk menjaga elastisitas agar kulit tampak glowing sehat, kenyal, dan bercahaya sepanjang hari.
+                </p>
+
+                <div class="mt-auto pt-4">
+                    <a href="https://shopee.co.id/LA-FLYDERM-Serum-Wajah-Shining-Whitening-Glow-Niacinamide-DNA-Salmon-untuk-Kulit-Normal-Kering-i.1491283682.46906100972?extraParams=%7B%22display_model_id%22%3A355553292732%2C%22model_selection_logic%22%3A3%7D"
+                       class="w-full py-4 border border-gray-900 text-gray-900 text-[10px] font-black uppercase tracking-widest rounded-full hover:bg-gray-900 hover:text-white transition-all duration-300 inline-block text-center">
+                        Pilih Produk
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Card 4 -->
+        <div class="retail-card delay-2 group flex flex-col h-full p-6 bg-[#F9F8F3] rounded-[2.5rem] hover:-translate-y-3 hover:shadow-2xl hover:bg-white transition-all duration-700">
+
+            <div class="aspect-square rounded-[2rem] overflow-hidden mb-6 bg-white shadow-sm">
+                <img src="{% static 'img/MOIST.webp' %}"
+                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000">
+            </div>
+
+            <div class="flex flex-col flex-grow px-1">
+
+                <h4 class="font-bold text-gray-900 text-lg mb-3 tracking-tight leading-snug">
+                    Moist Sparkling Cream 2 in 1 Cream Khusus Leher & Wajah
+                </h4>
+
+                <p class="text-gray-500 text-xs font-light mb-8 leading-relaxed">
+                    Toner wajah dengan Niacinamide & Allantoin yang membantu mencerahkan, melembapkan, dan menyeimbangkan pH kulit normal agar siap menerima serum.
+                </p>
+
+                <div class="mt-auto pt-4">
+                    <a href="https://shopee.co.id/LA-FLYDERM-Moist-Sparkling-Cream-2-in-1-Cream-Khusus-Leher-untuk-kulit-Normal-Kering-with-Niacinamide-DNA-Salmon-i.1491283682.54756069842?extraParams=%7B%22display_model_id%22%3A282403663586%2C%22model_selection_logic%22%3A3%7D"
+                       class="w-full py-4 border border-gray-900 text-gray-900 text-[10px] font-black uppercase tracking-widest rounded-full hover:bg-gray-900 hover:text-white transition-all duration-300 inline-block text-center">
+                        Pilih Produk
+                    </a>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+<section class="scroll-fade py-40 bg-gray-900 text-white overflow-hidden relative">
+    <div class="absolute inset-0 opacity-10" 
+         style="background-image: url('https://www.transparenttextures.com/patterns/cubes.png'); pointer-events: none;">
+    </div>
+
+    <div class="max-w-5xl mx-auto px-6 text-center relative z-10">
+        <h2 class="text-4xl md:text-7xl font-serif mb-10 italic text-center">
+            Dapatkan Kulit Impian Kamu Sekarang
+        </h2>
+        
+        <div class="flex flex-col md:flex-row justify-center items-center gap-8">
+            <a href="https://s.shopee.co.id/9pYT2lMgwD" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               class="w-full md:w-auto bg-[#C5A059] text-white py-7 px-16 rounded-full font-bold text-sm tracking-[0.3em] uppercase hover:bg-[#b08e4d] transition-all flex items-center justify-center group shadow-2xl no-underline">
+                Shopee Official
+                <svg class="ml-3 group-hover:scale-110 transition-transform" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+                    <path d="M3 6h18"/>
+                    <path d="M16 10a4 4 0 0 1-8 0"/>
+                </svg>
+            </a>
+
+            <a href="https://www.tokopedia.com/speechlessbeautyinnovation" 
+               target="_blank" 
+               rel="noopener noreferrer"
+               class="w-full md:w-auto border border-white/20 text-white py-7 px-16 rounded-full font-bold text-sm tracking-[0.3em] uppercase hover:bg-white/10 transition-all flex items-center justify-center group no-underline">
+                Tokopedia Store
+                <svg class="ml-3 opacity-50 group-hover:opacity-100 transition-opacity" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+                    <polyline points="15 3 21 3 21 9"/>
+                    <line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

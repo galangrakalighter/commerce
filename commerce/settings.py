@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-vj5mqu9*sv6rkpv)&y*p04_i^1yb_s$@#w*49l12doctdisg=c
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.14.99', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['192.168.14.99', 'localhost', '127.0.0.1', 'paislee-frigid-sherrie.ngrok-free.dev']
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://paislee-frigid-sherrie.ngrok-free.dev',
+]
 
 MIDTRANS_SERVER_KEY = 'Mid-server-Tx6GtBGD8zPYmKuw3u8czpXO'
 MIDTRANS_CLIENT_KEY = 'Mid-client-bJCUP24v9a55oDpV'
@@ -82,7 +86,7 @@ WSGI_APPLICATION = 'commerce.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'commerce',
+        'NAME': 'commerce_lfd',
         'USER': 'postgres',
         'PASSWORD': 'ADMIN',
         'HOST': '127.0.0.1',
@@ -129,3 +133,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]

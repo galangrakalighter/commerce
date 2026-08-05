@@ -111,6 +111,10 @@ class Pesanan(models.Model):
     lokasi_lat = models.FloatField(blank=True, null=True)
     lokasi_lon = models.FloatField(blank=True, null=True)
     
+    # === TAMBAHAN FIELD UNTUK DOKU ===
+    doku_invoice_number = models.CharField(max_length=100, blank=True, null=True)
+    doku_payment_url = models.URLField(max_length=500, blank=True, null=True)
+
     # Tracking otomatis waktu
     tanggal_dibuat = models.DateTimeField(auto_now_add=True)
     tanggal_diperbarui = models.DateTimeField(auto_now=True)

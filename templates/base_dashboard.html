@@ -1,0 +1,337 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        .scroll-fade{
+            opacity:0;
+            transform:
+                translateY(120px)
+                scale(.95)
+                rotateX(15deg);
+            filter:blur(20px);
+
+            transition:
+                opacity 1.2s cubic-bezier(.22,1,.36,1),
+                transform 1.2s cubic-bezier(.22,1,.36,1),
+                filter 1.2s ease;
+
+            transform-origin:center bottom;
+            will-change:transform,opacity;
+        }
+
+        
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(1deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        @keyframes float-subtle {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .antigravity-float { animation: float 6s ease-in-out infinite; }
+        .antigravity-float-slow { animation: float 9s ease-in-out infinite; }
+        .antigravity-float-subtle { animation: float-subtle 5s ease-in-out infinite; }
+
+        .scroll-fade.show{
+            opacity:1;
+            transform:
+                translateY(0)
+                scale(1)
+                rotateX(0);
+            filter:blur(0);
+        }
+
+        /* Delay animation */
+        .delay-1{
+            transition-delay:.2s;
+        }
+
+        @keyframes maskReveal {
+            from {
+                transform: translateY(100%);
+            }
+
+            to {
+                transform: translateY(0);
+            }
+        }
+
+        .hero-title-1 {
+            display: inline-block;
+            transform: translateY(100%);
+            animation: maskReveal .4s ease-out forwards;
+        }
+
+        .hero-title-2 {
+            display: inline-block;
+            transform: translateY(100%);
+            animation: maskReveal .4s ease-out .2s forwards;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-desc {
+            opacity: 0;
+            animation: fadeUp .8s ease .5s forwards;
+        }
+
+
+        /* Orb Float */
+
+        @keyframes floatOrb {
+
+            0%,100%{
+                transform: translateY(0);
+            }
+
+            50%{
+                transform: translateY(-20px);
+            }
+
+        }
+
+        .orb{
+            animation: floatOrb 8s ease-in-out infinite;
+        }
+
+        .dry-title {
+            display: block; /* Pastikan ini block */
+            transform: translateY(100%);
+            opacity: 0; /* Tambahkan opacity 0 agar tidak terlihat sebelum animasi */
+            transition: none; /* Hapus transition jika ada */
+        }
+
+        .dry-desc,
+        .dry-delay-1,
+        .dry-delay-2,
+        .dry-delay-3{
+            opacity:0;
+            transform:translateY(30px);
+        }
+
+        /* aktif saat muncul */
+        .scroll-fade.show .dry-title {
+            animation: maskReveal 0.6s ease-out forwards;
+            opacity: 1; /* Pastikan muncul */
+        }
+
+        .scroll-fade.show .dry-desc{
+            animation:fadeUp .8s ease .2s forwards;
+        }
+
+        .scroll-fade.show .dry-delay-1{
+            animation:fadeUp .8s ease .4s forwards;
+        }
+
+        .scroll-fade.show .dry-delay-2{
+            animation:fadeUp .8s ease .6s forwards;
+        }
+
+        .scroll-fade.show .dry-delay-3{
+            animation:fadeUp .8s ease .8s forwards;
+        }
+
+        /* ===== Retail title ===== */
+
+        .retail-title{
+            transform:translateY(100%);
+            transition:1s cubic-bezier(.16,1,.3,1);
+        }
+
+        .scroll-fade.show .retail-title{
+            transform:translateY(0);
+        }
+
+
+        /* ===== Card ===== */
+
+        .retail-card{
+            opacity:0;
+            transform:translateY(80px);
+            transition:
+                opacity .9s ease,
+                transform .9s cubic-bezier(.22,1,.36,1);
+        }
+
+        .scroll-fade.show .retail-card{
+            opacity:1;
+            transform:translateY(0);
+        }
+
+
+        /* delay */
+
+        .delay-1{
+            transition-delay:.15s;
+        }
+
+        .delay-2{
+            transition-delay:.3s;
+        }
+
+        .delay-3{
+            transition-delay:.45s;
+        }
+
+        .delay-4{
+            transition-delay:.6s;
+        }
+
+        .prose img{
+            border-radius:24px;
+            margin-top:2rem;
+            margin-bottom:2rem;
+        }
+
+        .prose p{
+            color:#555;
+            line-height:2;
+            margin-bottom:1.5rem;
+        }
+
+        .prose h2{
+            font-size:2rem;
+            margin-top:3rem;
+            margin-bottom:1rem;
+            color:#111827;
+        }
+
+        .prose h3{
+            font-size:1.5rem;
+            margin-top:2rem;
+            margin-bottom:1rem;
+        }
+
+        .prose ul{
+            padding-left:1.5rem;
+        }
+
+        .prose li{
+            margin-bottom:.75rem;
+        }
+
+        .prose a{
+            color:#C5A059;
+        }
+    </style>
+</head>
+<body class="bg-[#FDFBF7]">
+    
+    {% include 'includes/navbar.html' %}
+
+    <main class="min-h-screen">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include 'includes/footer.html' %}
+
+    <script>
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('is-visible'); });
+        });
+        document.querySelectorAll('.fade-in-section').forEach(s => observer.observe(s));
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+
+            const observer = new IntersectionObserver((entries) => {
+
+                entries.forEach(entry => {
+
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add("show");
+                    } else {
+                        entry.target.classList.remove("show");
+                    }
+
+                });
+
+            }, {
+                threshold: 0.15
+            });
+
+            document.querySelectorAll(".scroll-fade").forEach((el) => {
+                observer.observe(el);
+            });
+
+        });
+    </script>
+
+    <script>
+        const navbar = document.getElementById("navbar");
+        const logo = document.getElementById("logo");
+
+        window.addEventListener("scroll", () => {
+
+            if (window.scrollY > 80) {
+
+                navbar.classList.remove("bg-transparent", "py-6");
+                navbar.classList.add(
+                    "bg-white/95",
+                    "backdrop-blur-md",
+                    "shadow-sm",
+                    "py-3"
+                );
+
+                logo.classList.remove("h-10", "md:h-14");
+                logo.classList.add("h-8", "md:h-10");
+
+            } else {
+
+                navbar.classList.remove(
+                    "bg-white/95",
+                    "backdrop-blur-md",
+                    "shadow-sm",
+                    "py-3"
+                );
+
+                navbar.classList.add("bg-transparent", "py-6");
+
+                logo.classList.remove("h-8", "md:h-10");
+                logo.classList.add("h-10", "md:h-14");
+            }
+        });
+
+
+        // sidebar
+        const sidebar = document.getElementById("sidebar");
+        const backdrop = document.getElementById("backdrop");
+
+        document.getElementById("openMenu").onclick = () => {
+            sidebar.classList.remove("translate-x-full");
+            backdrop.classList.remove("hidden");
+        };
+
+        document.getElementById("closeMenu").onclick = () => {
+            sidebar.classList.add("translate-x-full");
+            backdrop.classList.add("hidden");
+        };
+
+        backdrop.onclick = () => {
+            sidebar.classList.add("translate-x-full");
+            backdrop.classList.add("hidden");
+        };
+    </script>
+
+</body>
+</html>
