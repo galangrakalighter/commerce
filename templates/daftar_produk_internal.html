@@ -54,7 +54,7 @@
                                 {% endif %}
                             </div>
                             <div class="truncate">
-                                <span class="font-medium text-[#2C2A29] block truncate">{{ produk.nama }}</span>
+                                <span class="font-medium text-[#2C2A29] block truncate">{{ produk.kategori }}</span>
                                 <span class="text-[10px] text-stone-400 font-mono block mt-0.5">slug: /{{ produk.slug }}</span>
                             </div>
                         </td>
@@ -454,7 +454,7 @@
         document.getElementById('edit_stok').value = stok;
         document.getElementById('edit_flash').checked = flash;
         document.getElementById('edit_deskripsi').value = deskripsi;
-        document.getElementById('editForm').action = `/dashboard/produk/edit/${id}/`;
+        document.getElementById('editForm').action = `/commerce/dashboard/produk/edit/${id}/`;
 
         document.getElementById('edit_flash').checked = flash;
         if (flash && flashSaleEnd) {

@@ -118,7 +118,7 @@ class DokuService:
                 "amount": int(pesanan.total_harga),
                 "invoice_number": f"INV-{pesanan.id}-{int(time.time())}",
                 "currency": "IDR",
-                "callback_url": f"https://paislee-frigid-sherrie.ngrok-free.dev/{pesanan.user.username}/",
+                "callback_url": f"https://laflyderm.com/commerce/{pesanan.user.username}/",
                 "expiry_time": 60
             },
             "payment": {

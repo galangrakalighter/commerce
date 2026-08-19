@@ -101,7 +101,7 @@
                 return;
             {% endif %}
 
-            fetch(`/produk/wishlist/${produkId}/`, {
+            fetch(`produk/wishlist/${produkId}/`, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': '{{ csrf_token }}',
@@ -188,7 +188,7 @@
                 return;
             {% endif %}
 
-            fetch(`/produk/like/${produkId}/`, {
+            fetch(`produk/like/${produkId}/`, {
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': '{{ csrf_token }}',

@@ -131,10 +131,14 @@
     function openEditKategoriModal(button) {
         const id = button.getAttribute('data-id');
         const nama = button.getAttribute('data-nama');
-        
+
         document.getElementById('edit_kategori_nama').value = nama;
-        document.getElementById('editKategoriForm').action = `/dashboard/kategori/edit/${id}/`;
-        
+
+        let url = "{% url 'edit_kategori' 999999 %}";
+        url = url.replace('999999', id);
+
+        document.getElementById('editKategoriForm').action = url;
+
         document.getElementById('editKategoriModal').classList.remove('hidden');
     }
 
