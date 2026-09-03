@@ -1,25 +1,7 @@
 services:
-  db:
-    image: postgres:15-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-commerce_lfd}
-      POSTGRES_USER: ${POSTGRES_USER:-commerce}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD harus diisi di file .env}
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   web:
     build: .
     restart: unless-stopped
-    depends_on:
-      db:
-        condition: service_healthy
     environment:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?DJANGO_SECRET_KEY harus diisi di file .env}
       DJANGO_DEBUG: ${DJANGO_DEBUG:-False}
@@ -36,8 +18,8 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-commerce_lfd}
       POSTGRES_USER: ${POSTGRES_USER:-commerce}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD harus diisi di file .env}
-      POSTGRES_HOST: db
-      POSTGRES_PORT: 5432
+      POSTGRES_HOST: ${POSTGRES_HOST:?POSTGRES_HOST harus diisi dengan nama container PostgreSQL}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
     command: >
       sh -c "python manage.py migrate --noinput &&
              python manage.py collectstatic --noinput &&
@@ -47,7 +29,13 @@ services:
     volumes:
       - ./media:/app/media
       - static_data:/app/staticfiles
+    networks:
+      - database_network
 
 volumes:
-  postgres_data:
   static_data:
+
+networks:
+  database_network:
+    external: true
+    name: ${DOCKER_NETWORK:?DOCKER_NETWORK harus diisi dengan network PostgreSQL}
