@@ -164,6 +164,11 @@ class DokuService:
             "customer": {
                 "name": pesanan.nama_penerima or pesanan.user.username,
                 "email": pesanan.user.email or "customer@example.com"
+            },
+            "additional_info": {
+                "override_notification_url": (
+                    f"{settings.PUBLIC_BASE_URL}/api/doku/notification/"
+                )
             }
         }
 
