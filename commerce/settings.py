@@ -132,6 +132,9 @@ DATABASES = {
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+SERVE_MEDIA = os.environ.get(
+    'DJANGO_SERVE_MEDIA', 'False'
+).lower() in ('1', 'true', 'yes')
 
 
 # Password validation
