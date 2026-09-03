@@ -1,4 +1,5 @@
 import midtransclient, json, time, requests
+from urllib.parse import urlparse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.dateparse import parse_datetime
 from django.db import transaction
@@ -553,6 +554,7 @@ def checkout_view(request):
                 pesanan.doku_payment_url = doku_result.get('payment_url')
                 pesanan.doku_invoice_number = doku_result.get('invoice_number')
                 pesanan.save()
+                kurangi_stok_pesanan(pesanan.id)
             else:
                 raise Exception(doku_result.get('message', 'Gagal membuat transaksi DOKU'))
             
@@ -581,7 +583,7 @@ def checkout_view(request):
             })
             
         except Exception as e:
-            error_msg = f"DOKU API Error: {str(e)}"
+            error_msg = f"Gagal membuat pembayaran DOKU: {str(e)}"
             print(error_msg)
             # Hapus pesanan yang terlanjur dibuat jika gagal koneksi payment gateway
             pesanan.delete()
@@ -645,6 +647,73 @@ def bayar_ulang_pesanan_view(request, pesanan_id):
             'error_api': error_msg
         })
 
+
+@login_required
+def lanjut_pembayaran_doku(request, pesanan_id):
+    pesanan = get_object_or_404(Pesanan, id=pesanan_id, user=request.user)
+    payment_url = (pesanan.doku_payment_url or '').strip()
+
+    if not payment_url:
+        messages.error(request, 'Tautan pembayaran DOKU belum tersedia.')
+        return redirect('user_dashboard', username=request.user.username)
+
+    parsed_url = urlparse(payment_url)
+    if parsed_url.scheme != 'https' or parsed_url.hostname != 'checkout.doku.com':
+        messages.error(request, 'Tautan pembayaran DOKU tidak valid.')
+        return redirect('user_dashboard', username=request.user.username)
+
+    return redirect(payment_url)
+
+
+@csrf_exempt
+@require_POST
+def doku_payment_notification(request):
+    target_path = request.path
+    request_body = request.body.decode('utf-8')
+
+    try:
+        doku = DokuService()
+        if not doku.verify_notification(request.headers, request_body, target_path):
+            return JsonResponse(
+                {'status': 'error', 'message': 'Signature DOKU tidak valid.'},
+                status=401,
+            )
+
+        payload = json.loads(request_body)
+        invoice_number = payload.get('order', {}).get('invoice_number')
+        transaction_status = payload.get('transaction', {}).get('status', '').upper()
+
+        if not invoice_number:
+            return JsonResponse(
+                {'status': 'error', 'message': 'Nomor invoice tidak ditemukan.'},
+                status=400,
+            )
+
+        with transaction.atomic():
+            pesanan = Pesanan.objects.select_for_update().get(
+                doku_invoice_number=invoice_number
+            )
+            if transaction_status == 'SUCCESS' and pesanan.status == 'MENUNGGU':
+                pesanan.status = 'PROSES'
+                pesanan.save(update_fields=['status', 'tanggal_diperbarui'])
+
+        return JsonResponse({'status': 'success'})
+    except Pesanan.DoesNotExist:
+        return JsonResponse(
+            {'status': 'error', 'message': 'Pesanan tidak ditemukan.'},
+            status=404,
+        )
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return JsonResponse(
+            {'status': 'error', 'message': 'Payload tidak valid.'},
+            status=400,
+        )
+    except Exception:
+        return JsonResponse(
+            {'status': 'error', 'message': 'Notifikasi gagal diproses.'},
+            status=500,
+        )
+
 def bersihkan_keranjang_ajax(request):
     if request.method == 'POST':
         try:
@@ -663,34 +732,19 @@ def bersihkan_keranjang_ajax(request):
                         # 1. Cari pesanan dan ubah status menjadi SELESAI
                         pesanan = Pesanan.objects.select_for_update().get(id=clean_id, user=request.user)
                         
-                        # Tambahkan pengecekan agar jika user me-refresh halaman, stok tidak berkurang dua kali
+                        # Status boleh diperbarui berkali-kali tanpa mengurangi stok dua kali.
                         if pesanan.status != 'SELESAI':
                             pesanan.status = 'SELESAI'
                             pesanan.save()
-                            
-                            # 2. Ambil semua item yang dibeli untuk diproses stok dan keranjangnya
-                            item_terbeli = DetailPesanan.objects.filter(pesanan_id=clean_id)
-                            
-                            for item in item_terbeli:
-                                # === SEGMEN PENGURANGAN STOK PRODUK ===
-                                try:
-                                    # Menggunakan select_for_update() untuk menghindari race condition (rebutan stok)
-                                    produk = Produk.objects.select_for_update().get(id=item.produk_id)
-                                    
-                                    # Kurangi stok berdasarkan jumlah yang dibeli
-                                    if produk.stok >= item.jumlah:
-                                        produk.stok -= item.jumlah
-                                    else:
-                                        produk.stok = 0 # Jaga-jaga jika stok kurang, set ke 0 atau berikan logika lain
-                                        
-                                    produk.save()
-                                except Produk.DoesNotExist:
-                                    pass
-                                
+
+                        kurangi_stok_pesanan(clean_id)
+
+                        item_terbeli = DetailPesanan.objects.filter(pesanan_id=clean_id)
+                        for item in item_terbeli:
                                 # === HAPUS DARI SESSION CART ===
-                                id_produk_str = str(item.produk_id)
-                                if id_produk_str in cart:
-                                    del cart[id_produk_str]
+                            id_produk_str = str(item.produk_id)
+                            if id_produk_str in cart:
+                                del cart[id_produk_str]
                                     
                             request.session['cart'] = cart
                     
@@ -719,6 +773,32 @@ def bersihkan_keranjang_ajax(request):
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
             
     return JsonResponse({'status': 'error', 'message': 'Invalid request'}, status=400)
+
+
+def kurangi_stok_pesanan(pesanan_id):
+    """Kurangi stok seluruh item pesanan tepat satu kali."""
+    with transaction.atomic():
+        pesanan = Pesanan.objects.select_for_update().get(id=pesanan_id)
+        if pesanan.stok_dikurangi:
+            return
+
+        items = list(
+            DetailPesanan.objects.filter(pesanan=pesanan).select_related('produk')
+        )
+        for item in items:
+            if item.produk_id is None:
+                continue
+            produk = Produk.objects.select_for_update().get(id=item.produk_id)
+            if produk.stok < item.jumlah:
+                raise ValueError(
+                    f"Stok {produk.nama} tidak mencukupi. Tersedia {produk.stok}, "
+                    f"dibutuhkan {item.jumlah}."
+                )
+            produk.stok -= item.jumlah
+            produk.save(update_fields=['stok'])
+
+        pesanan.stok_dikurangi = True
+        pesanan.save(update_fields=['stok_dikurangi'])
 
 def update_kuantitas_keranjang(request, produk_id, aksi):
     cart = request.session.get('cart', {})
@@ -859,7 +939,7 @@ def lacak_paket(request, pesanan_id):
     if pesanan.no_resi and pesanan.kurir:
         print("NO RESI DATABASE:", pesanan.no_resi)
         print("KURIR DATABASE:", pesanan.kurir)
-        api_key = "062af482976fa00ed00067f4570424d53742c507a2341932dfe8b00dc1f89bbd"
+        api_key = settings.BINDERBYTE_API_KEY
         url = "https://api.binderbyte.com/v1/track"
         params = {'api_key': api_key, 'courier': pesanan.kurir.lower(), 'awb': pesanan.no_resi}
         
@@ -910,7 +990,7 @@ def cek_status_kurir_api(request, pesanan_id):
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
     
 def update_posisi_dari_binderbyte(pesanan):
-    api_key = "062af482976fa00ed00067f4570424d53742c507a2341932dfe8b00dc1f89bbd"
+    api_key = settings.BINDERBYTE_API_KEY
     url = "https://api.binderbyte.com/v1/track"
     params = {
         'api_key': api_key,

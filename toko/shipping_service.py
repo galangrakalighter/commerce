@@ -6,17 +6,26 @@ import hashlib
 import base64
 import json
 import requests
+from django.conf import settings
+from django.core.exceptions import ImproperlyConfigured
 
 class BiteshipService:
     def __init__(self):
-        # Gunakan API Key Production jika sudah siap, atau tetap gunakan Test key
-        self.api_key = "biteship_test.eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiY29tbWVyY2UiLCJ1c2VySWQiOiI2YTMxZmY5NTgwOWQ2YTA5ZWNjZjBiMDciLCJpYXQiOjE3ODE2NjE4MDJ9.UDlUMmUzLfLCztTE6grJ7dleZ2jlKrbo7rV9l2PaFaw" 
+        self.api_key = settings.BITESHIP_API_KEY.strip()
+        if not self.api_key:
+            raise ImproperlyConfigured(
+                "BITESHIP_API_KEY belum diatur. Isi dengan API key production Biteship."
+            )
+        if not self.api_key.startswith("biteship_live."):
+            raise ImproperlyConfigured(
+                "BITESHIP_API_KEY harus berupa production key dengan awalan biteship_live."
+            )
         self.base_url = "https://api.biteship.com/v1"
 
     def create_order(self, pesanan):
         url = f"{self.base_url}/orders"
         headers = {
-            "Authorization": f"Bearer {self.api_key}",
+            "Authorization": self.api_key,
             "Content-Type": "application/json"
         }
         
@@ -56,22 +65,33 @@ class BiteshipService:
             ]
         }
         
-        response = requests.post(url, json=payload, headers=headers)
-        return response.json()
+        response = requests.post(url, json=payload, headers=headers, timeout=30)
+        try:
+            result = response.json()
+        except ValueError:
+            result = {}
+
+        if not response.ok:
+            message = (
+                result.get("error")
+                or result.get("message")
+                or response.text
+                or f"HTTP {response.status_code}"
+            )
+            raise RuntimeError(f"Biteship menolak pembuatan order: {message}")
+
+        return result
     
 class DokuService:
     def __init__(self):
-        # Masukkan Client ID dan Secret Key Anda secara langsung di sini untuk testing
-        self.client_id = "BRN-0238-1785732242754"  # Ganti dengan Client ID Anda dari DOKU
-        self.secret_key = "SK-G90cnCsKXJACD5LDuhU4"   # Ganti dengan Secret Key Anda dari DOKU
-        
-        # Karena kita pakai sandbox, pastikan URL-nya sandbox
-        self.is_sandbox = True
-        
-        if self.is_sandbox:
-            self.base_url = "https://api-sandbox.doku.com/checkout/v1/payment"
-        else:
-            self.base_url = "https://api.doku.com"
+        self.client_id = settings.DOKU_CLIENT_ID.strip()
+        self.secret_key = settings.DOKU_SECRET_KEY.strip()
+        if not self.client_id or not self.secret_key:
+            raise ImproperlyConfigured(
+                "DOKU_CLIENT_ID dan DOKU_SECRET_KEY production belum diatur."
+            )
+
+        self.base_url = "https://api.doku.com/checkout/v1/payment"
 
     def generate_secret(self):
         # Pastikan secret key dikonversi dengan benar ke bytes
@@ -90,8 +110,6 @@ class DokuService:
             f"Digest:{digest}"
         )
 
-        print(string_to_sign)
-
         signature = base64.b64encode(
             hmac.new(
                 self.secret_key.encode(),
@@ -102,6 +120,25 @@ class DokuService:
 
         return f"HMACSHA256={signature}", digest
 
+    def verify_notification(self, headers, request_body, target_path):
+        client_id = headers.get('Client-Id', '')
+        request_id = headers.get('Request-Id', '')
+        timestamp = headers.get('Request-Timestamp', '')
+        received_signature = headers.get('Signature', '')
+
+        if client_id != self.client_id:
+            return False
+        if not request_id or not timestamp or not received_signature:
+            return False
+
+        expected_signature, _ = self.generate_signature(
+            target_path,
+            request_id,
+            timestamp,
+            request_body,
+        )
+        return hmac.compare_digest(received_signature, expected_signature)
+
     def create_checkout_url(self, pesanan):
 
         target_path = "/checkout/v1/payment"
@@ -110,15 +147,15 @@ class DokuService:
         timestamp = time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())
         request_id = str(uuid.uuid4())
         
-        print(type(pesanan.total_harga))
-        print(pesanan.total_harga)
-
+        invoice_number = f"INV-{pesanan.id}-{int(time.time())}"
         payload = {
             "order": {
                 "amount": int(pesanan.total_harga),
-                "invoice_number": f"INV-{pesanan.id}-{int(time.time())}",
+                "invoice_number": invoice_number,
                 "currency": "IDR",
-                "callback_url": f"https://laflyderm.com/commerce/{pesanan.user.username}/",
+                "callback_url": (
+                    f"{settings.PUBLIC_BASE_URL}/commerce/{pesanan.user.username}/"
+                ),
                 "expiry_time": 60
             },
             "payment": {
@@ -150,22 +187,12 @@ class DokuService:
             "Digest": digest
         }
 
-        print("\n========== REQUEST ==========")
-        print("URL :", url)
-        print("HEADERS :", json.dumps(headers, indent=4))
-        print("BODY :", request_body)
-        print("=============================\n")
-
         response = requests.post(
             url,
             data=request_body,
-            headers=headers
+            headers=headers,
+            timeout=30
         )
-
-        print("STATUS :", response.status_code)
-        print("RESPONSE :", response.text)
-        
-        invoice_number = f"INV-{pesanan.id}-{int(time.time())}"
 
         if response.status_code in [200, 201]:
             res_json = response.json()
@@ -178,41 +205,16 @@ class DokuService:
                 .get("url")
             )
             
-            biteship = BiteshipService()
-
-            shipping_result = biteship.create_order(pesanan)
-
-
-            if shipping_result.get("success"):
-
-                tracking_id = (
-                    shipping_result
-                    .get("courier", {})
-                    .get("tracking_id")
-                )
-
-
-                pesanan.no_resi = tracking_id
-                pesanan.status = "KIRIM"
-
-            else:
-
-                # pembayaran berhasil tapi pengiriman gagal
-                pesanan.status = "MENUNGGU"
-
-
             pesanan.save()
 
             return {
                 "success": True,
                 "payment_url": pesanan.doku_payment_url,
                 "invoice_number": invoice_number,
-                "resi": pesanan.no_resi
+                "resi": None
             }
 
         return {
             "success": False,
             "message": response.text
         }
-        
-        

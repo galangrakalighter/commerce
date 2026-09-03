@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-commerce_lfd}
+      POSTGRES_USER: ${POSTGRES_USER:-commerce}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD harus diisi di file .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:?DJANGO_SECRET_KEY harus diisi di file .env}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-False}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:2026}
+      BITESHIP_API_KEY: ${BITESHIP_API_KEY:?BITESHIP_API_KEY harus diisi di file .env}
+      DOKU_CLIENT_ID: ${DOKU_CLIENT_ID:?DOKU_CLIENT_ID harus diisi di file .env}
+      DOKU_SECRET_KEY: ${DOKU_SECRET_KEY:?DOKU_SECRET_KEY harus diisi di file .env}
+      BINDERBYTE_API_KEY: ${BINDERBYTE_API_KEY:?BINDERBYTE_API_KEY harus diisi di file .env}
+      MIDTRANS_SERVER_KEY: ${MIDTRANS_SERVER_KEY:-}
+      MIDTRANS_CLIENT_KEY: ${MIDTRANS_CLIENT_KEY:-}
+      MIDTRANS_IS_PRODUCTION: ${MIDTRANS_IS_PRODUCTION:-False}
+      POSTGRES_DB: ${POSTGRES_DB:-commerce_lfd}
+      POSTGRES_USER: ${POSTGRES_USER:-commerce}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD harus diisi di file .env}
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput &&
+             gunicorn commerce.wsgi:application --bind 0.0.0.0:2026 --workers 3 --timeout 60"
+    ports:
+      - "2026:2026"
+    volumes:
+      - ./media:/app/media
+      - static_data:/app/staticfiles
+
+volumes:
+  postgres_data:
+  static_data:

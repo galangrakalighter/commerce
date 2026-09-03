@@ -20,20 +20,55 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-vj5mqu9*sv6rkpv)&y*p04_i^1yb_s$@#w*49l12doctdisg=c'
+SECRET_KEY = os.environ.get(
+    'DJANGO_SECRET_KEY',
+    'django-insecure-vj5mqu9*sv6rkpv)&y*p04_i^1yb_s$@#w*49l12doctdisg=c',
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('1', 'true', 'yes')
 
-ALLOWED_HOSTS = ['192.168.14.99', 'localhost', '127.0.0.1', 'laflyderm.com']
-
-CSRF_TRUSTED_ORIGINS = [
-    'https://laflyderm.com/',
+ALLOWED_HOSTS = [
+    '192.168.14.99',
+    'localhost',
+    '127.0.0.1',
+    'laflyderm.com',
+    'spoof-shelve-skintight.ngrok-free.dev',
+]
+ALLOWED_HOSTS += [
+    host.strip()
+    for host in os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
+    if host.strip()
 ]
 
-MIDTRANS_SERVER_KEY = 'Mid-server-Tx6GtBGD8zPYmKuw3u8czpXO'
-MIDTRANS_CLIENT_KEY = 'Mid-client-bJCUP24v9a55oDpV'
-MIDTRANS_IS_PRODUCTION = False
+CSRF_TRUSTED_ORIGINS = [
+    'https://laflyderm.com',
+    'https://spoof-shelve-skintight.ngrok-free.dev',
+]
+CSRF_TRUSTED_ORIGINS += [
+    origin.strip().rstrip('/')
+    for origin in os.environ.get('DJANGO_CSRF_TRUSTED_ORIGINS', '').split(',')
+    if origin.strip()
+]
+
+MIDTRANS_SERVER_KEY = os.environ.get('MIDTRANS_SERVER_KEY', '')
+MIDTRANS_CLIENT_KEY = os.environ.get('MIDTRANS_CLIENT_KEY', '')
+MIDTRANS_IS_PRODUCTION = os.environ.get(
+    'MIDTRANS_IS_PRODUCTION', 'False'
+).lower() in ('1', 'true', 'yes')
+
+# Biteship production credential. Set BITESHIP_API_KEY on the server with a
+# production key (it must not start with "biteship_test.").
+BITESHIP_API_KEY = os.environ.get('BITESHIP_API_KEY', '')
+
+# DOKU production credentials from Dashboard > Integrations > API Keys.
+DOKU_CLIENT_ID = os.environ.get('DOKU_CLIENT_ID', '')
+DOKU_SECRET_KEY = os.environ.get('DOKU_SECRET_KEY', '')
+BINDERBYTE_API_KEY = os.environ.get('BINDERBYTE_API_KEY', '')
+PUBLIC_BASE_URL = os.environ.get(
+    'PUBLIC_BASE_URL',
+    'https://spoof-shelve-skintight.ngrok-free.dev',
+).rstrip('/')
 
 # Application definition
 
@@ -51,6 +86,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -86,11 +122,11 @@ WSGI_APPLICATION = 'commerce.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'commerce_lfd',
-        'USER': 'postgres',
-        'PASSWORD': 'ADMIN',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'NAME': os.environ.get('POSTGRES_DB', 'commerce_lfd'),
+        'USER': os.environ.get('POSTGRES_USER', 'postgres'),
+        'PASSWORD': os.environ.get('POSTGRES_PASSWORD', 'ADMIN'),
+        'HOST': os.environ.get('POSTGRES_HOST', '127.0.0.1'),
+        'PORT': os.environ.get('POSTGRES_PORT', '5432'),
     }
 }
 
@@ -132,7 +168,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),
 ]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
+# Pertahankan tipe primary key yang dipakai migrasi awal proyek.
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

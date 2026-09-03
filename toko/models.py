@@ -114,6 +114,7 @@ class Pesanan(models.Model):
     # === TAMBAHAN FIELD UNTUK DOKU ===
     doku_invoice_number = models.CharField(max_length=100, blank=True, null=True)
     doku_payment_url = models.URLField(max_length=500, blank=True, null=True)
+    stok_dikurangi = models.BooleanField(default=False)
 
     # Tracking otomatis waktu
     tanggal_dibuat = models.DateTimeField(auto_now_add=True)

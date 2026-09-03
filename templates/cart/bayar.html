@@ -10,7 +10,7 @@
         <p class="text-sm text-stone-500 mb-6">Pesanan <span class="font-bold">#INV-{{ pesanan.id }}</span> telah dicatat. Silakan selesaikan pembayaran Anda.</p>
         
         <!-- Tombol langsung mengarah ke halaman Checkout DOKU -->
-        <a href="{{ doku_payment_url }}" class="block w-full bg-[#8C7454] text-white py-4 rounded-full font-medium hover:bg-[#735F43] transition-colors shadow-lg cursor-pointer no-underline text-center">
+        <a href="{% url 'lanjut_pembayaran_doku' pesanan.id %}" class="block w-full bg-[#8C7454] text-white py-4 rounded-full font-medium hover:bg-[#735F43] transition-colors shadow-lg cursor-pointer no-underline text-center">
             Bayar dengan DOKU
         </a>
     </div>

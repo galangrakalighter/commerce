@@ -2,6 +2,8 @@ asgiref==3.4.1
 certifi==2025.4.26
 charset-normalizer==2.0.12
 Django==3.2.25
+gunicorn==21.2.0
+whitenoise==6.5.0
 idna==3.10
 midtransclient==1.4.2
 Pillow==8.4.0
