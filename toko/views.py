@@ -671,6 +671,12 @@ def buat_pengiriman_biteship(pesanan):
         'no_resi', 'kurir', 'kurir_lat', 'kurir_lon', 'status',
         'tanggal_diperbarui',
     ])
+    logger.info(
+        'Biteship berhasil: pesanan_id=%s resi=%s kurir=%s',
+        pesanan.id,
+        nomor_resi,
+        pesanan.kurir,
+    )
     return nomor_resi
 
 
@@ -683,6 +689,13 @@ def doku_payment_notification(request):
     try:
         doku = DokuService()
         if not doku.verify_notification(request.headers, request_body, target_path):
+            logger.warning(
+                'Webhook DOKU ditolak: signature tidak valid '
+                '(client_id=%s request_id=%s path=%s)',
+                request.headers.get('Client-Id', ''),
+                request.headers.get('Request-Id', ''),
+                target_path,
+            )
             return JsonResponse(
                 {'status': 'error', 'message': 'Signature DOKU tidak valid.'},
                 status=401,
@@ -691,6 +704,12 @@ def doku_payment_notification(request):
         payload = json.loads(request_body)
         invoice_number = payload.get('order', {}).get('invoice_number')
         transaction_status = payload.get('transaction', {}).get('status', '').upper()
+        logger.info(
+            'Webhook DOKU diterima: invoice=%s status=%s request_id=%s',
+            invoice_number,
+            transaction_status,
+            request.headers.get('Request-Id', ''),
+        )
 
         if not invoice_number:
             return JsonResponse(

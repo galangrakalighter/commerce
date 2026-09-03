@@ -21,7 +21,8 @@ services:
     command: >
       sh -c "python manage.py migrate --noinput &&
              python manage.py collectstatic --noinput &&
-             gunicorn commerce.wsgi:application --bind 0.0.0.0:2026 --workers 3 --timeout 60"
+             gunicorn commerce.wsgi:application --bind 0.0.0.0:2026 --workers 3 --timeout 60
+             --access-logfile - --error-logfile -"
     ports:
       - "2026:2026"
     volumes:
