@@ -8,7 +8,7 @@ services:
       DJANGO_SERVE_MEDIA: ${DJANGO_SERVE_MEDIA:-True}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
       DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-}
-      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:2026}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-https://laflyderm.lightermediagroup.com}
       BITESHIP_API_KEY: ${BITESHIP_API_KEY:?BITESHIP_API_KEY harus diisi di file .env}
       DOKU_CLIENT_ID: ${DOKU_CLIENT_ID:?DOKU_CLIENT_ID harus diisi di file .env}
       DOKU_SECRET_KEY: ${DOKU_SECRET_KEY:?DOKU_SECRET_KEY harus diisi di file .env}

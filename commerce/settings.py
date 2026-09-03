@@ -33,7 +33,7 @@ ALLOWED_HOSTS = [
     'localhost',
     '127.0.0.1',
     'laflyderm.com',
-    'spoof-shelve-skintight.ngrok-free.dev',
+    'laflyderm.lightermediagroup.com',
 ]
 ALLOWED_HOSTS += [
     host.strip()
@@ -43,7 +43,7 @@ ALLOWED_HOSTS += [
 
 CSRF_TRUSTED_ORIGINS = [
     'https://laflyderm.com',
-    'https://spoof-shelve-skintight.ngrok-free.dev',
+    'https://laflyderm.lightermediagroup.com',
 ]
 CSRF_TRUSTED_ORIGINS += [
     origin.strip().rstrip('/')
@@ -67,7 +67,7 @@ DOKU_SECRET_KEY = os.environ.get('DOKU_SECRET_KEY', '')
 BINDERBYTE_API_KEY = os.environ.get('BINDERBYTE_API_KEY', '')
 PUBLIC_BASE_URL = os.environ.get(
     'PUBLIC_BASE_URL',
-    'https://spoof-shelve-skintight.ngrok-free.dev',
+    'https://laflyderm.lightermediagroup.com',
 ).rstrip('/')
 
 # Application definition
