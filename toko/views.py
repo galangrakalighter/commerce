@@ -1,5 +1,5 @@
 import logging
-import midtransclient, json, time, requests
+import json, time, requests
 from urllib.parse import urlparse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.dateparse import parse_datetime
@@ -548,7 +548,7 @@ def checkout_view(request):
                 harga_saat_beli=item['harga']
             )
             
-        # 3. Inisialisasi & Generate URL DOKU Checkout (Menggantikan Midtrans Snap)
+        # 3. Inisialisasi dan buat URL DOKU Checkout
         try:
             doku = DokuService()
             doku_result = doku.create_checkout_url(pesanan)
@@ -600,51 +600,27 @@ def checkout_view(request):
 
 @login_required
 def bayar_ulang_pesanan_view(request, pesanan_id):
-    # Ambil data pesanan lama milik user yang sedang login
     pesanan = get_object_or_404(Pesanan, id=pesanan_id, user=request.user)
-    
-    # Inisialisasi Midtrans Snap
-    snap = midtransclient.Snap(
-        is_production=settings.MIDTRANS_IS_PRODUCTION,
-        server_key=settings.MIDTRANS_SERVER_KEY
-    )
-    
-    # Gunakan kombinasi timestamp agar tidak terkena error order_id has been taken (HTTP 400)
-    order_id_midtrans = f"{pesanan.id}-{int(time.time())}"
-    
-    transaction_details = {
-        'order_id': order_id_midtrans, 
-        'gross_amount': int(pesanan.total_harga)
-    }
-    
-    customer_details = {
-        'first_name': pesanan.nama_penerima,
-        'phone': pesanan.telepon,
-        'email': request.user.email
-    }
-    
-    param = {
-        'transaction_details': transaction_details,
-        'customer_details': customer_details
-    }
-    
+
+    if pesanan.status != 'MENUNGGU':
+        messages.info(request, 'Pesanan ini tidak lagi menunggu pembayaran.')
+        return redirect('user_dashboard', username=request.user.username)
+
     try:
-        transaction = snap.create_transaction(param)
-        snap_token = transaction['token']
-        
-        # Lempar langsung ke template bayar.html bawaan checkout kamu
+        doku_result = DokuService().create_checkout_url(pesanan)
+        if not doku_result.get('success') or not doku_result.get('payment_url'):
+            raise RuntimeError(
+                doku_result.get('message') or 'DOKU tidak memberikan tautan pembayaran.'
+            )
+
         return render(request, 'cart/bayar.html', {
-            'pesanan': pesanan, 
-            'snap_token': snap_token,
-            'client_key': settings.MIDTRANS_CLIENT_KEY
+            'pesanan': pesanan,
+            'doku_payment_url': doku_result['payment_url'],
         })
-        
+
     except Exception as e:
-        error_msg = f"Midtrans API Error: {str(e)}"
-        print(error_msg)
-        
-        # Jika gagal generate token, kembalikan ke dashboard dengan pesan error (opsional)
-        # Atau render halaman error khusus
+        error_msg = f"DOKU API Error: {str(e)}"
+        logger.exception('Gagal membuat pembayaran ulang DOKU: %s', e)
         return render(request, 'cart/bayar.html', {
             'pesanan': pesanan,
             'error_api': error_msg

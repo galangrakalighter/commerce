@@ -51,12 +51,6 @@ CSRF_TRUSTED_ORIGINS += [
     if origin.strip()
 ]
 
-MIDTRANS_SERVER_KEY = os.environ.get('MIDTRANS_SERVER_KEY', '')
-MIDTRANS_CLIENT_KEY = os.environ.get('MIDTRANS_CLIENT_KEY', '')
-MIDTRANS_IS_PRODUCTION = os.environ.get(
-    'MIDTRANS_IS_PRODUCTION', 'False'
-).lower() in ('1', 'true', 'yes')
-
 # Biteship production credential. Set BITESHIP_API_KEY on the server with a
 # production key (it must not start with "biteship_test.").
 BITESHIP_API_KEY = os.environ.get('BITESHIP_API_KEY', '')
