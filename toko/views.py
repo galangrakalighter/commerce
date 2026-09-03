@@ -1,3 +1,4 @@
+import logging
 import midtransclient, json, time, requests
 from urllib.parse import urlparse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -17,6 +18,8 @@ from django.db.models import Avg, Count
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
 from .shipping_service import BiteshipService, DokuService
+
+logger = logging.getLogger(__name__)
 
 def halaman_utama(request):
     # 1. AMBIL DATA MASTER BANNER & KATEGORI
@@ -665,6 +668,36 @@ def lanjut_pembayaran_doku(request, pesanan_id):
     return redirect(payment_url)
 
 
+def buat_pengiriman_biteship(pesanan):
+    """Buat satu pengiriman dan simpan AWB/resi dari Biteship."""
+    if pesanan.no_resi:
+        return pesanan.no_resi
+
+    result = BiteshipService().create_order(pesanan)
+    if not result.get('success'):
+        raise RuntimeError(
+            'Biteship gagal membuat pengiriman: '
+            + str(result.get('error') or result.get('message') or 'Unknown error')
+        )
+
+    courier_data = result.get('courier', {})
+    nomor_resi = courier_data.get('waybill_id') or courier_data.get('tracking_id')
+    if not nomor_resi:
+        raise RuntimeError('Respons Biteship tidak berisi nomor resi.')
+
+    coordinate = result.get('origin', {}).get('coordinate', {})
+    pesanan.no_resi = nomor_resi
+    pesanan.kurir = courier_data.get('company') or pesanan.kurir or 'jne'
+    pesanan.kurir_lat = coordinate.get('latitude')
+    pesanan.kurir_lon = coordinate.get('longitude')
+    pesanan.status = 'KIRIM'
+    pesanan.save(update_fields=[
+        'no_resi', 'kurir', 'kurir_lat', 'kurir_lon', 'status',
+        'tanggal_diperbarui',
+    ])
+    return nomor_resi
+
+
 @csrf_exempt
 @require_POST
 def doku_payment_notification(request):
@@ -689,13 +722,21 @@ def doku_payment_notification(request):
                 status=400,
             )
 
-        with transaction.atomic():
-            pesanan = Pesanan.objects.select_for_update().get(
-                doku_invoice_number=invoice_number
-            )
-            if transaction_status == 'SUCCESS' and pesanan.status == 'MENUNGGU':
-                pesanan.status = 'PROSES'
-                pesanan.save(update_fields=['status', 'tanggal_diperbarui'])
+        if transaction_status == 'SUCCESS':
+            with transaction.atomic():
+                pesanan = Pesanan.objects.select_for_update().get(
+                    doku_invoice_number=invoice_number
+                )
+                if pesanan.status == 'MENUNGGU':
+                    pesanan.status = 'PROSES'
+                    pesanan.save(update_fields=['status', 'tanggal_diperbarui'])
+
+            # Lock pesanan mencegah notifikasi DOKU berulang membuat dua resi.
+            with transaction.atomic():
+                pesanan = Pesanan.objects.select_for_update().get(
+                    doku_invoice_number=invoice_number
+                )
+                buat_pengiriman_biteship(pesanan)
 
         return JsonResponse({'status': 'success'})
     except Pesanan.DoesNotExist:
@@ -708,7 +749,8 @@ def doku_payment_notification(request):
             {'status': 'error', 'message': 'Payload tidak valid.'},
             status=400,
         )
-    except Exception:
+    except Exception as exc:
+        logger.exception('Gagal memproses notifikasi DOKU: %s', exc)
         return JsonResponse(
             {'status': 'error', 'message': 'Notifikasi gagal diproses.'},
             status=500,
@@ -1072,42 +1114,16 @@ def create_shipping_order(request):
     if request.method == 'POST':
         pesanan_id = request.POST.get('pesanan_id')
         try:
-            pesanan = Pesanan.objects.get(id=pesanan_id)
-            biteship = BiteshipService()
-            result = biteship.create_order(pesanan)
-            
-            # Cek sukses dari respons
-            if result.get('success'):
-                # 1. Mengambil tracking_id
-                tracking_id = result.get('courier', {}).get('tracking_id')
-                
-                # 2. MENGAMBIL KOORDINAT (Sesuai struktur log Anda)
-                # Lokasi koordinat ada di result['origin']['coordinate']
-                origin_data = result.get('origin', {}).get('coordinate', {})
-                lat = origin_data.get('latitude')
-                lon = origin_data.get('longitude')
-                
-                # UPDATE DATABASE
-                pesanan.no_resi = tracking_id
-                
-                # Hanya simpan jika koordinat valid (bukan None)
-                if lat and lon:
-                    pesanan.kurir_lat = lat
-                    pesanan.kurir_lon = lon
-                    
-                pesanan.save() 
-                
-                return JsonResponse({
-                    'status': 'success', 
-                    'resi': tracking_id,
-                    'lat': lat,
-                    'lon': lon
-                })
-            else:
-                return JsonResponse({
-                    'status': 'error', 
-                    'message': 'Gagal dari API: ' + str(result.get('error', 'Unknown'))
-                })
+            with transaction.atomic():
+                pesanan = Pesanan.objects.select_for_update().get(id=pesanan_id)
+                nomor_resi = buat_pengiriman_biteship(pesanan)
+
+            return JsonResponse({
+                'status': 'success',
+                'resi': nomor_resi,
+                'lat': pesanan.kurir_lat,
+                'lon': pesanan.kurir_lon,
+            })
                 
         except Pesanan.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Pesanan tidak ditemukan'})
