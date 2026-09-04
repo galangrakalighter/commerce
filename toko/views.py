@@ -69,9 +69,10 @@ def _biteship_rate_items(items):
     ]
 
 
-@login_required
 @require_GET
 def cari_area_biteship(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Sesi login telah berakhir. Silakan login kembali.'}, status=401)
     query = request.GET.get('q', '').strip()
     if len(query) < 3:
         return JsonResponse({'areas': []})
@@ -91,9 +92,10 @@ def cari_area_biteship(request):
         return JsonResponse({'error': str(exc)}, status=502)
 
 
-@login_required
 @require_POST
 def cek_ongkir_biteship(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Sesi login telah berakhir. Silakan login kembali.'}, status=401)
     try:
         data = json.loads(request.body.decode('utf-8'))
         area_id = str(data.get('destination_area_id', '')).strip()
@@ -619,6 +621,7 @@ def checkout_view(request):
         nama_penerima = request.POST.get('nama_penerima', '').strip()
         telepon = request.POST.get('telepon', '').strip()
         alamat_lengkap = request.POST.get('alamat_lengkap', '').strip()
+        area_name = request.POST.get('area_search', '').strip()
         kode_pos = request.POST.get('kode_pos', '').strip()
         catatan = request.POST.get('catatan', '').strip()
         lat = request.POST.get('lat', '').strip()
@@ -633,7 +636,7 @@ def checkout_view(request):
             postal_code = int(kode_pos)
             if not (-90 <= latitude <= 90 and -180 <= longitude <= 180):
                 raise ValueError
-            if not destination_area_id or selected_courier != 'jne' or not selected_service:
+            if not alamat_lengkap or not area_name or not destination_area_id or selected_courier != 'jne' or not selected_service:
                 raise ValueError
 
             # Hitung ulang pada server agar ongkir dari browser tidak dapat dipalsukan.
@@ -671,7 +674,7 @@ def checkout_view(request):
             status='MENUNGGU',
             nama_penerima=nama_penerima,
             telepon=telepon,
-            alamat_lengkap=alamat_lengkap,
+            alamat_lengkap=f'{alamat_lengkap}, {area_name}',
             catatan=catatan,
             lokasi_lat=latitude,
             lokasi_lon=longitude,
