@@ -58,6 +58,13 @@
             <div class="lg:w-1/2">
                 <h1 class="text-4xl font-serif text-stone-900 mb-4">{{ produk.nama }}</h1>
                 <p class="text-2xl font-bold text-[#8C7454] mb-6">Rp {{ produk.harga }}</p>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6">
+                    <div class="bg-[#FAF8F5] rounded-xl p-3"><span class="block text-[10px] uppercase text-stone-400">Berat</span><strong class="text-sm text-stone-700">{{ produk.berat_gram }} g</strong></div>
+                    <div class="bg-[#FAF8F5] rounded-xl p-3"><span class="block text-[10px] uppercase text-stone-400">Panjang</span><strong class="text-sm text-stone-700">{{ produk.panjang_cm }} cm</strong></div>
+                    <div class="bg-[#FAF8F5] rounded-xl p-3"><span class="block text-[10px] uppercase text-stone-400">Lebar</span><strong class="text-sm text-stone-700">{{ produk.lebar_cm }} cm</strong></div>
+                    <div class="bg-[#FAF8F5] rounded-xl p-3"><span class="block text-[10px] uppercase text-stone-400">Tinggi</span><strong class="text-sm text-stone-700">{{ produk.tinggi_cm }} cm</strong></div>
+                </div>
                 
                 <div class="text-stone-600 leading-relaxed mb-8 prose prose-sm">
                     {{ produk.deskripsi|linebreaks }}

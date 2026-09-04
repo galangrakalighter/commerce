@@ -5,6 +5,9 @@
 <p class="text-sm text-stone-500 mb-6">Pilih wilayah dari saran, lengkapi alamat rumah, lalu pastikan pin peta sudah tepat.</p>
 {% if error_api %}<div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-xs font-medium mb-4">{{ error_api }}</div>{% endif %}
 <form method="POST" class="space-y-5" id="checkout-form">{% csrf_token %}
+<div class="rounded-2xl border border-stone-200 divide-y divide-stone-100">
+{% for item in checkout_items %}<div class="flex justify-between gap-4 p-3 text-xs"><div><strong class="block text-stone-800">{{ item.nama }} × {{ item.jumlah }}</strong><span class="text-stone-400">{{ item.berat_gram }} g/item · {{ item.panjang_cm }}×{{ item.lebar_cm }}×{{ item.tinggi_cm }} cm</span></div><strong class="text-[#8C7454]">Rp {{ item.subtotal }}</strong></div>{% endfor %}
+</div>
 <div class="grid md:grid-cols-2 gap-4">
 <div><label class="block text-xs font-medium text-stone-700 mb-1">Nama Penerima</label><input type="text" name="nama_penerima" value="{{ form_data.nama_penerima|default:'' }}" required autocomplete="name" class="w-full bg-[#FAF8F5] border border-[#EAE3D2] rounded-xl py-3 px-4 text-sm outline-none focus:border-[#8C7454]"></div>
 <div><label class="block text-xs font-medium text-stone-700 mb-1">Nomor Telepon/WhatsApp</label><input type="tel" name="telepon" value="{{ form_data.telepon|default:'' }}" required autocomplete="tel" class="w-full bg-[#FAF8F5] border border-[#EAE3D2] rounded-xl py-3 px-4 text-sm outline-none focus:border-[#8C7454]"></div>

@@ -98,10 +98,10 @@ class BiteshipService:
                     "name": detail.produk.nama if detail.produk else "Produk",
                     "description": "Produk dari toko online",
                     "value": int(detail.harga_saat_beli),
-                    "length": 10,
-                    "width": 10,
-                    "height": 10,
-                    "weight": 1000,
+                    "length": detail.produk.panjang_cm if detail.produk else 10,
+                    "width": detail.produk.lebar_cm if detail.produk else 10,
+                    "height": detail.produk.tinggi_cm if detail.produk else 10,
+                    "weight": detail.produk.berat_gram if detail.produk else 1000,
                     "quantity": detail.jumlah,
                 }
                 for detail in pesanan.items.select_related("produk").all()

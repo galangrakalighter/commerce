@@ -48,6 +48,11 @@ def _checkout_items(request, source):
             'jumlah': quantity,
             'harga': product.harga,
             'nama': product.nama,
+            'berat_gram': product.berat_gram,
+            'panjang_cm': product.panjang_cm,
+            'lebar_cm': product.lebar_cm,
+            'tinggi_cm': product.tinggi_cm,
+            'subtotal': product.harga * quantity,
         }
         total += product.harga * quantity
     return items, total
@@ -59,10 +64,10 @@ def _biteship_rate_items(items):
             'name': item['nama'],
             'description': 'Produk dari toko online',
             'value': int(item['harga']),
-            'length': 10,
-            'width': 10,
-            'height': 10,
-            'weight': 1000,
+            'length': int(item['panjang_cm']),
+            'width': int(item['lebar_cm']),
+            'height': int(item['tinggi_cm']),
+            'weight': int(item['berat_gram']),
             'quantity': int(item['jumlah']),
         }
         for item in items.values()
@@ -212,6 +217,16 @@ def tambah_produk_proses(request):
         kategori_id = request.POST.get('kategori')
         harga = request.POST.get('harga')
         stok = request.POST.get('stok')
+        try:
+            berat_gram = int(request.POST.get('berat_gram', ''))
+            panjang_cm = int(request.POST.get('panjang_cm', ''))
+            lebar_cm = int(request.POST.get('lebar_cm', ''))
+            tinggi_cm = int(request.POST.get('tinggi_cm', ''))
+            if min(berat_gram, panjang_cm, lebar_cm, tinggi_cm) <= 0:
+                raise ValueError
+        except (TypeError, ValueError):
+            messages.error(request, 'Berat dan seluruh dimensi produk harus berupa angka lebih dari 0.')
+            return redirect('daftar_produk_internal')
         is_flash_sale = 'is_flash_sale' in request.POST
         deskripsi = request.POST.get('deskripsi')
         gambar = request.FILES.get('gambar')
@@ -243,6 +258,10 @@ def tambah_produk_proses(request):
             gambar=gambar,
             harga=harga,
             stok=stok,
+            berat_gram=berat_gram,
+            panjang_cm=panjang_cm,
+            lebar_cm=lebar_cm,
+            tinggi_cm=tinggi_cm,
             is_flash_sale=is_flash_sale,
             flash_sale_end=flash_sale_end,  # <-- Tambahkan baris ini agar tersimpan
             deskripsi=deskripsi,
@@ -656,6 +675,7 @@ def checkout_view(request):
                 'total_belanja': total_belanja,
                 'error_api': 'Pilih alamat dari saran dan pilih layanan pengiriman kembali.',
                 'form_data': request.POST,
+                'checkout_items': items_to_checkout.values(),
             })
         except Exception as exc:
             logger.warning('Validasi ongkir checkout gagal: %s', exc)
@@ -663,6 +683,7 @@ def checkout_view(request):
                 'total_belanja': total_belanja,
                 'error_api': f'Ongkir tidak dapat diverifikasi: {exc}',
                 'form_data': request.POST,
+                'checkout_items': items_to_checkout.values(),
             })
         
         # 1. Simpan data induk Pesanan
@@ -740,9 +761,13 @@ def checkout_view(request):
                 'total_belanja': total_belanja,
                 'error_api': error_msg,
                 'form_data': request.POST,
+                'checkout_items': items_to_checkout.values(),
             })
             
-    return render(request, 'cart/checkout.html', {'total_belanja': total_belanja})
+    return render(request, 'cart/checkout.html', {
+        'total_belanja': total_belanja,
+        'checkout_items': items_to_checkout.values(),
+    })
 
 @login_required
 def bayar_ulang_pesanan_view(request, pesanan_id):
@@ -1034,6 +1059,10 @@ def edit_produk(request, id):
         kategori_id = request.POST.get('kategori')
         harga = request.POST.get('harga')
         stok = request.POST.get('stok')
+        berat_gram = request.POST.get('berat_gram')
+        panjang_cm = request.POST.get('panjang_cm')
+        lebar_cm = request.POST.get('lebar_cm')
+        tinggi_cm = request.POST.get('tinggi_cm')
         is_flash_sale = 'is_flash_sale' in request.POST # Checkbox menghasilkan 'on' jika dicentang
         deskripsi = request.POST.get('deskripsi')
         flash_sale_end = request.POST.get('flash_sale_end')
@@ -1042,6 +1071,13 @@ def edit_produk(request, id):
             flash_sale_end = None
         
         try:
+            berat_gram = int(berat_gram)
+            panjang_cm = int(panjang_cm)
+            lebar_cm = int(lebar_cm)
+            tinggi_cm = int(tinggi_cm)
+            if min(berat_gram, panjang_cm, lebar_cm, tinggi_cm) <= 0:
+                raise ValueError('Berat dan dimensi harus lebih dari 0.')
+
             # 3. Update data teks & relasi kategori
             kategori = get_object_or_404(Kategori, id=kategori_id)
             
@@ -1049,6 +1085,10 @@ def edit_produk(request, id):
             produk.kategori = kategori
             produk.harga = harga
             produk.stok = stok
+            produk.berat_gram = berat_gram
+            produk.panjang_cm = panjang_cm
+            produk.lebar_cm = lebar_cm
+            produk.tinggi_cm = tinggi_cm
             produk.is_flash_sale = is_flash_sale
             produk.deskripsi = deskripsi
             

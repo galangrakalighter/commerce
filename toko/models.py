@@ -22,6 +22,10 @@ class Produk(models.Model):
     deskripsi = models.TextField(blank=True, null=True)
     harga = models.IntegerField()  # Menggunakan integer agar pas untuk mata uang Rupiah
     stok = models.IntegerField(default=0)
+    berat_gram = models.PositiveIntegerField(default=1000, help_text="Berat satu produk dalam gram")
+    panjang_cm = models.PositiveIntegerField(default=10, help_text="Panjang kemasan dalam cm")
+    lebar_cm = models.PositiveIntegerField(default=10, help_text="Lebar kemasan dalam cm")
+    tinggi_cm = models.PositiveIntegerField(default=10, help_text="Tinggi kemasan dalam cm")
     is_flash_sale = models.BooleanField(default=False) # Penanda untuk masuk bagian diskon
     dibuat_pada = models.DateTimeField(auto_now_add=True)
     flash_sale_end = models.DateTimeField(null=True, blank=True)

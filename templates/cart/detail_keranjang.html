@@ -32,6 +32,7 @@
                                 <div class="flex-1">
                                     <h3 class="font-medium text-stone-900 text-sm">{{ item.produk.nama }}</h3>
                                     <p class="text-xs text-stone-400 mt-0.5">Rp {{ item.produk.harga }}</p>
+                                    <p class="text-[10px] text-stone-400 mt-1">{{ item.produk.berat_gram }} g/item · {{ item.produk.panjang_cm }}×{{ item.produk.lebar_cm }}×{{ item.produk.tinggi_cm }} cm</p>
                                     
                                     <div class="flex items-center mt-3 bg-[#FAF8F5] border border-[#EAE3D2] rounded-xl p-0.5 w-max">
                                         <a href="{% url 'update_kuantitas_keranjang' item.produk.id 'kurang' %}" class="w-7 h-7 flex items-center justify-center text-stone-600 hover:text-[#8C7454] font-bold select-none text-xs rounded-lg hover:bg-stone-100 transition-colors">-</a>

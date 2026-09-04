@@ -8,6 +8,15 @@
         </div>
         <h2 class="text-2xl font-serif text-stone-900 mb-2">Satu Langkah Lagi</h2>
         <p class="text-sm text-stone-500 mb-6">Pesanan <span class="font-bold">#INV-{{ pesanan.id }}</span> telah dicatat. Silakan selesaikan pembayaran Anda.</p>
+
+        <div class="text-left rounded-2xl bg-[#FAF8F5] p-4 mb-6 text-xs space-y-3">
+            {% for item in pesanan.items.all %}
+            <div class="flex justify-between gap-3"><div><strong class="block text-stone-700">{{ item.produk.nama|default:'Produk' }} × {{ item.jumlah }}</strong><span class="text-stone-400">{% if item.produk %}{{ item.produk.berat_gram }} g/item · {{ item.produk.panjang_cm }}×{{ item.produk.lebar_cm }}×{{ item.produk.tinggi_cm }} cm{% endif %}</span></div><span>Rp {{ item.subtotal }}</span></div>
+            {% endfor %}
+            <div class="border-t border-stone-200 pt-2 flex justify-between"><span>Subtotal</span><span>Rp {{ pesanan.subtotal_harga }}</span></div>
+            <div class="flex justify-between"><span>Ongkir JNE {{ pesanan.kurir_layanan|upper }}</span><span>Rp {{ pesanan.biaya_ongkir }}</span></div>
+            <div class="border-t border-stone-200 pt-2 flex justify-between font-bold text-sm text-[#8C7454]"><span>Total</span><span>Rp {{ pesanan.total_harga }}</span></div>
+        </div>
         
         <!-- Tombol langsung mengarah ke halaman Checkout DOKU -->
         <a href="{% url 'lanjut_pembayaran_doku' pesanan.id %}" class="block w-full bg-[#8C7454] text-white py-4 rounded-full font-medium hover:bg-[#735F43] transition-colors shadow-lg cursor-pointer no-underline text-center">
