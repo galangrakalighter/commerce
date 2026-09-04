@@ -6,7 +6,7 @@ from django.utils.dateparse import parse_datetime
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_GET, require_POST
 from django.http import JsonResponse
 from django.contrib import messages
 from .forms import BannerPromoForm
@@ -20,6 +20,113 @@ from django.views.decorators.csrf import csrf_exempt
 from .shipping_service import BiteshipService, DokuService
 
 logger = logging.getLogger(__name__)
+
+def _checkout_items(request, source):
+    if source == 'buy_now':
+        raw_items = request.session.get('buy_now', {})
+    elif source == 'selected':
+        raw_items = request.session.get('checkout_selected', {})
+    else:
+        raw_items = request.session.get('cart', {})
+
+    product_ids = []
+    for product_id in raw_items:
+        try:
+            product_ids.append(int(product_id))
+        except (TypeError, ValueError):
+            continue
+    products = {p.id: p for p in Produk.objects.filter(id__in=product_ids)}
+    items = {}
+    total = 0
+    for product_id, raw_item in raw_items.items():
+        try:
+            product = products[int(product_id)]
+            quantity = max(1, int(raw_item.get('jumlah', 1)))
+        except (KeyError, TypeError, ValueError):
+            continue
+        items[str(product.id)] = {
+            'jumlah': quantity,
+            'harga': product.harga,
+            'nama': product.nama,
+        }
+        total += product.harga * quantity
+    return items, total
+
+
+def _biteship_rate_items(items):
+    return [
+        {
+            'name': item['nama'],
+            'description': 'Produk dari toko online',
+            'value': int(item['harga']),
+            'length': 10,
+            'width': 10,
+            'height': 10,
+            'weight': 1000,
+            'quantity': int(item['jumlah']),
+        }
+        for item in items.values()
+    ]
+
+
+@login_required
+@require_GET
+def cari_area_biteship(request):
+    query = request.GET.get('q', '').strip()
+    if len(query) < 3:
+        return JsonResponse({'areas': []})
+    try:
+        areas = BiteshipService().search_areas(query)[:8]
+        return JsonResponse({'areas': [
+            {
+                'id': area.get('id'),
+                'name': area.get('name'),
+                'postal_code': area.get('postal_code'),
+            }
+            for area in areas
+            if area.get('id') and area.get('name')
+        ]})
+    except Exception as exc:
+        logger.warning('Pencarian area Biteship gagal: %s', exc)
+        return JsonResponse({'error': str(exc)}, status=502)
+
+
+@login_required
+@require_POST
+def cek_ongkir_biteship(request):
+    try:
+        data = json.loads(request.body.decode('utf-8'))
+        area_id = str(data.get('destination_area_id', '')).strip()
+        source = str(data.get('source', '')).strip()
+        items, subtotal = _checkout_items(request, source)
+        if not area_id or not items:
+            return JsonResponse({'error': 'Alamat dan produk harus dipilih.'}, status=400)
+        rates = BiteshipService().get_rates(
+            area_id,
+            _biteship_rate_items(items),
+            couriers='jne',
+        )
+        options = []
+        for rate in rates:
+            courier = rate.get('courier_code') or rate.get('company')
+            service = rate.get('courier_service_code') or rate.get('type')
+            if courier == 'jne' and service and rate.get('price') is not None:
+                options.append({
+                    'courier': courier,
+                    'service': service,
+                    'name': rate.get('courier_service_name') or service.upper(),
+                    'duration': rate.get('duration') or '',
+                    'price': int(rate['price']),
+                })
+        options.sort(key=lambda option: option['price'])
+        if not options:
+            return JsonResponse({'error': 'JNE tidak tersedia untuk alamat ini.'}, status=422)
+        return JsonResponse({'subtotal': subtotal, 'options': options})
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return JsonResponse({'error': 'Permintaan tidak valid.'}, status=400)
+    except Exception as exc:
+        logger.warning('Pengecekan ongkir Biteship gagal: %s', exc)
+        return JsonResponse({'error': str(exc)}, status=502)
 
 def halaman_utama(request):
     # 1. AMBIL DATA MASTER BANNER & KATEGORI
@@ -501,42 +608,77 @@ def checkout_view(request):
         request.session['checkout_selected'] = checkout_selected
         request.session.modified = True
     
-    # === STEP 2: TENTUKAN SUMBER DATA PRODUK YANG AKAN DI-CHECKOUT ===
-    if source == 'buy_now':
-        items_to_checkout = request.session.get('buy_now', {})
-    elif source == 'selected':
-        items_to_checkout = request.session.get('checkout_selected', {})
-    else:
-        items_to_checkout = request.session.get('cart', {})
+    # Harga selalu diambil ulang dari database, bukan dari nilai di browser/session.
+    items_to_checkout, total_belanja = _checkout_items(request, source)
         
     if not items_to_checkout:
         return redirect('detail_keranjang')
         
-    total_belanja = sum(item['jumlah'] * item['harga'] for item in items_to_checkout.values())
-    
     # === STEP 3: PROSES SUBMIT ALAMAT & INTEGRASI KE DOKU ===
     if request.method == 'POST' and request.POST.get('nama_penerima'):
-        nama_penerima = request.POST.get('nama_penerima')
-        telepon = request.POST.get('telepon')
-        alamat_lengkap = request.POST.get('alamat_lengkap')
-        kode_pos = request.POST.get('kode_pos')
-        catatan = request.POST.get('catatan', '')
-        lat = request.POST.get('lat')
-        lon = request.POST.get('lon')
+        nama_penerima = request.POST.get('nama_penerima', '').strip()
+        telepon = request.POST.get('telepon', '').strip()
+        alamat_lengkap = request.POST.get('alamat_lengkap', '').strip()
+        kode_pos = request.POST.get('kode_pos', '').strip()
+        catatan = request.POST.get('catatan', '').strip()
+        lat = request.POST.get('lat', '').strip()
+        lon = request.POST.get('lon', '').strip()
+        destination_area_id = request.POST.get('destination_area_id', '').strip()
+        selected_courier = request.POST.get('selected_courier', '').strip()
+        selected_service = request.POST.get('selected_service', '').strip()
+
+        try:
+            latitude = float(lat)
+            longitude = float(lon)
+            postal_code = int(kode_pos)
+            if not (-90 <= latitude <= 90 and -180 <= longitude <= 180):
+                raise ValueError
+            if not destination_area_id or selected_courier != 'jne' or not selected_service:
+                raise ValueError
+
+            # Hitung ulang pada server agar ongkir dari browser tidak dapat dipalsukan.
+            rates = BiteshipService().get_rates(
+                destination_area_id,
+                _biteship_rate_items(items_to_checkout),
+                couriers=selected_courier,
+            )
+            selected_rate = next(
+                rate for rate in rates
+                if (rate.get('courier_code') or rate.get('company')) == selected_courier
+                and (rate.get('courier_service_code') or rate.get('type')) == selected_service
+            )
+            biaya_ongkir = int(selected_rate['price'])
+        except (ValueError, TypeError, KeyError, StopIteration):
+            return render(request, 'cart/checkout.html', {
+                'total_belanja': total_belanja,
+                'error_api': 'Pilih alamat dari saran dan pilih layanan pengiriman kembali.',
+                'form_data': request.POST,
+            })
+        except Exception as exc:
+            logger.warning('Validasi ongkir checkout gagal: %s', exc)
+            return render(request, 'cart/checkout.html', {
+                'total_belanja': total_belanja,
+                'error_api': f'Ongkir tidak dapat diverifikasi: {exc}',
+                'form_data': request.POST,
+            })
         
         # 1. Simpan data induk Pesanan
         pesanan = Pesanan.objects.create(
             user=request.user,
-            total_harga=total_belanja,
+            subtotal_harga=total_belanja,
+            biaya_ongkir=biaya_ongkir,
+            total_harga=total_belanja + biaya_ongkir,
             status='MENUNGGU',
             nama_penerima=nama_penerima,
             telepon=telepon,
             alamat_lengkap=alamat_lengkap,
             catatan=catatan,
-            lokasi_lat=lat,
-            lokasi_lon=lon,
-            kode_pos=kode_pos,
-            kurir='jne'
+            lokasi_lat=latitude,
+            lokasi_lon=longitude,
+            kode_pos=postal_code,
+            destination_area_id=destination_area_id,
+            kurir=selected_courier,
+            kurir_layanan=selected_service,
         )
         
         # 2. Simpan item produk ke DetailPesanan
@@ -593,7 +735,8 @@ def checkout_view(request):
             
             return render(request, 'cart/checkout.html', {
                 'total_belanja': total_belanja,
-                'error_api': error_msg
+                'error_api': error_msg,
+                'form_data': request.POST,
             })
             
     return render(request, 'cart/checkout.html', {'total_belanja': total_belanja})

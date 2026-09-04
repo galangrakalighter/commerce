@@ -92,6 +92,8 @@ class Pesanan(models.Model):
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pesanan')
+    subtotal_harga = models.IntegerField(default=0)
+    biaya_ongkir = models.IntegerField(default=0)
     total_harga = models.IntegerField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='MENUNGGU')
     catatan = models.TextField(blank=True, null=True, help_text="Catatan tambahan dari pembeli")
@@ -106,7 +108,9 @@ class Pesanan(models.Model):
     kurir_lon = models.FloatField(null=True, blank=True)
     no_resi = models.CharField(max_length=100, blank=True, null=True, verbose_name="Nomor Resi")
     kurir = models.CharField(max_length=20, choices=KURIR_CHOICES, blank=True, null=True, help_text="Pilih ekspedisi pengiriman")
+    kurir_layanan = models.CharField(max_length=50, blank=True, null=True)
     kode_pos = models.IntegerField(null=True, blank=True)
+    destination_area_id = models.CharField(max_length=100, blank=True, null=True)
     
     lokasi_lat = models.FloatField(blank=True, null=True)
     lokasi_lon = models.FloatField(blank=True, null=True)

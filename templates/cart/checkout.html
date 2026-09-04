@@ -1,86 +1,39 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<div class="bg-[#FAF8F5] min-h-screen py-12">
-    <div class="container mx-auto px-4 max-w-2xl">
-        <div class="bg-white p-8 rounded-3xl border border-stone-100 shadow-sm">
-            <h2 class="text-2xl font-serif text-stone-900 mb-6">Informasi Pengiriman</h2>
-            
-            {% if error_api %}
-            <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-xs font-medium mb-4">
-                ❌ {{ error_api }}
-            </div>
-            {% endif %}
-            
-            <form method="POST" class="space-y-4">
-                {% csrf_token %}
-                <div>
-                    <label class="block text-xs font-medium text-stone-700 mb-1">Nama Penerima</label>
-                    <input type="text" name="nama_penerima" required class="w-full bg-[#FAF8F5] border border-[#EAE3D2] rounded-xl py-2 px-4 text-sm outline-none focus:border-[#8C7454]">
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-stone-700 mb-1">Nomor Telepon/WhatsApp</label>
-                    <input type="text" name="telepon" required class="w-full bg-[#FAF8F5] border border-[#EAE3D2] rounded-xl py-2 px-4 text-sm outline-none focus:border-[#8C7454]">
-                </div>
-                
-                <div>
-                    <label class="block text-xs font-medium text-stone-700 mb-1">Alamat Lengkap</label>
-                    <textarea id="input-alamat" name="alamat_lengkap" rows="3" required class="w-full bg-[#FAF8F5] border border-[#EAE3D2] rounded-xl py-2 px-4 text-sm outline-none focus:border-[#8C7454] resize-none"></textarea>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-medium text-stone-700 mb-2">Tandai Lokasi di Peta (Geser pin ke rumahmu):</label>
-                    <div id="map" class="w-full h-64 rounded-xl border border-stone-200 z-10"></div>
-                    <input type="hidden" name="lat" id="lat" value="-6.9175" required>
-                    <input type="hidden" name="lon" id="lon" value="107.6191" required>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-medium text-stone-700 mb-1">Kode Pos</label>
-                    <input type="text" name="kode_pos" class="w-full bg-[#FAF8F5] border border-[#EAE3D2] rounded-xl py-2 px-4 text-sm outline-none focus:border-[#8C7454]" required>
-                </div>
-
-                <div class="border-t border-stone-100 pt-4 mt-6 flex justify-between items-center">
-                    <div>
-                        <span class="text-xs text-stone-400 block">Total yang harus dibayar:</span>
-                        <span class="text-xl font-bold text-[#8C7454]">Rp {{ total_belanja }}</span>
-                    </div>
-                    <button type="submit" class="bg-[#8C7454] text-white px-8 py-3 rounded-full text-sm font-medium hover:bg-[#735F43] transition-colors shadow-md">
-                        Proses Pembayaran
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+<div class="bg-[#FAF8F5] min-h-screen py-12"><div class="container mx-auto px-4 max-w-3xl"><div class="bg-white p-6 md:p-8 rounded-3xl border border-stone-100 shadow-sm">
+<h2 class="text-2xl font-serif text-stone-900 mb-2">Informasi Pengiriman</h2>
+<p class="text-sm text-stone-500 mb-6">Pilih wilayah dari saran, lengkapi alamat rumah, lalu pastikan pin peta sudah tepat.</p>
+{% if error_api %}<div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-xs font-medium mb-4">{{ error_api }}</div>{% endif %}
+<form method="POST" class="space-y-5" id="checkout-form">{% csrf_token %}
+<div class="grid md:grid-cols-2 gap-4">
+<div><label class="block text-xs font-medium text-stone-700 mb-1">Nama Penerima</label><input type="text" name="nama_penerima" value="{{ form_data.nama_penerima|default:'' }}" required autocomplete="name" class="w-full bg-[#FAF8F5] border border-[#EAE3D2] rounded-xl py-3 px-4 text-sm outline-none focus:border-[#8C7454]"></div>
+<div><label class="block text-xs font-medium text-stone-700 mb-1">Nomor Telepon/WhatsApp</label><input type="tel" name="telepon" value="{{ form_data.telepon|default:'' }}" required autocomplete="tel" class="w-full bg-[#FAF8F5] border border-[#EAE3D2] rounded-xl py-3 px-4 text-sm outline-none focus:border-[#8C7454]"></div>
 </div>
-
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
+<div class="relative"><label class="block text-xs font-medium text-stone-700 mb-1">Cari Kecamatan, Kota, atau Kode Pos</label>
+<input id="area-search" name="area_search" type="search" value="{{ form_data.area_search|default:'' }}" placeholder="Contoh: Astanaanyar Bandung 40252" autocomplete="off" required class="w-full bg-[#FAF8F5] border border-[#EAE3D2] rounded-xl py-3 pl-4 pr-16 text-sm outline-none focus:border-[#8C7454]">
+<span id="search-spinner" class="hidden absolute right-4 top-9 text-stone-400 text-xs">Mencari…</span><div id="area-suggestions" class="hidden absolute z-[1000] left-0 right-0 mt-1 bg-white border border-stone-200 rounded-xl shadow-xl overflow-hidden"></div>
+<input type="hidden" id="destination-area-id" name="destination_area_id" value="{{ form_data.destination_area_id|default:'' }}"><input type="hidden" id="kode-pos" name="kode_pos" value="{{ form_data.kode_pos|default:'' }}"></div>
+<div><label class="block text-xs font-medium text-stone-700 mb-1">Detail Alamat Rumah</label><textarea id="input-alamat" name="alamat_lengkap" rows="3" required autocomplete="street-address" placeholder="Nama jalan, nomor rumah, RT/RW, patokan, kelurahan" class="w-full bg-[#FAF8F5] border border-[#EAE3D2] rounded-xl py-3 px-4 text-sm outline-none focus:border-[#8C7454] resize-none">{{ form_data.alamat_lengkap|default:'' }}</textarea><p id="selected-area-label" class="mt-1 text-xs text-emerald-700"></p></div>
+<div><div class="flex items-center justify-between gap-3 mb-2"><label class="block text-xs font-medium text-stone-700">Titik Lokasi Penerima</label><button type="button" id="use-location" class="text-xs font-medium text-[#8C7454] hover:underline">Gunakan lokasi saya</button></div><div id="map" class="w-full h-72 rounded-xl border border-stone-200 z-10"></div><p class="mt-2 text-xs text-stone-400">Klik peta atau geser pin agar kurir lebih mudah menemukan alamat.</p><input type="hidden" name="lat" id="lat" value="{{ form_data.lat|default:'-6.9175' }}" required><input type="hidden" name="lon" id="lon" value="{{ form_data.lon|default:'107.6191' }}" required></div>
+<section class="rounded-2xl border border-stone-200 p-4"><div class="flex items-center justify-between gap-3"><div><h3 class="text-sm font-semibold text-stone-800">Layanan Pengiriman</h3><p id="shipping-help" class="text-xs text-stone-400 mt-1">Pilih wilayah terlebih dahulu untuk menghitung ongkir.</p></div><span id="rates-spinner" class="hidden text-xs text-[#8C7454]">Menghitung…</span></div><div id="shipping-options" class="mt-3 space-y-2"></div><input type="hidden" name="selected_courier" id="selected-courier" value="{{ form_data.selected_courier|default:'' }}"><input type="hidden" name="selected_service" id="selected-service" value="{{ form_data.selected_service|default:'' }}"></section>
+<div class="rounded-2xl bg-[#FAF8F5] p-4 space-y-2 text-sm"><div class="flex justify-between"><span class="text-stone-500">Subtotal produk</span><span id="subtotal-label"></span></div><div class="flex justify-between"><span class="text-stone-500">Ongkir</span><span id="shipping-label">Belum dihitung</span></div><div class="border-t border-stone-200 pt-3 flex justify-between items-center"><span class="font-semibold text-stone-800">Total pembayaran</span><span id="grand-total" class="text-xl font-bold text-[#8C7454]"></span></div></div>
+<button id="submit-payment" type="submit" disabled class="w-full bg-[#8C7454] text-white px-8 py-4 rounded-full text-sm font-medium hover:bg-[#735F43] transition-colors shadow-md disabled:bg-stone-300 disabled:cursor-not-allowed">Proses Pembayaran</button>
+</form></div></div></div>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3ynhMZCcMZFWp30uK5Dq9itf93A+o=" crossorigin="anonymous"><script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // Inisialisasi Peta (Default Bandung)
-        const map = L.map('map').setView([-6.9175, 107.6191], 13);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap'
-        }).addTo(map);
-
-        // Marker yang bisa digeser
-        const marker = L.marker([-6.9175, 107.6191], { draggable: true }).addTo(map);
-
-        // Update hidden input saat marker digeser
-        marker.on('dragend', function(e) {
-            const pos = marker.getLatLng();
-            document.getElementById('lat').value = pos.lat;
-            document.getElementById('lon').value = pos.lng;
-        });
-
-        // Opsional: Klik peta untuk memindahkan marker
-        map.on('click', function(e) {
-            marker.setLatLng(e.latlng);
-            document.getElementById('lat').value = e.latlng.lat;
-            document.getElementById('lon').value = e.latlng.lng;
-        });
-    });
+document.addEventListener('DOMContentLoaded', () => {
+const subtotal=Number('{{ total_belanja }}'),source=new URLSearchParams(location.search).get('source')||'',csrf=document.querySelector('[name=csrfmiddlewaretoken]').value,fmt=v=>new Intl.NumberFormat('id-ID',{style:'currency',currency:'IDR',maximumFractionDigits:0}).format(v);
+const search=document.getElementById('area-search'),suggestions=document.getElementById('area-suggestions'),areaId=document.getElementById('destination-area-id'),postal=document.getElementById('kode-pos'),areaLabel=document.getElementById('selected-area-label'),searchSpin=document.getElementById('search-spinner'),rateSpin=document.getElementById('rates-spinner'),options=document.getElementById('shipping-options'),help=document.getElementById('shipping-help'),shippingLabel=document.getElementById('shipping-label'),grand=document.getElementById('grand-total'),submit=document.getElementById('submit-payment'),courier=document.getElementById('selected-courier'),service=document.getElementById('selected-service');let timer,requestNo=0;
+document.getElementById('subtotal-label').textContent=fmt(subtotal);grand.textContent=fmt(subtotal);
+const latInput=document.getElementById('lat'),lonInput=document.getElementById('lon'),lat=Number(latInput.value)||-6.9175,lon=Number(lonInput.value)||107.6191,map=L.map('map').setView([lat,lon],13);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'&copy; OpenStreetMap contributors',maxZoom:19}).addTo(map);const marker=L.marker([lat,lon],{draggable:true}).addTo(map);
+function move(lat,lon,zoom=16){marker.setLatLng([lat,lon]);map.setView([lat,lon],zoom);latInput.value=Number(lat).toFixed(7);lonInput.value=Number(lon).toFixed(7)}marker.on('dragend',()=>{const p=marker.getLatLng();move(p.lat,p.lng,map.getZoom())});map.on('click',e=>move(e.latlng.lat,e.latlng.lng,map.getZoom()));
+document.getElementById('use-location').onclick=()=>navigator.geolocation?navigator.geolocation.getCurrentPosition(p=>move(p.coords.latitude,p.coords.longitude,18),()=>alert('Izinkan akses lokasi pada browser lalu coba kembali.'),{enableHighAccuracy:true,timeout:10000}):alert('Browser tidak mendukung lokasi perangkat.');
+async function focusMap(name){try{const u=new URL('https://nominatim.openstreetmap.org/search');u.searchParams.set('q',name+', Indonesia');u.searchParams.set('format','jsonv2');u.searchParams.set('limit','1');const p=await(await fetch(u,{headers:{'Accept-Language':'id'}})).json();if(p.length)move(+p[0].lat,+p[0].lon,15)}catch(e){}}
+function reset(){courier.value='';service.value='';options.innerHTML='';shippingLabel.textContent='Belum dihitung';grand.textContent=fmt(subtotal);submit.disabled=true}
+function choose(o,row){options.querySelectorAll('[data-rate]').forEach(n=>n.classList.remove('border-[#8C7454]','bg-amber-50'));row.classList.add('border-[#8C7454]','bg-amber-50');row.querySelector('input').checked=true;courier.value=o.courier;service.value=o.service;shippingLabel.textContent=fmt(o.price);grand.textContent=fmt(subtotal+o.price);submit.disabled=false}
+async function rates(){reset();rateSpin.classList.remove('hidden');help.classList.remove('text-red-600');help.textContent='Mengambil tarif JNE dari Biteship…';try{const r=await fetch('{% url "cek_ongkir_biteship" %}',{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':csrf},body:JSON.stringify({destination_area_id:areaId.value,source})}),d=await r.json();if(!r.ok)throw Error(d.error||'Ongkir tidak tersedia.');help.textContent='Pilih layanan yang paling sesuai.';d.options.forEach((o,i)=>{const row=document.createElement('label');row.dataset.rate='true';row.className='flex items-center justify-between gap-3 border border-stone-200 rounded-xl p-3 cursor-pointer transition-colors';row.innerHTML=`<span class="flex items-center gap-3"><input type="radio" name="shipping_display"><span><strong class="block text-sm text-stone-800">JNE ${o.name}</strong><small class="text-stone-400">${o.duration||'Estimasi mengikuti kurir'}</small></span></span><strong class="text-sm text-[#8C7454]">${fmt(o.price)}</strong>`;row.onclick=()=>choose(o,row);options.appendChild(row);if(i===0)choose(o,row)})}catch(e){help.textContent=e.message;help.classList.add('text-red-600')}finally{rateSpin.classList.add('hidden')}}
+search.addEventListener('input',()=>{clearTimeout(timer);areaId.value='';postal.value='';areaLabel.textContent='';suggestions.classList.add('hidden');help.classList.remove('text-red-600');help.textContent='Pilih wilayah terlebih dahulu untuk menghitung ongkir.';reset();const q=search.value.trim();if(q.length<3)return;timer=setTimeout(async()=>{const no=++requestNo;searchSpin.classList.remove('hidden');try{const r=await fetch(`{% url "cari_area_biteship" %}?q=${encodeURIComponent(q)}`),d=await r.json();if(no!==requestNo)return;suggestions.innerHTML='';(d.areas||[]).forEach(a=>{const b=document.createElement('button');b.type='button';b.className='block w-full text-left px-4 py-3 text-sm hover:bg-[#FAF8F5] border-b border-stone-100 last:border-0';b.innerHTML=`<span class="block font-medium text-stone-800">${a.name}</span><span class="text-xs text-stone-400">Kode pos ${a.postal_code}</span>`;b.onclick=()=>{search.value=a.name;areaId.value=a.id;postal.value=a.postal_code;areaLabel.textContent=`Wilayah terpilih: ${a.name}`;suggestions.classList.add('hidden');focusMap(a.name);rates()};suggestions.appendChild(b)});suggestions.classList.toggle('hidden',!(d.areas||[]).length)}catch(e){suggestions.innerHTML='<p class="px-4 py-3 text-sm text-red-600">Pencarian alamat sedang tidak tersedia.</p>';suggestions.classList.remove('hidden')}finally{searchSpin.classList.add('hidden')}},650)});
+document.addEventListener('click',e=>{if(!e.target.closest('#area-search')&&!e.target.closest('#area-suggestions'))suggestions.classList.add('hidden')});if(areaId.value)rates();
+});
 </script>
 {% endblock %}

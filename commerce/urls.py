@@ -19,7 +19,7 @@ from django.urls import path, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.static import serve as serve_media
-from toko.views import halaman_utama, dashboard_utama_view, kelola_banner, toggle_status_banner, hapus_banner, kelola_kategori_view, edit_kategori, create_shipping_order, daftar_produk_internal_view, cek_status_kurir_api, tambah_produk_proses, lacak_paket, hapus_produk_proses, bayar_ulang_pesanan_view, lanjut_pembayaran_doku, doku_payment_notification, matikan_flash_sale_ajax, tambah_kategori_proses, hapus_kategori_proses, toggle_like_view, toggle_wishlist_view, halaman_wishlist, halaman_like, detail_produk, kirim_review, tambah_ke_keranjang, detail_keranjang, hapus_dari_keranjang, checkout_view, bersihkan_keranjang_ajax, update_kuantitas_keranjang, live_search_view, edit_produk
+from toko.views import halaman_utama, dashboard_utama_view, kelola_banner, toggle_status_banner, hapus_banner, kelola_kategori_view, edit_kategori, create_shipping_order, daftar_produk_internal_view, cek_status_kurir_api, tambah_produk_proses, lacak_paket, hapus_produk_proses, bayar_ulang_pesanan_view, lanjut_pembayaran_doku, doku_payment_notification, cari_area_biteship, cek_ongkir_biteship, matikan_flash_sale_ajax, tambah_kategori_proses, hapus_kategori_proses, toggle_like_view, toggle_wishlist_view, halaman_wishlist, halaman_like, detail_produk, kirim_review, tambah_ke_keranjang, detail_keranjang, hapus_dari_keranjang, checkout_view, bersihkan_keranjang_ajax, update_kuantitas_keranjang, live_search_view, edit_produk
 from akun.views import register_view, login_view, logout_view, kelola_staff_view, tambah_staff_proses, pecat_staff_proses, user_dashboard, edit_profil_view, terms_view
 from website.views import halaman_web, halaman_produk, halaman_artikel, detail_artikel
 urlpatterns = [
@@ -55,6 +55,8 @@ urlpatterns = [
     path('commerce/cart/buka/', detail_keranjang, name='detail_keranjang'),
     path('commerce/cart/delete/<int:produk_id>/', hapus_dari_keranjang, name='hapus_dari_keranjang'),
     path('commerce/cart/checkout/', checkout_view, name='checkout'),
+    path('api/biteship/areas/', cari_area_biteship, name='cari_area_biteship'),
+    path('api/biteship/rates/', cek_ongkir_biteship, name='cek_ongkir_biteship'),
     path('commerce/cart/checkout/<int:pesanan_id>/', bayar_ulang_pesanan_view, name='bayar_ulang_pesanan'),
     path('commerce/pembayaran/doku/<int:pesanan_id>/', lanjut_pembayaran_doku, name='lanjut_pembayaran_doku'),
     path('api/doku/notification/', doku_payment_notification, name='doku_payment_notification'),

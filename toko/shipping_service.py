@@ -22,12 +22,56 @@ class BiteshipService:
             )
         self.base_url = "https://api.biteship.com/v1"
 
+    @property
+    def headers(self):
+        return {
+            "Authorization": self.api_key,
+            "Content-Type": "application/json",
+        }
+
+    def search_areas(self, query):
+        response = requests.get(
+            f"{self.base_url}/maps/areas",
+            params={"countries": "ID", "input": query, "type": "single"},
+            headers=self.headers,
+            timeout=15,
+        )
+        result = response.json() if response.content else {}
+        if not response.ok:
+            raise RuntimeError(
+                result.get("error") or result.get("message") or "Pencarian alamat gagal."
+            )
+        return result.get("areas", [])
+
+    def get_rates(self, destination_area_id, items, couriers="jne"):
+        payload = {
+            "origin_postal_code": 40252,
+            "destination_area_id": destination_area_id,
+            "couriers": couriers,
+            "items": items,
+        }
+        response = requests.post(
+            f"{self.base_url}/rates/couriers",
+            json=payload,
+            headers=self.headers,
+            timeout=20,
+        )
+        try:
+            result = response.json()
+        except ValueError:
+            result = {}
+        if not response.ok:
+            raise RuntimeError(
+                result.get("error")
+                or result.get("message")
+                or response.text
+                or "Tarif pengiriman tidak tersedia."
+            )
+        return result.get("pricing", [])
+
     def create_order(self, pesanan):
         url = f"{self.base_url}/orders"
-        headers = {
-            "Authorization": self.api_key,
-            "Content-Type": "application/json"
-        }
+        headers = self.headers
         
         # Payload Minimalis yang disukai API Biteship
         payload = {
@@ -37,32 +81,31 @@ class BiteshipService:
             "origin_contact_phone": "0895428171038",
             "origin_address": "Jl. Otto Iskandar Dinata No.392, Nyengseret, Kec. Astanaanyar, Kota Bandung",
             "origin_postal_code": 40252,
-            "origin_coordinate": {
-                "latitude": -6.89113689999999,
-                "longitude": 107.5621076
-            },
             "destination_contact_name": pesanan.nama_penerima,
             "destination_contact_phone": pesanan.telepon,
             "destination_address": pesanan.alamat_lengkap,
-            "destination_postal_code": int(pesanan.kode_pos) if pesanan.kode_pos else 40175,
+            "destination_postal_code": int(pesanan.kode_pos),
+            "destination_area_id": pesanan.destination_area_id,
             
             # Ganti ke "now" agar tidak butuh input tanggal
             "delivery_type": "now", 
             "courier_company": "jne",
-            "courier_type": "reg",
+            "courier_type": pesanan.kurir_layanan or "reg",
+            "reference_id": f"commerce-{pesanan.id}",
             
             "items": [
                 {
-                    "name": "Produk",
+                    "name": detail.produk.nama if detail.produk else "Produk",
                     "description": "Produk dari toko online",
-                    "value": int(pesanan.total_harga),
+                    "value": int(detail.harga_saat_beli),
                     "length": 10,
                     "width": 10,
                     "height": 10,
-                    "weight": 1000, # dalam gram
-                    "quantity": 1
+                    "weight": 1000,
+                    "quantity": detail.jumlah,
                 }
-            ]
+                for detail in pesanan.items.select_related("produk").all()
+            ],
         }
         
         response = requests.post(url, json=payload, headers=headers, timeout=30)
