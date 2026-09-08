@@ -30,24 +30,11 @@ class BiteshipService:
             "Content-Type": "application/json",
         }
 
-    def search_areas(self, query):
-        response = requests.get(
-            f"{self.base_url}/maps/areas",
-            params={"countries": "ID", "input": query, "type": "single"},
-            headers=self.headers,
-            timeout=15,
-        )
-        result = response.json() if response.content else {}
-        if not response.ok:
-            raise RuntimeError(
-                result.get("error") or result.get("message") or "Pencarian alamat gagal."
-            )
-        return result.get("areas", [])
-
-    def get_rates(self, destination_area_id, items, couriers="jne"):
+    def get_rates(self, destination_latitude, destination_longitude, items, couriers="jne"):
         payload = {
             "origin_postal_code": 40252,
-            "destination_area_id": destination_area_id,
+            "destination_latitude": float(destination_latitude),
+            "destination_longitude": float(destination_longitude),
             "couriers": couriers,
             "items": items,
         }
@@ -115,7 +102,10 @@ class BiteshipService:
             "destination_contact_phone": pesanan.telepon,
             "destination_address": pesanan.alamat_lengkap,
             "destination_postal_code": int(pesanan.kode_pos),
-            "destination_area_id": pesanan.destination_area_id,
+            "destination_coordinate": {
+                "latitude": float(pesanan.lokasi_lat),
+                "longitude": float(pesanan.lokasi_lon),
+            },
             
             # Ganti ke "now" agar tidak butuh input tanggal
             "delivery_type": "now", 

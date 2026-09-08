@@ -75,42 +75,21 @@ def _biteship_rate_items(items):
     ]
 
 
-@require_GET
-def cari_area_biteship(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({'error': 'Sesi login telah berakhir. Silakan login kembali.'}, status=401)
-    query = request.GET.get('q', '').strip()
-    if len(query) < 3:
-        return JsonResponse({'areas': []})
-    try:
-        areas = BiteshipService().search_areas(query)[:8]
-        return JsonResponse({'areas': [
-            {
-                'id': area.get('id'),
-                'name': area.get('name'),
-                'postal_code': area.get('postal_code'),
-            }
-            for area in areas
-            if area.get('id') and area.get('name')
-        ]})
-    except Exception as exc:
-        logger.warning('Pencarian area Biteship gagal: %s', exc)
-        return JsonResponse({'error': str(exc)}, status=502)
-
-
 @require_POST
 def cek_ongkir_biteship(request):
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'Sesi login telah berakhir. Silakan login kembali.'}, status=401)
     try:
         data = json.loads(request.body.decode('utf-8'))
-        area_id = str(data.get('destination_area_id', '')).strip()
+        latitude = float(data.get('destination_latitude'))
+        longitude = float(data.get('destination_longitude'))
         source = str(data.get('source', '')).strip()
         items, subtotal = _checkout_items(request, source)
-        if not area_id or not items:
+        if not (-11 <= latitude <= 6 and 95 <= longitude <= 141) or not items:
             return JsonResponse({'error': 'Alamat dan produk harus dipilih.'}, status=400)
         rates = BiteshipService().get_rates(
-            area_id,
+            latitude,
+            longitude,
             _biteship_rate_items(items),
             couriers='jne',
         )
@@ -130,7 +109,7 @@ def cek_ongkir_biteship(request):
         if not options:
             return JsonResponse({'error': 'JNE tidak tersedia untuk alamat ini.'}, status=422)
         return JsonResponse({'subtotal': subtotal, 'options': options})
-    except (UnicodeDecodeError, json.JSONDecodeError):
+    except (UnicodeDecodeError, json.JSONDecodeError, TypeError, ValueError):
         return JsonResponse({'error': 'Permintaan tidak valid.'}, status=400)
     except Exception as exc:
         logger.warning('Pengecekan ongkir Biteship gagal: %s', exc)
@@ -646,7 +625,7 @@ def checkout_view(request):
         catatan = request.POST.get('catatan', '').strip()
         lat = request.POST.get('lat', '').strip()
         lon = request.POST.get('lon', '').strip()
-        destination_area_id = request.POST.get('destination_area_id', '').strip()
+        google_place_id = request.POST.get('google_place_id', '').strip()
         selected_courier = request.POST.get('selected_courier', '').strip()
         selected_service = request.POST.get('selected_service', '').strip()
 
@@ -654,14 +633,15 @@ def checkout_view(request):
             latitude = float(lat)
             longitude = float(lon)
             postal_code = int(kode_pos)
-            if not (-90 <= latitude <= 90 and -180 <= longitude <= 180):
+            if not (-11 <= latitude <= 6 and 95 <= longitude <= 141):
                 raise ValueError
-            if not alamat_lengkap or not area_name or not destination_area_id or selected_courier != 'jne' or not selected_service:
+            if not alamat_lengkap or not area_name or not google_place_id or selected_courier != 'jne' or not selected_service:
                 raise ValueError
 
             # Hitung ulang pada server agar ongkir dari browser tidak dapat dipalsukan.
             rates = BiteshipService().get_rates(
-                destination_area_id,
+                latitude,
+                longitude,
                 _biteship_rate_items(items_to_checkout),
                 couriers=selected_courier,
             )
@@ -677,6 +657,7 @@ def checkout_view(request):
                 'error_api': 'Pilih alamat dari saran dan pilih layanan pengiriman kembali.',
                 'form_data': request.POST,
                 'checkout_items': items_to_checkout.values(),
+                'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY,
             })
         except Exception as exc:
             logger.warning('Validasi ongkir checkout gagal: %s', exc)
@@ -685,6 +666,7 @@ def checkout_view(request):
                 'error_api': f'Ongkir tidak dapat diverifikasi: {exc}',
                 'form_data': request.POST,
                 'checkout_items': items_to_checkout.values(),
+                'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY,
             })
         
         # 1. Simpan data induk Pesanan
@@ -701,7 +683,7 @@ def checkout_view(request):
             lokasi_lat=latitude,
             lokasi_lon=longitude,
             kode_pos=postal_code,
-            destination_area_id=destination_area_id,
+            destination_area_id=None,
             kurir=selected_courier,
             kurir_layanan=selected_service,
         )
@@ -763,11 +745,13 @@ def checkout_view(request):
                 'error_api': error_msg,
                 'form_data': request.POST,
                 'checkout_items': items_to_checkout.values(),
+                'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY,
             })
             
     return render(request, 'cart/checkout.html', {
         'total_belanja': total_belanja,
         'checkout_items': items_to_checkout.values(),
+        'google_maps_api_key': settings.GOOGLE_MAPS_API_KEY,
     })
 
 @login_required

@@ -54,6 +54,7 @@ CSRF_TRUSTED_ORIGINS += [
 # Biteship production credential. Set BITESHIP_API_KEY on the server with a
 # production key (it must not start with "biteship_test.").
 BITESHIP_API_KEY = os.environ.get('BITESHIP_API_KEY', '')
+GOOGLE_MAPS_API_KEY = os.environ.get('GOOGLE_MAPS_API_KEY', '')
 
 # DOKU production credentials from Dashboard > Integrations > API Keys.
 DOKU_CLIENT_ID = os.environ.get('DOKU_CLIENT_ID', '')
