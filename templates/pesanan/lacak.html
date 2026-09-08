@@ -95,8 +95,8 @@
         const startLat = parseFloat("{{ origin_lat|default:-6.9175|stringformat:'.4f' }}".replace(',', '.'));
         const startLon = parseFloat("{{ origin_lon|default:107.6191|stringformat:'.4f' }}".replace(',', '.'));
         
-        const lokasiLat = parseFloat("{{ pesanan.lokasi_lat|default:-6.9175|stringformat:'.4f' }}".replace(',', '.'));
-        const lokasiLon = parseFloat("{{ pesanan.lokasi_lon|default:107.6191|stringformat:'.4f' }}".replace(',', '.'));
+        const lokasiLat = parseFloat("{{ pesanan.lokasi_lat|default_if_none:'' }}".replace(',', '.'));
+        const lokasiLon = parseFloat("{{ pesanan.lokasi_lon|default_if_none:'' }}".replace(',', '.'));
 
 
         
@@ -117,38 +117,37 @@
         const markerKurir = L.marker([startLat, startLon], { icon: kurirIcon }).addTo(map);
         markerKurir.bindPopup("<b>Kurir sedang memproses paket</b>").openPopup();
 
-        // 1. Geocoding Alamat Tujuan
-        const geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${alamatTujuanEncoded}&limit=1&addressdetails=1`;
+        function tampilkanTujuan(destLat, destLon) {
+            inisialisasiRuteDanPelacakan(destLat, destLon, alamatTujuan);
+            const bounds = L.latLngBounds([startLat, startLon], [destLat, destLon]);
+            map.fitBounds(bounds, { padding: [50, 50] });
+        }
 
-        fetch(geocodeUrl)
-            .then(res => res.json())
-            .then(data => {
-                if (data && data.length > 0) {
-                    const destLat = lokasiLat
-                    const destLon = lokasiLon
-                    inisialisasiRuteDanPelacakan(destLat, destLon, alamatTujuan);
-                    
-                    const bounds = L.latLngBounds([startLat, startLon], [destLat, destLon]);
-                    map.fitBounds(bounds, { padding: [50, 50] });
-                } else {
-                    // --- FALLBACK KE GOOGLE MAPS ---
-                    console.warn("Alamat tidak ditemukan, menampilkan link Google Maps.");
-                    mapContainer.innerHTML = `
-                        <div class="flex flex-col items-center justify-center h-full bg-gray-50 text-center p-6">
-                            <svg class="w-12 h-12 text-red-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            <p class="text-sm text-gray-600 mb-4 font-medium">Lokasi tujuan tidak dapat dimuat otomatis.</p>
-                            <a href="https://www.google.com/maps/search/?api=1&query=${alamatTujuanEncoded}" 
-                               target="_blank" 
-                               class="bg-blue-600 text-white px-5 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors">
-                               Buka di Google Maps
-                            </a>
-                        </div>
-                    `;
-                }
-            })
-            .catch(err => {
-                console.error("Geocoding Error:", err);
-            });
+        function tampilkanFallbackAlamat() {
+            mapContainer.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full bg-gray-50 text-center p-6">
+                    <svg class="w-12 h-12 text-red-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <p class="text-sm text-gray-600 mb-4 font-medium">Pesanan lama ini belum memiliki titik lokasi tujuan.</p>
+                    <a href="https://www.google.com/maps/search/?api=1&query=${alamatTujuanEncoded}" target="_blank" rel="noopener noreferrer" class="bg-blue-600 text-white px-5 py-2 rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors">Buka alamat di Google Maps</a>
+                </div>`;
+        }
+
+        // Pesanan baru sudah menyimpan pin dari checkout, jadi tidak perlu geocoding ulang.
+        if (Number.isFinite(lokasiLat) && Number.isFinite(lokasiLon)) {
+            tampilkanTujuan(lokasiLat, lokasiLon);
+        } else {
+            // Hanya untuk pesanan lama yang dibuat sebelum koordinat checkout disimpan.
+            const geocodeUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${alamatTujuanEncoded}&limit=1&addressdetails=1`;
+            fetch(geocodeUrl)
+                .then(res => {
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    return res.json();
+                })
+                .then(data => data && data.length
+                    ? tampilkanTujuan(parseFloat(data[0].lat), parseFloat(data[0].lon))
+                    : tampilkanFallbackAlamat())
+                .catch(() => tampilkanFallbackAlamat());
+        }
 
         // 2. Fungsi Rute OSRM
         function inisialisasiRuteDanPelacakan(destLat, destLon, textAlamat) {
