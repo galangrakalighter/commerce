@@ -24,8 +24,8 @@
                 </svg>
                 <p>{{ error_msg }}</p>
             </div>
-        {% else %}
-            
+        {% endif %}
+
             <div class="grid grid-cols-2 md:grid-cols-3 gap-4 bg-gray-50 border border-gray-100 rounded-2xl p-5 mb-6 text-sm">
                 <div>
                     <span class="text-gray-400 block text-xs font-medium uppercase tracking-wider">Ekspedisi</span>
@@ -44,8 +44,9 @@
             </div>
 
             <div class="mb-8 space-y-2">
-                <label class="text-xs font-medium text-gray-400 uppercase tracking-wider block">Posisi Paket Terkini (Estimasi Kota)</label>
+                <label class="text-xs font-medium text-gray-400 uppercase tracking-wider block">Rute Pengiriman (Ilustrasi)</label>
                 <div id="map" class="w-full h-64 md:h-80 rounded-2xl border border-gray-200 shadow-inner bg-gray-100 relative z-10"></div>
+                <p class="text-xs text-gray-400">JNE reguler tidak menyediakan koordinat kurir secara langsung. Peta menunjukkan rute dari toko menuju pin tujuan.</p>
             </div>
 
             <div class="relative border-l-2 border-gray-100 ml-3 md:ml-4 space-y-8">
@@ -70,8 +71,6 @@
                 {% endfor %}
 
             </div>
-
-        {% endif %}
         
         <div class="mt-8 pt-6 border-t border-gray-100 flex justify-end">
             <a href="javascript:history.back()" class="px-5 py-2.5 text-sm font-medium text-gray-600 bg-gray-50 border border-gray-200 rounded-xl hover:bg-gray-100 transition-colors">
@@ -84,7 +83,6 @@
 {% endblock %}
 
 {% block extra_js %}
-{% if not error_msg %}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -115,7 +113,7 @@
         });
 
         const markerKurir = L.marker([startLat, startLon], { icon: kurirIcon }).addTo(map);
-        markerKurir.bindPopup("<b>Kurir sedang memproses paket</b>").openPopup();
+        markerKurir.bindPopup("<b>Lokasi awal pengiriman</b>").openPopup();
 
         function tampilkanTujuan(destLat, destLon) {
             inisialisasiRuteDanPelacakan(destLat, destLon, alamatTujuan);
@@ -162,25 +160,9 @@
                         const coords = routingData.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
                         L.polyline(coords, { color: '#3b82f6', weight: 4, opacity: 0.7 }).addTo(map);
                     }
-                    mulaiSinkronisasiDatabaseKurir();
                 })
-                .catch(() => mulaiSinkronisasiDatabaseKurir());
-        }
-
-        // 3. Polling Koordinat
-        function mulaiSinkronisasiDatabaseKurir() {
-            setInterval(function() {
-                fetch(`/api/cek-status-pesanan/${pesananId}/`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.kurir_lat && data.kurir_lon) {
-                            markerKurir.setLatLng([data.kurir_lat, data.kurir_lon]);
-                        }
-                    })
-                    .catch(err => console.log("Menunggu update koordinat..."));
-            }, 60000); 
+                .catch(() => {});
         }
     });
 </script>
-{% endif %}
 {% endblock %}

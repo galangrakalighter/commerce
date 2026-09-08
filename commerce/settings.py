@@ -58,7 +58,6 @@ BITESHIP_API_KEY = os.environ.get('BITESHIP_API_KEY', '')
 # DOKU production credentials from Dashboard > Integrations > API Keys.
 DOKU_CLIENT_ID = os.environ.get('DOKU_CLIENT_ID', '')
 DOKU_SECRET_KEY = os.environ.get('DOKU_SECRET_KEY', '')
-BINDERBYTE_API_KEY = os.environ.get('BINDERBYTE_API_KEY', '')
 PUBLIC_BASE_URL = os.environ.get(
     'PUBLIC_BASE_URL',
     'https://laflyderm.lightermediagroup.com',

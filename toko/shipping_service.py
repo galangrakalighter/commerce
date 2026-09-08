@@ -6,6 +6,7 @@ import hashlib
 import base64
 import json
 import requests
+from urllib.parse import quote
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 
@@ -68,6 +69,35 @@ class BiteshipService:
                 or "Tarif pengiriman tidak tersedia."
             )
         return result.get("pricing", [])
+
+    def retrieve_tracking(self, tracking_id=None, waybill_id=None, courier_code=None):
+        if tracking_id:
+            path = f"/trackings/{quote(str(tracking_id), safe='')}"
+        elif waybill_id and courier_code:
+            path = (
+                f"/trackings/{quote(str(waybill_id), safe='')}"
+                f"/couriers/{quote(str(courier_code).lower(), safe='')}"
+            )
+        else:
+            raise ValueError("Tracking ID atau kombinasi resi dan kurir wajib tersedia.")
+
+        response = requests.get(
+            f"{self.base_url}{path}",
+            headers=self.headers,
+            timeout=20,
+        )
+        try:
+            result = response.json()
+        except ValueError:
+            result = {}
+        if not response.ok or not result.get("success"):
+            raise RuntimeError(
+                result.get("error")
+                or result.get("message")
+                or response.text
+                or "Pelacakan Biteship tidak tersedia."
+            )
+        return result
 
     def create_order(self, pesanan):
         url = f"{self.base_url}/orders"

@@ -111,6 +111,8 @@ class Pesanan(models.Model):
     kurir_lat = models.FloatField(null=True, blank=True)
     kurir_lon = models.FloatField(null=True, blank=True)
     no_resi = models.CharField(max_length=100, blank=True, null=True, verbose_name="Nomor Resi")
+    biteship_order_id = models.CharField(max_length=100, blank=True, null=True)
+    biteship_tracking_id = models.CharField(max_length=100, blank=True, null=True)
     kurir = models.CharField(max_length=20, choices=KURIR_CHOICES, blank=True, null=True, help_text="Pilih ekspedisi pengiriman")
     kurir_layanan = models.CharField(max_length=50, blank=True, null=True)
     kode_pos = models.IntegerField(null=True, blank=True)

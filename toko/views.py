@@ -3,6 +3,7 @@ import json, time, requests
 from urllib.parse import urlparse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.dateparse import parse_datetime
+from django.utils import timezone
 from django.db import transaction
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -834,12 +835,15 @@ def buat_pengiriman_biteship(pesanan):
 
     coordinate = result.get('origin', {}).get('coordinate', {})
     pesanan.no_resi = nomor_resi
+    pesanan.biteship_order_id = result.get('id')
+    pesanan.biteship_tracking_id = courier_data.get('tracking_id')
     pesanan.kurir = courier_data.get('company') or pesanan.kurir or 'jne'
     pesanan.kurir_lat = coordinate.get('latitude')
     pesanan.kurir_lon = coordinate.get('longitude')
     pesanan.status = 'KIRIM'
     pesanan.save(update_fields=[
-        'no_resi', 'kurir', 'kurir_lat', 'kurir_lon', 'status',
+        'no_resi', 'biteship_order_id', 'biteship_tracking_id',
+        'kurir', 'kurir_lat', 'kurir_lon', 'status',
         'tanggal_diperbarui',
     ])
     logger.info(
@@ -1152,31 +1156,105 @@ def matikan_flash_sale_ajax(request, produk_id):
             return JsonResponse({'status': 'error', 'message': 'Produk tidak ditemukan'}, status=404)
     return JsonResponse({'status': 'error', 'message': 'Metode tidak diizinkan'}, status=400)
 
+STATUS_BITESHIP_LABELS = {
+    'confirmed': 'Pesanan dikonfirmasi',
+    'allocated': 'Kurir dialokasikan',
+    'picking_up': 'Kurir menuju lokasi pengambilan',
+    'picked': 'Paket telah diambil kurir',
+    'dropping_off': 'Paket menuju penerima',
+    'delivered': 'Paket telah diterima',
+    'cancelled': 'Pengiriman dibatalkan',
+    'on_hold': 'Pengiriman ditahan sementara',
+    'return_in_transit': 'Paket sedang dikembalikan',
+    'returned': 'Paket telah dikembalikan',
+}
+
+
+@login_required
 def lacak_paket(request, pesanan_id):
     pesanan = get_object_or_404(Pesanan, id=pesanan_id, user=request.user)
     tracking_data = []
-    summary_data = {'courier': pesanan.kurir, 'awb': pesanan.no_resi, 'status': 'Memuat...'}
+    summary_data = {
+        'courier': pesanan.kurir or '-',
+        'awb': pesanan.no_resi or '-',
+        'status': pesanan.get_status_display(),
+    }
     error_msg = None
 
-    # 1. AMBIL TRACKING DARI BINDERBYTE
     if pesanan.no_resi and pesanan.kurir:
-        print("NO RESI DATABASE:", pesanan.no_resi)
-        print("KURIR DATABASE:", pesanan.kurir)
-        api_key = settings.BINDERBYTE_API_KEY
-        url = "https://api.binderbyte.com/v1/track"
-        params = {'api_key': api_key, 'courier': pesanan.kurir.lower(), 'awb': pesanan.no_resi}
-        
         try:
-            response = requests.get(url, params=params, timeout=5)
-            result = response.json()
-            print(f"BinderByte API Response: {result}")
-            if result.get('status') == 200:
-                tracking_data = result['data']['history']
-                summary_data = result['data']['summary']
+            cache_key = f'biteship_tracking_{pesanan.id}'
+            cached = request.session.get(cache_key, {})
+            if cached.get('data') and time.time() - cached.get('timestamp', 0) < 300:
+                result = cached['data']
             else:
-                summary_data['status'] = "Resi tidak ditemukan"
-        except Exception:
-            error_msg = "Sistem pelacakan sedang gangguan."
+                result = BiteshipService().retrieve_tracking(
+                    tracking_id=pesanan.biteship_tracking_id,
+                    waybill_id=pesanan.no_resi,
+                    courier_code=pesanan.kurir,
+                )
+                request.session[cache_key] = {
+                    'timestamp': time.time(),
+                    'data': result,
+                }
+                request.session.modified = True
+            biteship_status = str(result.get('status') or '').lower()
+            summary_data = {
+                'courier': result.get('courier', {}).get('company') or pesanan.kurir,
+                'awb': result.get('waybill_id') or pesanan.no_resi,
+                'status': STATUS_BITESHIP_LABELS.get(
+                    biteship_status,
+                    biteship_status.replace('_', ' ').title() or 'Belum ada status',
+                ),
+            }
+            histories = sorted(
+                result.get('history') or [],
+                key=lambda item: item.get('updated_at') or '',
+                reverse=True,
+            )
+            for history in histories:
+                updated_at = history.get('updated_at') or ''
+                parsed_date = parse_datetime(updated_at) if updated_at else None
+                if parsed_date:
+                    updated_at = timezone.localtime(parsed_date).strftime('%d %b %Y, %H:%M WIB')
+                history_status = str(history.get('status') or '').lower()
+                tracking_data.append({
+                    'desc': history.get('note') or STATUS_BITESHIP_LABELS.get(
+                        history_status,
+                        history_status.replace('_', ' ').title(),
+                    ),
+                    'date': updated_at,
+                })
+
+            update_fields = []
+            if biteship_status and pesanan.status_kurir != biteship_status:
+                pesanan.status_kurir = biteship_status
+                update_fields.append('status_kurir')
+            if biteship_status == 'delivered' and pesanan.status != 'SELESAI':
+                pesanan.status = 'SELESAI'
+                update_fields.append('status')
+            elif biteship_status == 'cancelled' and pesanan.status != 'BATAL':
+                pesanan.status = 'BATAL'
+                update_fields.append('status')
+            if update_fields:
+                update_fields.append('tanggal_diperbarui')
+                pesanan.save(update_fields=update_fields)
+            logger.info(
+                'Biteship Tracking berhasil: pesanan_id=%s resi=%s status=%s',
+                pesanan.id,
+                pesanan.no_resi,
+                biteship_status,
+            )
+        except Exception as exc:
+            logger.warning(
+                'Biteship Tracking gagal: pesanan_id=%s resi=%s error=%s',
+                pesanan.id,
+                pesanan.no_resi,
+                exc,
+            )
+            error_msg = f'Pelacakan Biteship belum tersedia: {exc}'
+    else:
+        error_msg = 'Nomor resi belum tersedia untuk pesanan ini.'
     
     # KITA TETAP MENGGUNAKAN KOORDINAT ORIGIN DARI BITESHIP (Database)
     # Jika origin_lat di database kosong (belum di-update), gunakan koordinat default toko
@@ -1192,17 +1270,10 @@ def lacak_paket(request, pesanan_id):
         'origin_lon': origin_lon
     })
 
+@login_required
 def cek_status_kurir_api(request, pesanan_id):
     try:
-        pesanan = Pesanan.objects.get(id=pesanan_id)
-        
-        # 1. Update data dari BinderByte ke database SEBELUM membaca database
-        # Hanya update jika pesanan belum selesai/diterima
-        if pesanan.status_kurir not in ['DELIVERED', 'RETURN']:
-            update_posisi_dari_binderbyte(pesanan)
-            # Reload object dari database setelah di-save
-            pesanan.refresh_from_db()
-            
+        pesanan = Pesanan.objects.get(id=pesanan_id, user=request.user)
         return JsonResponse({
             'status': 'success',
             'kurir_lat': float(pesanan.kurir_lat) if pesanan.kurir_lat else None,
@@ -1211,33 +1282,6 @@ def cek_status_kurir_api(request, pesanan_id):
         })
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-    
-def update_posisi_dari_binderbyte(pesanan):
-    api_key = settings.BINDERBYTE_API_KEY
-    url = "https://api.binderbyte.com/v1/track"
-    params = {
-        'api_key': api_key,
-        'courier': pesanan.kurir,
-        'awb': pesanan.no_resi
-    }
-    
-    try:
-        # Timeout 3 detik agar user tidak menunggu terlalu lama jika API lambat
-        response = requests.get(url, params=params, timeout=3)
-        if response.status_code == 200:
-            result = response.json()
-            # Contoh struktur data: sesuaikan dengan field di JSON response BinderByte
-            # Biasanya data terbaru ada di index 0 dari history/tracking
-            last_history = result['data']['history'][0]
-            
-            # Jika BinderByte memberikan koordinat langsung:
-            if 'lat' in last_history and 'lon' in last_history:
-                pesanan.kurir_lat = last_history['lat']
-                pesanan.kurir_lon = last_history['lon']
-                pesanan.status_kurir = last_history['status']
-                pesanan.save()
-    except Exception as e:
-        print(f"Error fetching BinderByte: {e}")
 
 @login_required
 def kelola_banner(request):
