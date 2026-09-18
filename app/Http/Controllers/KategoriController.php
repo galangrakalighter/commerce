@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Kategori;
 use App\Models\Promo;
+use App\Models\ArticleCategory;
 
 class KategoriController extends Controller
 {
@@ -12,26 +13,56 @@ class KategoriController extends Controller
     {
         $query = Kategori::with('promo');
 
-        // Pencarian dengan otomatis mengubah input & database menjadi huruf kecil
-        if ($request->filled('search')) {
-            $search = strtolower($request->input('search'));
-            $query->whereRaw('LOWER(nama_kategori) like ?', ['%' . $search . '%']);
+        if ($request->filled('search-produk')) {
+            $search_produk = strtolower($request->input('search-produk'));
+
+            $query->whereRaw('LOWER(nama_kategori) LIKE ?', ["%{$search_produk}%"]);
         }
 
-        $categories = $query->latest()->get();
-        $promos = Promo::latest()->get(); // Untuk pilihan dropdown di form modal
+        $categories = $query->latest()->paginate(10)->withQueryString();
+        $totalCategories = Kategori::count();
 
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'html' => view('kategori.table_rows', compact('categories'))->render(),
-                'stats' => [
-                    'total' => Kategori::count(),
-                    'berpromo' => Kategori::whereNotNull('id_promo')->count()
-                ]
-            ]);
+        $promos = Promo::latest()->get();
+
+        $queryArticle = ArticleCategory::query();
+
+        if ($request->filled('search-artikel')) {
+            $search_artikel = strtolower($request->input('search-artikel'));
+
+            $queryArticle->whereRaw('LOWER(name) LIKE ?', ["%{$search_artikel}%"]);
         }
 
-        return view('kategori.kategori', compact('categories', 'promos'));
+        $articleCategories = $queryArticle->latest()->paginate(10)->withQueryString();
+        $totalArticleCategories = ArticleCategory::count();
+
+        if ($request->ajax()) {
+
+            if ($request->has('search-produk')) {
+
+                return response()->json([
+                    'html' => view('kategori.table_rows', compact('categories'))->render(),
+                    'pagination' => $categories->links()->render(),
+                    'stats' => [
+                        'total' => $totalCategories,
+                    ]
+                ]);
+
+            }
+
+            if ($request->has('search-artikel')) {
+
+                return response()->json([
+                    'html' => view('articles.categori_table_rows', compact('articleCategories'))->render(),
+                    'pagination' => $articleCategories->links()->render(),
+                    'stats' => [
+                        'total' => $totalArticleCategories,
+                    ]
+                ]);
+
+            }
+        }
+
+        return view('kategori.kategori', compact('categories', 'promos', 'totalCategories', 'totalArticleCategories', 'articleCategories'));
     }
 
     public function store(Request $request)

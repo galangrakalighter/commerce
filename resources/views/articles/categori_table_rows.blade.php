@@ -1,14 +1,14 @@
-@forelse($categories as $kategori)
+@forelse($articleCategories as $kategori)
 <tr class="hover:bg-gray-50/80 transition">
     <td class="py-4 px-4 font-bold text-gray-900 text-sm uppercase">
-        {{ $kategori->nama_kategori }}
+        {{ $kategori->name }}
     </td>
     <td class="py-4 px-4 text-center">
         <div class="flex items-center justify-center space-x-2">
             <button onclick="prepareEdit({{ $kategori->id }})" class="p-1.5 bg-amber-50 text-[#E0A226] hover:bg-amber-100 rounded transition" title="Ubah Data">
                 📝
             </button>
-            <button onclick="deleteKategori({{ $kategori->id }})" class="p-1.5 bg-red-50 text-red-500 hover:bg-red-100 rounded transition" title="Hapus">
+            <button onclick="deleteArticle({{ $kategori->id }})" class="p-1.5 bg-red-50 text-red-500 hover:bg-red-100 rounded transition" title="Hapus">
                 🗑️
             </button>
         </div>

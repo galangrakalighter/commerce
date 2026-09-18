@@ -240,7 +240,7 @@ function checkoutWhatsApp() {
     
     let pesan = greeting + orderList.join("\n") + footer;
 
-    window.open(`https://wa.me/62895428171038?text=${encodeURIComponent(pesan)}`, '_blank');
+    window.open(`https://wa.me/6289612821257?text=${encodeURIComponent(pesan)}`, '_blank');
 }
 </script>
 

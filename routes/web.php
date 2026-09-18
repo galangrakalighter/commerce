@@ -9,21 +9,24 @@ use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\VoucherController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\ArticleGenerateKeywordController;
+use App\Http\Controllers\ArticleGenerateKeywordPlanController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/beranda', [HomeController::class, 'beranda'])->name('beranda');
 Route::get('/tentang-kami', [HomeController::class, 'tentangKami'])->name('tentang');
 Route::get('/promo-dashboard', [HomeController::class, 'promo'])->name('promo.home');
 Route::get('/articles-all', [ArticleController::class, 'indexArtikel'])->name('articles.all');
+Route::get('/search', [HomeController::class, 'search'])->name('search');
 
 Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/register', [AuthController::class, 'register'])->name('register');
     Route::get('/filter-produk/{kategori_id?}', [HomeController::class, 'filter'])->name('produk.filter');
-    Route::get('/articles/fetch', [ArticleController::class, 'fetch'])->name('articles.fetch');
-    Route::get('/search', [HomeController::class, 'search'])->name('search');
 });
-    
+
+
+Route::get('/articles/fetch', [ArticleController::class, 'fetch'])->name('articles.fetch');
 Route::get('/articles/detail/{slug}', [ArticleController::class, 'detailArtikel'])->name('articles.detailArtikel');
 Route::get('/produk/detail/{id}', [ProdukController::class, 'detail_produk'])->name('produk.detail');
     
@@ -40,6 +43,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/keranjang/{id}/delete', [ProdukController::class, 'hapusKeranjang'])->name('keranjang.destroy');
     Route::post('/keranjang/delete-batch', [ProdukController::class, 'hapusSemuaKeranjang'])->name('keranjang.destroy_all');
     Route::post('/categories', [ArticleController::class, 'storeCategory'])->name('articles.category');
+    Route::put('/categories-edit/{id}', [ArticleController::class, 'editCategory'])->name('articles.editCategory');
+    Route::delete('/categories-delete/{id}', [ArticleController::class, 'deleteCategory'])->name('articles.deleteCategory');
     Route::middleware(['auth', 'admin'])->group(function () {
         Route::resource('promo', PromoController::class);
         Route::resource('kategori', KategoriController::class);
@@ -47,6 +52,18 @@ Route::middleware('auth')->group(function () {
         Route::resource('voucher', VoucherController::class);
         Route::resource('banner', BannerController::class);
         Route::resource('articles', ArticleController::class);
+        Route::post('/article-generate-keyword', [ArticleGenerateKeywordController::class, 'store'])
+            ->name('article-generate-keyword.store');
+        Route::put('/article-generate-keyword/{articleGenerateKeyword}', [ArticleGenerateKeywordController::class, 'update'])
+            ->name('article-generate-keyword.update');
+        Route::delete('/article-generate-keyword/{articleGenerateKeyword}', [ArticleGenerateKeywordController::class, 'destroy'])
+            ->name('article-generate-keyword.destroy');
+        Route::post('/article-generate-keyword-plan', [ArticleGenerateKeywordPlanController::class, 'store'])
+            ->name('article-generate-keyword-plan.store');
+        Route::put('/article-generate-keyword-plan/{articleGenerateKeywordPlan}', [ArticleGenerateKeywordPlanController::class, 'update'])
+            ->name('article-generate-keyword-plan.update');
+        Route::delete('/article-generate-keyword-plan/{articleGenerateKeywordPlan}', [ArticleGenerateKeywordPlanController::class, 'destroy'])
+            ->name('article-generate-keyword-plan.destroy');
     });
 
 });

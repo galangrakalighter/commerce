@@ -11,20 +11,22 @@
     <section class="relative pb-16">
         <!-- BANNER UTAMA -->
         <div class="relative w-full h-[500px] sm:h-[550px] md:h-[600px] lg:h-[650px] overflow-hidden">
-            <img src="{{ asset('images/banner_beranda_Awal.png') }}" 
+            <img src="{{ asset('images/head_beranda.webp') }}" 
                 alt="Banner Utama" 
                 class="w-full h-full object-cover object-center">
+            
+            <div class="absolute inset-0" style="background: linear-gradient(to bottom, rgba(0,0,0,.45), rgba(0,0,0,.15));"></div>
 
             <!-- Overlay Text -->
-            <div class="absolute inset-0 flex items-center justify-center text-center px-4 sm:px-6">
+            <div class="absolute inset-0 flex items-center justify-center text-center px-4 sm:px-6 mb-[17%]">
                 <div class="text-white max-w-5xl mx-auto">
-                    <h1 class="text-2xl sm:text-3xl md:text-5xl font-bold uppercase leading-tight drop-shadow-md font-['Platypi']">
-                        Supplier Bumbu Makanan <br class="hidden sm:inline"> & Bubuk Minuman Halal
+                    <h1 class="text-2xl sm:text-3xl md:text-5xl font-bold uppercase leading-tight drop-shadow-md">
+                        Supplier Bumbu Makanan & Bubuk Minuman Halal Untuk Bisnis Anda
                     </h1>
-                    <h2 class="text-lg sm:text-xl md:text-3xl font-bold mt-2 sm:mt-3 drop-shadow-md font-['Platypi']">
+                    {{-- <h2 class="text-lg sm:text-xl md:text-3xl font-bold mt-2 sm:mt-3 drop-shadow-md">
                         Untuk Bisnis Anda
-                    </h2>
-                    <p class="max-w-5xl mx-auto mt-6 sm:mt-8 md:mt-10 font-semibold text-sm sm:text-base md:text-lg leading-relaxed text-gray-100 font-['Inter']">
+                    </h2> --}}
+                    <p class="max-w-5xl text-white mx-auto mt-6 sm:mt-8 md:mt-10 font-semibold text-sm sm:text-base md:text-lg leading-relaxed" style="opacity: 0.95;">
                         Golden Aroma Food Indonesia menyediakan bumbu tabur, bubuk minuman, cabe bubuk, rempah-rempah, essen flavor, dan <br class="hidden md:inline"> bahan baku F&B berkualitas untuk UMKM, distributor, reseller, hingga industri makanan dan minuman di seluruh Indonesia.
                     </p>
                 </div>
@@ -35,26 +37,15 @@
         <div class="relative z-20 max-w-4xl mx-auto flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 -mt-12 sm:-mt-16 px-4">
             
             <!-- Card 1: Lihat Produk -->
-            <a href="/" class="group relative w-full sm:w-[317px] h-[130px] sm:h-[143px] bg-[#FFBE32] rounded-[15px] overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl flex items-center px-5 sm:px-6">
-                <div class="z-10 text-[#2C4A04] text-xl sm:text-[27px] font-bold font-['Platypi'] transition-all duration-300 group-hover:scale-105">
+            <a href="/" class="group relative w-full sm:w-[317px] h-[130px] sm:h-[143px] bg-[#FFBE32] rounded-[15px] overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl flex items-center justify-center px-5 sm:px-6">
+                <div class="z-10 text-[#2C4A04] text-center text-xl sm:text-[27px] font-bold transition-transform duration-300 group-hover:scale-105 transform-gpu" style="-webkit-font-smoothing: antialiased;">
                     Lihat Produk
-                </div>
-                <div class="absolute -right-2 bottom-0 w-[150px] sm:w-[200px] h-full pointer-events-none">
-                    <img src="{{ asset('images/bubuk.png') }}" 
-                        class="w-full h-full object-contain object-right-bottom transition-transform duration-500 group-hover:-translate-x-2 group-hover:-translate-y-2 group-hover:rotate-[-5deg] group-hover:scale-110" 
-                        alt="Lihat Produk" />
                 </div>
             </a>
 
-            <!-- Card 2: Konsultasi Custom Bumbu (Diperbaiki) -->
-            <a href="#footer" class="group relative w-full sm:w-[317px] min-h-[130px] sm:h-[143px] bg-[#24420A] rounded-[15px] overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl flex items-center justify-end px-5 sm:px-6 py-4 sm:py-0">
-                <div class="absolute -left-2 bottom-0 w-[140px] sm:w-[180px] h-full pointer-events-none">
-                    <img src="{{ asset('images/buah-baru.png') }}" 
-                        class="w-full h-full object-contain object-left-bottom transition-transform duration-500 group-hover:translate-x-2 group-hover:-translate-y-2 group-hover:rotate-[5deg] group-hover:scale-110" 
-                        alt="Konsultasi Bumbu" />
-                </div>
-                <!-- Menambahkan class -translate-y-1 atau sm:-translate-y-1.5 agar teks naik dan tidak tertutup -->
-                <div class="z-10 text-yellow-400 text-xl sm:text-[27px] font-bold font-['Platypi'] text-right transition-all duration-300 group-hover:scale-105 -translate-y-1 sm:-translate-y-1.5 leading-tight">
+            <!-- Card 2: Konsultasi Custom Bumbu -->
+            <a href="https://wa.me/6289612821257?text={{ urlencode('Halo, saya ingin melakukan Konsultasi Custom Bumbu.') }}" target="_blank" class="group relative w-full sm:w-[317px] min-h-[130px] sm:h-[143px] bg-[#24420A] rounded-[15px] overflow-hidden shadow-lg transition-all duration-300 hover:shadow-xl flex items-center justify-center px-5 sm:px-6 py-4 sm:py-0">
+                <div class="z-10 text-center text-yellow-400 text-xl sm:text-[27px] font-bold transition-transform duration-300 group-hover:scale-105 -translate-y-1 sm:-translate-y-1.5 leading-tight transform-gpu" style="-webkit-font-smoothing: antialiased;">
                     Konsultasi Custom Bumbu
                 </div>
             </a>
@@ -93,7 +84,7 @@
                 <!-- Kolom Gambar / Placeholder -->
                 <div class="order-1 md:order-2 w-full">
                     @if($imageExists)
-                        <img src="{{ asset('images/tentang.png') }}" 
+                        <img src="{{ asset('images/mengapa_beranda.webp') }}" 
                             class="rounded-2xl sm:rounded-3xl shadow-xl w-full h-auto object-cover aspect-[4/3] max-h-[450px] md:max-h-none mx-auto" 
                             alt="Golden Aroma Food">
                     @else
@@ -161,7 +152,7 @@
     <section class="py-20 overflow-hidden">
         <div class="max-w-6xl mx-auto px-4 text-center">
             <!-- Heading -->
-            <h2 class="text-3xl md:text-5xl font-extrabold text-[#24420A] mb-4 font-['Platypi']">
+            <h2 class="text-3xl md:text-5xl font-extrabold text-[#24420A] mb-4">
                 Solusi Bahan Baku Kuliner
             </h2>
             <p class="text-gray-600 mb-16 text-base md:text-lg">Pilih kategori terbaik untuk mendukung bisnis Anda</p>
@@ -221,7 +212,7 @@
     <section class="py-20 bg-gradient-to-b from-white from-30% to-[#24420A] to-30%">
         <div class="max-w-6xl mx-auto px-4 text-center">
             <!-- Heading -->
-            <h2 class="text-3xl md:text-4xl font-extrabold text-[#24420A] mb-4 font-['Platypi']">
+            <h2 class="text-3xl md:text-4xl font-extrabold text-[#24420A] mb-4">
                 Ciptakan Rasa Khas untuk Produk Anda
             </h2>
             <p class="text-gray-600 mb-12 text-base md:text-lg">
@@ -230,12 +221,12 @@
 
             @php
                 $customItems = [
-                    ['nama' => 'Bumbu Snack', 'img' => 'bumbu-snack.png'], 
-                    ['nama' => 'Bumbu Tabur', 'img' => 'bumbu-tabur.png'], 
-                    ['nama' => 'Bumbu Pedas', 'img' => 'bumbu-pedas.png'], 
+                    ['nama' => 'Bumbu Snack', 'img' => 'bumbu-snack-baru-lagi.jpg'], 
+                    ['nama' => 'Bumbu Tabur', 'img' => 'bumbu-tabur.jpeg'], 
+                    ['nama' => 'Bumbu Pedas', 'img' => 'bumbu-pedas-lagi.webp'], 
                     ['nama' => 'Bumbu Gurih', 'img' => 'bumbu-gurih.png'], 
                     ['nama' => 'Bumbu Rempah', 'img' => 'bumbu-rempah.png'], 
-                    ['nama' => 'Formula Rasa Khusus', 'img' => 'formula-rasa-khusus.png']
+                    ['nama' => 'Formula Rasa Khusus', 'img' => 'formula-rasa-khusus-beranda.webp']
                 ];
             @endphp
 
@@ -246,7 +237,7 @@
                         <div class="w-full h-48 overflow-hidden rounded-t-[24px] mb-4">
                             <img src="{{ asset('images/' . $item['img']) }}" alt="{{ $item['nama'] }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
                         </div>
-                        <h3 class="text-[#24420A] font-bold text-lg md:text-xl font-['Platypi'] transition-colors">
+                        <h3 class="text-[#24420A] font-bold text-lg md:text-xl transition-colors">
                             {{ $item['nama'] }}
                         </h3>
                     </div>
@@ -259,7 +250,7 @@
                     Layanan custom pembuatan bumbu untuk membantu bisnis Anda <br class="hidden md:block">
                     menciptakan rasa yang unik, konsisten, dan sesuai dengan target pasar.
                 </p>
-                <a href="#footer" class="bg-[#F2B705] text-[#24420A] px-8 py-3.5 rounded-xl font-bold text-sm md:text-base hover:bg-white transition duration-300 shadow-md shrink-0">
+                <a href="https://wa.me/6289612821257?text={{ urlencode('Halo, saya ingin melakukan Konsultasi Custom Bumbu.') }}" target="_blank" class="bg-[#F2B705] text-[#24420A] px-8 py-3.5 rounded-xl font-bold text-sm md:text-base hover:bg-white transition duration-300 shadow-md shrink-0">
                     Konsultasi Custom Bumbu
                 </a>
             </div>
@@ -271,7 +262,7 @@
         <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
             
             <!-- Judul Responsif -->
-            <h2 class="text-2xl sm:text-3xl md:text-5xl font-bold text-[#24420A] mb-6 sm:mb-8 leading-tight font-['Platypi']">
+            <h2 class="text-2xl sm:text-3xl md:text-5xl font-bold text-[#24420A] mb-6 sm:mb-8 leading-tight">
                 Tentang Golden Aroma Food <br class="hidden md:inline"> Indonesia
             </h2>
 
@@ -290,7 +281,7 @@
             </div>
             
             <!-- Tombol Responsif -->
-            <div class="text-center md:text-left">
+            <div class="text-center md:text-center">
                 <a href="{{ route('tentang') }}" 
                 class="inline-flex items-center justify-center bg-[#24420A] text-white px-8 py-3.5 rounded-xl font-bold text-sm sm:text-base hover:bg-[#3a5a1f] transition-all duration-300 shadow-md hover:shadow-lg">
                     Selengkapnya Tentang Kami
@@ -355,7 +346,7 @@
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="max-w-2xl">
                 <!-- Judul Responsif -->
-                <h2 class="text-2xl sm:text-3xl md:text-5xl font-bold text-[#F2B705] mb-4 sm:mb-6 leading-tight font-['Platypi']">
+                <h2 class="text-2xl sm:text-3xl md:text-5xl font-bold text-[#F2B705] mb-4 sm:mb-6 leading-tight">
                     Siap Mengembangkan Produk Kuliner Anda?
                 </h2>
 

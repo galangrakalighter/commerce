@@ -59,21 +59,12 @@
                             mb-6 sm:mb-8">
 
                     <p>
-                        <strong>Golden Aroma Food Indonesia (GAFI)</strong>
-                        adalah perusahaan yang bergerak di bidang produksi bumbu
-                        dan seasoning berkualitas untuk kebutuhan rumah tangga,
-                        UMKM, hingga industri makanan dan minuman. Dengan
-                        pengalaman dalam pengembangan produk, GAFI menghadirkan
-                        berbagai pilihan bumbu instan, bumbu tabur, dry rub,
-                        dan bubuk minuman yang praktis, konsisten, serta sesuai
-                        dengan selera pasar Indonesia.
+                        <strong>Golden Aroma Food Indonesia (GAFIKU)</strong>
+                        adalah perusahaan yang bergerak di bidang produksi bumbu dan seasoning berkualitas untuk kebutuhan rumah tangga, UMKM, hingga industri makanan dan minuman. Dengan pengalaman dalam pengembangan produk, GAFIKU menghadirkan berbagai pilihan bumbu instan, bumbu tabur, dry rub, dan bubuk minuman yang praktis, konsisten, serta sesuai dengan selera pasar Indonesia.
                     </p>
 
                     <p>
-                        Kami berkomitmen menjadi mitra terpercaya bagi para pelaku
-                        usaha F&B dengan menghadirkan produk berkualitas,
-                        inovatif, dan memiliki nilai terbaik untuk mendukung
-                        pertumbuhan bisnis pelanggan.
+                        Kami berkomitmen menjadi mitra terpercaya bagi para pelaku usaha F&B dengan menghadirkan produk berkualitas, inovatif, dan memiliki nilai terbaik untuk mendukung pertumbuhan bisnis pelanggan.
                     </p>
 
                 </div>
@@ -651,7 +642,7 @@
     </div>
 </section>
 
-<!-- Section: Mengapa Memilih GAFI? -->
+<!-- Section: Mengapa Memilih GAFIKU? -->
 <section class="relative overflow-hidden bg-[#2D4424] py-12 text-white sm:py-16 md:py-20 lg:py-24">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
@@ -659,16 +650,16 @@
         <!-- Judul Section -->
         <div class="mb-10 text-center sm:mb-12 md:mb-16">
             <h2 class="font-['Platypi'] text-3xl font-extrabold leading-tight tracking-tight text-[#FFBE32] sm:text-4xl md:text-5xl lg:text-6xl">
-                Mengapa Memilih GAFI?
+                Mengapa Memilih GAFIKU?
             </h2>
         </div>
 
         <!-- Gambar Utama -->
         <div class="mx-auto mb-10 w-full overflow-hidden rounded-xl sm:mb-12 sm:rounded-2xl">
             <img
-                src="{{ asset('images/Banner-tentang.png') }}"
-                alt="Mengapa Memilih GAFI"
-                class="block h-auto w-full object-cover"
+                src="{{ asset('images/tentang-kami.webp') }}"
+                alt="Mengapa Memilih GAFIKU"
+                class="block w-full h-[347px] object-cover"
                 loading="lazy"
             />
         </div>

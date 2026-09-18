@@ -9,7 +9,7 @@
                 <span class="text-2xl">🏷️</span>
                 <div>
                     <h1 class="text-md md:text-lg font-bold text-[#24420A] uppercase tracking-wide">Pusat Kelola Promo</h1>
-                    <p class="text-xs text-[#24420A]/80 font-medium">Atur diskon dan penawaran toko GAFI</p>
+                    <p class="text-xs text-[#24420A]/80 font-medium">Atur diskon dan penawaran toko GAFIKU</p>
                 </div>
             </div>
             

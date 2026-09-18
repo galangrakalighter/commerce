@@ -5,7 +5,7 @@
     {{-- Banner Promo --}}
     <div class="relative overflow-hidden rounded-2xl shadow-lg border border-gray-100">
         <img 
-            src="{{ asset('images/mobil-promo.png') }}" 
+            src="{{ asset('images/promo_paling_atas.png') }}" 
             alt="Promo Spesial GAFIKU - Gratis Subsidi Ongkir Seluruh Indonesia" 
             class="w-full h-auto object-cover block"
         >
@@ -24,7 +24,7 @@
             {{-- Text Pesan --}}
             <div class="text-center md:text-left">
                 <p class="text-sm md:text-lg font-semibold leading-snug">
-                    Dapatkan subsidi ongkir untuk setiap pembelian minimal 20 kg ke seluruh Indonesia.
+                     Belanja lebih hemat, untung lebih banyak <br> bersama GAFIKU.
                 </p>
             </div>
         </div>
@@ -91,7 +91,7 @@
             
             {{-- Bagian Kiri (Gambar Bumbu) --}}
             <div class="w-full md:w-1/2 relative min-h-[250px] md:min-h-full">
-                <img src="{{ asset('storage/' . $gambar_promo->image_path) }}" alt="Varian Bumbu GAFI" class="absolute inset-0 w-full h-full object-cover">
+                <img src="{{ asset('storage/' . $gambar_promo->image_path) }}" alt="Varian Bumbu GAFIKU" class="absolute inset-0 w-full h-full object-cover">
             </div>
 
             {{-- Bagian Kanan (Background Hijau & Teks) --}}
@@ -101,12 +101,12 @@
                     Hubungi Customer Service kami untuk <br> mendapatkan informasi promo terbaru dan <br> penawaran terbaik sesuai kebutuhan Anda.
                 </p>
                 <div class="flex justify-center md:justify-center">
-                    <a href="https://wa.me/6289612821257" target="_blank" class="inline-flex items-center gap-2 bg-white text-[#284807] font-bold px-6 py-3 rounded-full shadow hover:bg-gray-100 transition">
+                    <a href="https://wa.me/6289612821257?text={{ urlencode('Halo, saya ingin menanyakan informasi tentang promo yang sedang berlangsung.') }}" target="_blank" class="inline-flex items-center gap-2 bg-white text-[#284807] font-bold px-6 py-3 rounded-full shadow hover:bg-gray-100 transition">
                         <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.03-.42 1.98-1.07 2.75z"/></svg>
                         Hubungi CS
                     </a>
                 </div>
-                <p class="text-lg md:text-xl text-center mt-6">Belanja lebih hemat, untung lebih banyak bersama GAFI.</p>
+                <p class="text-lg md:text-xl text-center mt-6">Belanja lebih hemat, untung lebih banyak bersama GAFIKU.</p>
             </div>
 
         </div>

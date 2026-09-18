@@ -5,12 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     {{-- SEO DYNAMIC --}}
-    <title>@yield('meta_title', 'GAFI - Golden Aroma Food Indonesia')</title>
+    <title>@yield('meta_title', 'GAFIKU - Golden Aroma Food Indonesia')</title>
     <meta name="description" content="@yield('meta_description', 'Pusat seasoning powder dan beverage powder terbaik di Indonesia.')">
-    <meta name="keywords" content="@yield('meta_keywords', 'GAFI, seasoning powder, bumbu tabur, minuman serbuk')">
+    <meta name="keywords" content="@yield('meta_keywords', 'GAFIKU, seasoning powder, bumbu tabur, minuman serbuk')">
 
     {{-- Open Graph (Social Media Preview) --}}
-    <meta property="og:title" content="@yield('meta_title', 'GAFI - Golden Aroma Food Indonesia')">
+    <meta property="og:title" content="@yield('meta_title', 'GAFIKU - Golden Aroma Food Indonesia')">
     <meta property="og:description" content="@yield('meta_description', 'Pusat seasoning powder dan beverage powder terbaik di Indonesia.')">
     <meta property="og:image" content="@yield('og_image', asset('img/default-logo.png'))">
 
@@ -55,7 +55,7 @@
         <div class="max-w-7xl mx-auto flex items-center justify-between">
             <!-- Logo -->
             <a href="{{ route('home') }}" class="flex items-center space-x-2 focus:outline-none shrink-0">
-                <img src="{{ asset('images/Logo_gafi.png') }}" alt="Logo GAFI" class="h-9 md:h-12 w-auto object-contain">
+                <img src="{{ asset('images/Logo_gafi.png') }}" alt="Logo GAFIKU" class="h-9 md:h-12 w-auto object-contain">
             </a>
             
             <!-- Menu Desktop -->
@@ -73,7 +73,7 @@
 
                                 <div id="admin-cms-menu" class="opacity-0 scale-95 pointer-events-none invisible transition-all duration-200 ease-out absolute left-0 mt-3 w-52 bg-white rounded-md shadow-lg py-1.5 z-50 border border-gray-100 ring-1 ring-black ring-opacity-5 origin-top-left">
                                     <div class="px-4 py-1 border-b border-gray-100 mb-1">
-                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Fitur CMS GAFI</p>
+                                        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Fitur CMS GAFIKU</p>
                                     </div>
                                     <a href="{{ route('kategori.index') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#24420A] transition">Kelola Kategori</a>
                                     <a href="{{ route('produk.index') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-[#24420A] transition">Kelola Produk</a>
@@ -482,31 +482,65 @@
                         <ul class="space-y-3 text-gray-600 text-sm">
                             <li><a href="{{ route('beranda') }}" class="hover:text-[#24420A] transition">Beranda</a></li>
                             <li><a href="{{ route('tentang') }}" class="hover:text-[#24420A] transition">Tentang Kami</a></li>
-                            <li><a href="{{ route('home') }}" class="hover:text-[#24420A] transition">Produk</a></li>
-                            <li><a href="#" class="hover:text-[#24420A] transition">Custom Bumbu</a></li>
+                            <li><a href="{{ route('home') }}" class="hover:text-[#24420A] transition">Toko</a></li>
                             <li><a href="{{ route('articles.all') }}" class="hover:text-[#24420A] transition">Artikel</a></li>
+                            <li><a href="{{ route('promo.home') }}" class="hover:text-[#24420A] transition">Promo</a></li>
                             <li><a href="#footer" class="hover:text-[#24420A] transition">Kontak Kami</a></li>
                         </ul>
                     </div>
                     <div>
                         <h4 class="text-[#24420A] font-bold mb-6 uppercase text-sm tracking-wide">Produk</h4>
                         <ul class="space-y-3 text-gray-600 text-sm">
-                            <li><a href="#" class="hover:text-[#24420A] transition">Bumbu Tabur</a></li>
-                            <li><a href="#" class="hover:text-[#24420A] transition">Bubuk Minuman</a></li>
-                            <li><a href="#" class="hover:text-[#24420A] transition">Cabe Bubuk</a></li>
-                            <li><a href="#" class="hover:text-[#24420A] transition">Bubuk Rempah</a></li>
-                            <li><a href="#" class="hover:text-[#24420A] transition">Essen Flavor</a></li>
-                            <li><a href="#" class="hover:text-[#24420A] transition">Bahan Baku F&B</a></li>
+                            @foreach ($randomCategories as $rc)
+                                <li>
+                                    <button onclick="filterProduk({{ $rc->id }}, this, '.product-item', 'footer')" 
+                                        class="w-full text-left pl-3 hover:text-[#24420A] cursor-pointer font-semibold transition hover:underline flex items-center">
+                                        <!-- Tanda panah dinamis (awalnya kosong) -->
+                                        <span class="arrow-icon mr-1"></span> 
+                                        {{ $rc->nama_kategori }}
+                                    </button>
+                                </li>
+                            @endforeach
                         </ul>
                     </div>
                     <div>
                         <h4 class="text-[#24420A] font-bold mb-6 uppercase text-sm tracking-wide">Layanan</h4>
                         <ul class="space-y-3 text-gray-600 text-sm">
-                            <li><a href="#" class="hover:text-[#24420A] transition">Custom Pembuatan Bumbu</a></li>
-                            <li><a href="#" class="hover:text-[#24420A] transition">Konsultasi Produk</a></li>
-                            <li><a href="#" class="hover:text-[#24420A] transition">Pemesanan Grosir</a></li>
-                            <li><a href="#" class="hover:text-[#24420A] transition">Kerja Sama Distributor</a></li>
-                            <li><a href="#" class="hover:text-[#24420A] transition">Private Label</a></li>
+                            <li>
+                                <a href="https://wa.me/6289612821257?text={{ urlencode('Halo, saya ingin menggunakan layanan Custom Pembuatan Bumbu.') }}" 
+                                target="_blank" 
+                                class="hover:text-[#24420A] transition">
+                                Custom Pembuatan Bumbu
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://wa.me/6289612821257?text={{ urlencode('Halo, saya ingin melakukan Konsultasi Produk.') }}" 
+                                target="_blank" 
+                                class="hover:text-[#24420A] transition">
+                                Konsultasi Produk
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://wa.me/6289612821257?text={{ urlencode('Halo, saya tertarik dengan Pemesanan Grosir.') }}" 
+                                target="_blank" 
+                                class="hover:text-[#24420A] transition">
+                                Pemesanan Grosir
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://wa.me/6289612821257?text={{ urlencode('Halo, saya ingin tahu informasi mengenai Kerja Sama Distributor.') }}" 
+                                target="_blank" 
+                                class="hover:text-[#24420A] transition">
+                                Kerja Sama Distributor
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://wa.me/6289612821257?text={{ urlencode('Halo, saya tertarik dengan layanan Private Label.') }}" 
+                                target="_blank" 
+                                class="hover:text-[#24420A] transition">
+                                Private Label
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -518,10 +552,31 @@
                 <p class="text-gray-600 mb-6 text-sm max-w-2xl leading-relaxed">Gerbang Kuning Gudang Bumbu, Jalan Ceuri no 51 Kampung Sindang Asih, Sebelah Sawah, Jl. Raya Kopo, Katapang, Pamentasan, Kabupaten Bandung, Jawa Barat 40921</p>
                 
                 <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 text-sm text-[#24420A] font-medium">
-                    <div class="flex flex-wrap gap-4 sm:gap-8 items-center">
-                        <span class="flex items-center gap-2">WhatsApp: <a href="https://wa.me/6289612821257" target="_blank" class="hover:underline">0896-1282-1257</a></span>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8">
+                        
+                        <!-- Daftar Nomor WhatsApp (Disusun Kebawah) -->
+                        <div class="flex flex-col gap-1.5">
+                            <!-- Bagian Gafi -->
+                            <span>Gafiku: <a href="https://wa.me/6289612821257" target="_blank" class="hover:underline font-medium">0896-1282-1257</a></span>
+                            
+                            <!-- Bagian Mitra -->
+                            <div class="flex flex-col gap-1.5 mt-1">
+                                <span class="font-semibold text-gray-700">Mitra:</span>
+                                <span class="pl-3">Bandung: <a href="https://wa.me/6287823837022" target="_blank" class="hover:underline font-medium">0878-2383-7022</a></span>
+                                <span class="pl-3">Jakarta: <a href="https://wa.me/6289660271556" target="_blank" class="hover:underline font-medium">0896-6027-1556</a></span>
+                                <span class="pl-3">Bali: <a href="https://wa.me/6287860360864" target="_blank" class="hover:underline font-medium">0878-6036-0864</a></span>
+                                <span class="pl-3">Surabaya & Jawa Timur: <a href="https://wa.me/628113338804" target="_blank" class="hover:underline font-medium">0811-3338-804</a></span>
+                                <span class="pl-3">Bandung & Jawa Tengah & Yogyakarta: <a href="https://wa.me/6285100749395" target="_blank" class="hover:underline font-medium">0851-0074-9395</a></span>
+                            </div>
+                        </div>
+
+                        <!-- Pemisah -->
                         <span class="hidden sm:inline text-gray-300">|</span>
-                        <span class="flex items-center gap-2">Email: <a href="mailto:gafi.bdg.adm@gmail.com" class="hover:underline">gafi.bdg.adm@gmail.com</a></span>
+
+                        <!-- Email -->
+                        <div class="flex items-center gap-2">
+                            <span>Email: <a href="mailto:gafi.bdg.adm@gmail.com" class="hover:underline font-medium">gafi.bdg.adm@gmail.com</a></span>
+                        </div>
                     </div>
 
                     <!-- Ikon Media Sosial -->
@@ -530,7 +585,7 @@
                         <a href="https://www.instagram.com/goldenaromafood_gafi.official?igsh=MXB1dXhhbGR4NDE4ag==" target="_blank" class="w-9 h-9 rounded-full bg-gray-50 flex items-center justify-center text-gray-600 hover:text-white hover:bg-[#E1306C] transition-all duration-200 shadow-sm" aria-label="Instagram">
                             <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
                                 <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                        </svg>
+                            </svg>
                         </a>
 
                         <!-- LinkedIn -->
@@ -631,6 +686,100 @@
     </script>
     <script>
 
+        document.addEventListener("DOMContentLoaded", function() {
+            // Ambil parameter 'kategori' dari URL (contoh: ?kategori=3)
+            const urlParams = new URLSearchParams(window.location.search);
+            const kategoriId = urlParams.get('kategori');
+
+            if (kategoriId) {
+                // Cari tombol kategori yang sesuai di sidebar/halaman berdasarkan ID-nya
+                // (Sesuaikan selector tombolnya jika diperlukan)
+                const targetButton = document.querySelector(`button[onclick*="filterProduk(${kategoriId}"]`);
+                
+                // Jalankan fungsi filter
+                filterProduk(parseInt(kategoriId), targetButton, '.product-item-all', 'footer');
+
+                // Scroll halus ke #main-content
+                const mainContent = document.getElementById('main-content');
+                if (mainContent) {
+                    mainContent.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+        });
+
+        function filterProduk(kategoriId, element, className, tipe = null) {
+            // Hanya lakukan pengecekan home dan scroll/redirect jika tipenya BUKAN null (misal: 'footer')
+            if (tipe !== null) {
+                const isHome = window.location.pathname === '/' || window.location.pathname === '/home';
+
+                // Jika belum di home, arahkan ke route home dengan parameter dan hash #main-content
+                if (!isHome) {
+                    window.location.href = "{{ route('home') }}?kategori=" + kategoriId + "#main-content";
+                    return;
+                }
+
+                // Jika sudah di home, lakukan scroll halus ke #main-content
+                const mainContent = document.getElementById('main-content');
+                if (mainContent) {
+                    mainContent.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+
+            const items = document.querySelectorAll(className);
+            const messageElement = document.getElementById('no-product-message');
+            
+            if (items.length === 0) {
+                console.warn(`Elemen dengan class ${className} tidak ditemukan.`);
+                return; 
+            }
+                
+            // 1. Logika Filter
+            let visibleCount = 0;
+
+            items.forEach(item => {
+                const catId = item.getAttribute('data-kategori');
+                if (kategoriId === null || catId == kategoriId) {
+                    item.style.display = 'block'; 
+                    visibleCount++; 
+                } else {
+                    item.style.display = 'none'; 
+                }
+            });
+
+            // 2. Logika Pesan Kosong
+            if (messageElement) {
+                if (visibleCount === 0) {
+                    messageElement.classList.remove('hidden'); 
+                } else {
+                    messageElement.classList.add('hidden'); 
+                }
+            }
+
+            // 3. Logika Penanda Aktif & Tanda Panah Dinamis
+            if (element) {
+                const allButtons = document.querySelectorAll('aside button');
+                
+                allButtons.forEach(btn => {
+                    btn.classList.remove('text-[#24420A]', 'font-bold');
+                    btn.classList.add('font-semibold');
+                    
+                    const arrow = btn.querySelector('.arrow-icon');
+                    if (arrow) arrow.textContent = '';
+                });
+
+                // Jika tipenya footer, jangan ubah style-nya menjadi bold/aktif
+                if (tipe !== 'footer') {
+                    element.classList.remove('font-semibold');
+                    element.classList.add('text-[#24420A]', 'font-bold');
+
+                    const activeArrow = element.querySelector('.arrow-icon');
+                    if (activeArrow) {
+                        activeArrow.textContent = '>';
+                    }
+                }
+            }
+        }
+
         function loadProduk(kategoriId) {
             const items = document.querySelectorAll('.product-item');
             
@@ -641,44 +790,6 @@
                     item.style.display = 'none';
                 }
             });
-        }
-        function filterProduk(kategoriId, element, className) {
-            const items = document.querySelectorAll(className);
-            const messageElement = document.getElementById('no-product-message');
-            
-            if (items.length === 0) {
-                console.warn(`Elemen dengan class ${className} tidak ditemukan.`);
-                return; 
-            }
-                    
-            // 1. Logika Filter
-            let visibleCount = 0; // Tambahkan variabel hitung
-
-            items.forEach(item => {
-                const catId = item.getAttribute('data-kategori');
-                if (kategoriId === null || catId == kategoriId) {
-                    item.style.display = 'block';
-                    visibleCount++; // Tambah jika produk terlihat
-                } else {
-                    item.style.display = 'none';
-                }
-            });
-
-            // 2. Logika Pesan Kosong
-            if (messageElement) {
-                if (visibleCount === 0) {
-                    messageElement.classList.remove('hidden'); // Tampilkan pesan
-                } else {
-                    messageElement.classList.add('hidden'); // Sembunyikan pesan
-                }
-            }
-
-            // 3. Logika Penanda Aktif
-            if (element) {
-                const allButtons = document.querySelectorAll('nav button, aside button');
-                allButtons.forEach(btn => btn.classList.remove('text-[#24420A]', 'font-bold'));
-                element.classList.add('text-[#24420A]', 'font-bold');
-            }
         }
 
         const stars = document.querySelectorAll('#starRating label');

@@ -7,6 +7,7 @@ use Illuminate\Console\Attributes\Signature;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use App\Models\ArticleCategory;
+use App\Models\ArticleGenerateKeyword;
 
 #[Signature('app:trigger-n8n-webhook')]
 #[Description('Command description')]
@@ -33,10 +34,23 @@ class TriggerN8nWebhook extends Command
             $targetCategoryId = $daftarKategori[$index % count($daftarKategori)];
 
             $namaCategory = ArticleCategory::find(2);
+            $generateConfig = ArticleGenerateKeyword::configurationForDate($waktuSekarang);
+
+            if (! $generateConfig) {
+                $this->warn('Generate artikel dilewati karena konfigurasi kata kunci belum tersedia.');
+
+                return self::SUCCESS;
+            }
 
             $response = Http::get('https://bmglbl3.n8n.bocindonesia.com/webhook-test/4ac54138-1d5d-4da0-9967-71758c4c510a', [
                 'category_id' => $namaCategory->name,
                 'jam' => $jam,
+                'keyword' => $generateConfig->keyword,
+                'article_prompt' => $generateConfig->article_prompt,
+                'image_prompt' => $generateConfig->image_prompt,
+                'keyword_source' => $generateConfig instanceof \App\Models\ArticleGenerateKeywordPlan
+                    ? 'planning'
+                    : 'regular',
                 'message' => 'Trigger jam ' . $jam . ':00 WIB untuk Kategori ID ' . $targetCategoryId
             ]);
 

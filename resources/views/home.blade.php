@@ -66,14 +66,18 @@
             {{-- Bungkus grid produk agar pesan tidak masuk ke dalam grid --}}
             <div id="product-grid-container">
                 <div id="product-grid-rekomendasi" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
-                    @foreach($katalog as $item)
+                    @foreach($rekomendasi as $item) 
                         <div class="product-item" data-kategori="{{ $item->id_kategori }}">
                             <div class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition relative">
                                 
                                 <div class="aspect-square w-full overflow-hidden bg-gray-100 relative">
-                                    <img src="{{ !empty($item->gambar) ? asset('storage/' . $item->gambar[0]) : asset('images/default.jpg') }}" 
+                                    <img 
+                                        src="{{ !empty($item->gambar) ? asset('storage/' . $item->gambar[0]) : asset('images/default.jpg') }}" 
                                         alt="{{ $item->nama_produk }}" 
-                                        class="w-full h-full object-cover">
+                                        loading="lazy"
+                                        decoding="async"
+                                        class="w-full h-full object-cover"
+                                    >
                                     
                                     @if(isset($item->status_produk) && $item->status_produk == false)
                                         <div class="absolute inset-0 bg-white/60 flex items-center justify-center backdrop-blur-[1px] z-20">
@@ -103,7 +107,7 @@
                                         <div class="flex items-center bg-orange-100 px-1.5 py-0.5 rounded text-orange-600 font-bold">
                                             ★ {{ number_format($item->averageRating, 1) }}
                                         </div>
-                                        <span>{{ $item->sold ?? 0 }} terjual</span>
+                                        <span>{{ $item->terjual ?? 0 }} terjual</span>
                                     </div>
                                 </div>
                             </div>
@@ -112,7 +116,7 @@
                 </div>
 
                 {{-- Pesan ditempatkan di luar grid agar tidak merusak layout --}}
-                <div id="no-product-message" class="hidden flex flex-col items-center justify-center py-20 text-center px-4">
+                {{-- <div id="no-product-message" class="hidden flex flex-col items-center justify-center py-20 text-center px-4">
                     <div class="bg-gray-100 p-6 rounded-full mb-6">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -120,10 +124,10 @@
                     </div>
                     <h3 class="text-xl font-bold text-gray-700 mb-2">Oops! Produk Tidak Ditemukan</h3>
                     <p class="text-gray-500 max-w-sm">Maaf, saat ini belum ada produk yang tersedia untuk kategori yang Anda pilih.</p>
-                    <button onclick="filterProduk(null, this, '.product-item')" class="mt-6 px-6 py-2 bg-[#24420A] text-white rounded-full hover:bg-[#3a5a1f] transition">
+                    <button onclick="filterProduk(null, this, '.product-item-all')" class="mt-6 px-6 py-2 bg-[#24420A] text-white rounded-full hover:bg-[#3a5a1f] transition">
                         Lihat Semua Produk
                     </button>
-                </div>
+                </div> --}}
             </div>
         </div>
 
@@ -157,7 +161,7 @@
         </div>
 
         <!-- DUA KOLOM UTAMA (Sidebar Kategori & Katalog Katalog Utama) -->
-        <div class="flex flex-col lg:flex-row gap-6 lg:gap-8">
+        <div class="flex flex-col lg:flex-row gap-6 lg:gap-8" id="main-content">
             
             <!-- ASIDE: Navigasi Kategori Kiri (Sembunyi di HP, Tampil Desktop) -->
             <aside class="w-full lg:w-1/5 shrink-0 hidden lg:block">
@@ -166,16 +170,19 @@
                         <span class="mr-2 text-[#24420A]">■</span> Kategori
                     </h3>
                     <ul class="text-xs space-y-2.5 font-medium text-gray-600">
+                        <!-- Tombol Semua Produk (Aktif by default) -->
                         <li>
                             <button onclick="filterProduk(null, this, '.product-item-all')" class="w-full text-left text-[#24420A] font-bold flex items-center hover:underline">
-                                <span class="mr-1">></span> Semua Produk
+                                <span class="arrow-icon mr-1">></span> Semua Produk
                             </button>
                         </li>
                         
-                        @foreach($kategoriList as $kategori)
+                        @foreach($categories as $kategori)
                             <li>
                                 <button onclick="filterProduk({{ $kategori->id }}, this, '.product-item-all')" 
-                                        class="w-full text-left pl-3 hover:text-[#24420A] cursor-pointer font-semibold transition hover:underline">
+                                        class="w-full text-left pl-3 hover:text-[#24420A] cursor-pointer font-semibold transition hover:underline flex items-center">
+                                    <!-- Tanda panah dinamis (awalnya kosong) -->
+                                    <span class="arrow-icon mr-1"></span> 
                                     {{ $kategori->nama_kategori }}
                                 </button>
                             </li>
@@ -205,13 +212,17 @@
                 <!-- MAIN PRODUCTS GRID -->
                 <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 md:gap-4">
                     @foreach($katalog as $item)
-                        <div class="product-item" data-kategori="{{ $item->id_kategori }}">
+                        <div class="product-item-all" data-kategori="{{ $item->id_kategori }}" data-created="{{ $item->created_at }}" data-terjual="{{ $item->terjual ?? 0 }}" data-rating="{{ $item->averageRating ?? 0 }}">
                             <div class="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm hover:shadow-md transition relative">
                                 
                                 <div class="aspect-square w-full overflow-hidden bg-gray-100 relative">
-                                    <img src="{{ !empty($item->gambar) ? asset('storage/' . $item->gambar[0]) : asset('images/default.jpg') }}" 
+                                    <img 
+                                        src="{{ !empty($item->gambar) ? asset('storage/' . $item->gambar[0]) : asset('images/default.jpg') }}" 
                                         alt="{{ $item->nama_produk }}" 
-                                        class="w-full h-full object-cover">
+                                        loading="lazy"
+                                        decoding="async"
+                                        class="w-full h-full object-cover"
+                                    >
                                     
                                     @if(isset($item->status_produk) && $item->status_produk == false)
                                         <div class="absolute inset-0 bg-white/60 flex items-center justify-center backdrop-blur-[1px] z-20">
@@ -241,7 +252,7 @@
                                         <div class="flex items-center bg-orange-100 px-1.5 py-0.5 rounded text-orange-600 font-bold">
                                             ★ {{ number_format($item->averageRating, 1) }}
                                         </div>
-                                        <span>{{ $item->sold ?? 0 }} terjual</span>
+                                        <span>{{ $item->terjual ?? 0 }} terjual</span>
                                     </div>
                                 </div>
                             </div>
@@ -265,23 +276,22 @@
         btn.classList.add('bg-[#24420A]', 'text-white');
         btn.classList.remove('bg-gray-200', 'text-gray-700');
 
-        // 2. Kirim Request ke Controller (Atau sort array lokal)
-        // Jika data tidak terlalu banyak, kita bisa sort lokal:
+        // 2. Ambil elemen grid dan ubah item menjadi array
         const grid = document.getElementById('product-grid');
         let items = Array.from(grid.getElementsByClassName('product-item-all'));
 
+        // 3. Lakukan pengurutan (Sorting)
         items.sort((a, b) => {
             if (type === 'terbaru') {
-                // Asumsi ada atribut data-created_at
                 return new Date(b.dataset.created) - new Date(a.dataset.created);
             } else if (type === 'terlaris') {
-                return b.dataset.terjual - a.dataset.terjual;
+                return parseFloat(b.dataset.terjual) - parseFloat(a.dataset.terjual);
             } else { // Populer (berdasarkan rating)
-                return b.dataset.rating - a.dataset.rating;
+                return parseFloat(b.dataset.rating) - parseFloat(a.dataset.rating);
             }
         });
 
-        // 3. Masukkan kembali ke grid
+        // 4. Masukkan kembali item yang sudah diurutkan ke dalam grid
         grid.innerHTML = '';
         items.forEach(item => grid.appendChild(item));
     }

@@ -35,12 +35,17 @@ class HomeController extends Controller
 
         // Gunakan withQueryString() agar parameter filter/sort terbawa ke halaman berikutnya
         $katalog = $query->paginate(20)->withQueryString();
-        $kategoriList = Kategori::all();
-        $banner_home = Banner::where('is_active', true)->where('tipe', 'home')->orderBy('urutan', 'asc')->get();
-        $banners = Banner::where('is_active', true)->where('tipe', 'keduanya')->orderBy('urutan', 'asc')->get();
-        $rekomendasi = Produk::latest()->take(6)->get();
+        $banner_home = Banner::where('is_active', true)
+            ->where('tipe', 'home')
+            ->get();
 
-        return view('home', compact('katalog', 'kategoriList', 'rekomendasi', 'banners', 'request', 'banner_home'));
+        $banners = Banner::where('is_active', true)
+            ->where('tipe', 'keduanya')
+            ->get();
+
+        $rekomendasi = Produk::latest()->take(5)->get();
+
+        return view('home', compact('katalog', 'rekomendasi', 'banners', 'request', 'banner_home'));
     }
 
     public function promo(){
@@ -67,7 +72,7 @@ class HomeController extends Controller
 
     public function search(Request $request)
     {
-        $keyword = $request->input('keyword');
+        $keyword = $request->input('query');
         $categoryId = $request->input('category');
 
         // Mulai query produk

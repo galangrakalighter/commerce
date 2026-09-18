@@ -42,9 +42,8 @@ class ProdukController extends Controller
         $request->validate([
             'id_kategori' => 'required|exists:kategori,id',
             'nama_produk' => 'required|string',
-            'harga'       => 'required|numeric',
             'spec_produk' => 'required|json',
-            'images.*'    => 'image|mimes:jpeg,png,jpg|max:2048'
+            'images.*'    => 'image|mimes:jpeg,png,jpg,webp,avif'
         ]);
 
         $data = $request->except('images');

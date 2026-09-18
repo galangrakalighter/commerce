@@ -2,19 +2,26 @@
 
 @section('content')
 <div class="max-w-7xl mx-auto px-4 py-8">
-    <div class="text-xs text-gray-500 mb-6">
-        Toko > Hobi > Tanaman > Hias > Asli > {{ $produk->nama_produk }}
+    <div class="text-xs text-gray-500 mb-6 flex items-center gap-1.5">
+        <a href="{{ route('home') }}" class="hover:underline">Toko</a>
+        <span>></span>
+        <!-- Mengarahkan ke halaman home dengan membawa parameter kategori dan fragment #main-content -->
+        <button onclick="filterProduk({{ $produk->kategori->id }}, this, '.product-item', 'footer')" 
+            class="text-left hover:text-[#24420A] cursor-pointer transition hover:underline flex items-center inline-flex">
+            <!-- Tanda panah dinamis (awalnya kosong) -->
+            <span class="arrow-icon mr-1"></span> 
+            {{ $produk->kategori->nama_kategori }}
+        </button>
+        <span>></span>
+        <span class="text-gray-800 font-medium">{{ $produk->nama_produk }}</span>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 items-start">
         <!-- Kolom Kiri: Gambar Produk & Aksi Pendukung -->
         <div class="space-y-4 w-full">
             @php $images = $produk->gambar; @endphp
-            <div class="w-full max-w-full md:max-w-[620px] h-[300px] sm:h-[400px] md:h-[528px] overflow-hidden rounded-2xl border border-gray-100 shadow-sm bg-gray-50 flex items-center justify-center">
-                <img id="mainImage" 
-                    src="{{ asset('storage/' . $images[0]) }}" 
-                    alt="{{ $produk->nama_produk }}" 
-                    class="w-full h-full object-contain transition-opacity duration-300">
+            <div class="w-full max-w-full m-auto md:max-w-[500px] h-[300px] sm:h-[400px] md:h-[500px] overflow-hidden rounded-2xl border border-gray-100 shadow-sm bg-gray-50 relative">
+                <img id="mainImage" src="{{ asset('storage/' . $images[0]) }}" alt="{{ $produk->nama_produk }}" class="absolute inset-0 w-full h-full object-cover m-auto transition-opacity duration-300">
             </div>
 
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mt-4 text-sm border-t sm:border-t-0 pt-4 sm:pt-0 border-gray-100">
@@ -119,25 +126,45 @@
             <!-- Variasi Produk -->
             <div class="mb-6">
                 <span class="text-sm font-medium mb-2 block text-gray-700">Variasi</span>
-                <div class="flex flex-wrap gap-2" id="variasiContainer">
-                    @foreach(['1KG', '2KG', '3KG', '5KG', 'BUNDLE'] as $v)
-                        <button type="button" 
-                                onclick="pilihVariasi(this)"
-                                class="px-4 sm:px-6 py-2 border rounded-md transition text-sm font-medium hover:border-[#24420A] focus:outline-none">
-                            {{ $v }}
-                        </button>
-                    @endforeach
+                <div class="space-y-3" id="variasiContainer">
+                    <!-- Tombol Pilihan Utama (1KG - 4KG/5KG) -->
+                    <div class="flex flex-wrap gap-2">
+                        @foreach(['1', '6', '20'] as $v)
+                            <button type="button" onclick="pilihVariasi(this, {{ $v }})" class="variasi-btn px-4 sm:px-6 py-2 border rounded-md transition text-sm font-medium hover:border-[#24420A] focus:outline-none flex flex-col items-center justify-center">
+                                <span class="font-semibold">{{ $v }}KG</span>
+                                @if($v == '6')
+                                    <span class="subteks text-[10px] text-gray-500 font-normal transition">Harga Grosir</span>
+                                @elseif($v == '20')
+                                    <span class="subteks text-[10px] text-gray-500 font-normal transition">Free Ongkir</span>
+                                @endif
+                            </button>
+                        @endforeach
+                    </div>
+
+                    <!-- Input Custom Kilo (Pengganti Bundle) -->
+                    <div class="flex items-center gap-2 pt-1">
+                        <div class="relative flex items-center max-w-[180px]">
+                            <input type="number" 
+                                id="customKiloInput" 
+                                min="1" 
+                                placeholder="Atur jumlah" 
+                                oninput="pilihCustomKilo(this)"
+                                class="w-full px-3 py-2 text-sm border rounded-md focus:outline-none focus:border-[#24420A] pr-12">
+                            <span class="absolute right-3 text-sm text-gray-500 font-medium">KG</span>
+                        </div>
+                        <span class="text-xs text-gray-500">Atau masukkan jumlah kilo sendiri</span>
+                    </div>
                 </div>
             </div>
 
             <!-- Kuantiti -->
             <div class="flex items-center gap-4 mb-6">
-                <span class="text-sm text-gray-600 font-medium">Kuantiti</span>
+                {{-- <span class="text-sm text-gray-600 font-medium">Kuantiti</span>
                 <div class="flex items-center border rounded-md overflow-hidden bg-white">
                     <button type="button" onclick="updateKuantiti(-1)" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 transition">-</button>
                     <input type="number" id="kuantitiInput" value="1" min="1" class="w-12 text-center text-sm outline-none border-x py-1">
                     <button type="button" onclick="updateKuantiti(1)" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 transition">+</button>
-                </div>
+                </div> --}}
             </div>
 
             <!-- Tombol Aksi (Keranjang & WhatsApp) -->
@@ -532,14 +559,46 @@
 
     let selectedVarian = null;
 
-    function pilihVariasi(btn) {
-        // Hapus class aktif dari semua tombol di container
-        const buttons = document.querySelectorAll('#variasiContainer button');
-        buttons.forEach(b => b.classList.remove('border-[#24420A]', 'bg-green-50', 'ring-1', 'ring-[#24420A]'));
+    function pilihVariasi(button, nilai) {
+        document.querySelectorAll('.variasi-btn').forEach(btn => {
+            // Hapus kelas aktif dari semua tombol
+            btn.classList.remove('border-[#24420A]', 'bg-[#24420A]', 'text-white');
+            
+            // Kembalikan subteks ke warna abu-abu
+            btn.querySelectorAll('.subteks').forEach(span => {
+                span.classList.remove('text-gray-200');
+                span.classList.add('text-gray-500');
+            });
+        });
+
+        selectedVarian = nilai;
         
-        // Tambahkan class aktif ke tombol yang diklik
-        btn.classList.add('border-[#24420A]', 'bg-green-50', 'ring-1', 'ring-[#24420A]');
-        selectedVarian = btn.innerText;
+        // Tambah kelas aktif ke tombol yang sedang diklik
+        button.classList.add('border-[#24420A]', 'bg-[#24420A]', 'text-white');
+        
+        // Ubah subteks pada tombol yang dipilih menjadi terang agar terbaca
+        button.querySelectorAll('.subteks').forEach(span => {
+            span.classList.remove('text-gray-500');
+            span.classList.add('text-gray-200');
+        });
+        
+        // Reset input custom jika ada
+        const customInput = document.getElementById('customKiloInput');
+        if (customInput) customInput.value = '';
+    }
+
+    function pilihCustomKilo(input) {
+        if (input.value && input.value > 0) {
+            selectedVarian = input.value;
+            
+            // Hapus aktif dari semua tombol varian karena user memakai custom
+            document.querySelectorAll('.variasi-btn').forEach(btn => {
+                btn.classList.remove('border-[#24420A]', 'bg-[#24420A]', 'text-white');
+            });
+        } else {
+            selectedVarian = null;
+        }
+        
     }
 
     function checkoutWhatsAppDetail() {
@@ -548,14 +607,21 @@
             return;
         }
 
-        let qty = document.getElementById('kuantitiInput').value;
+        console.log(selectedVarian)
+
+        if(selectedVarian < 4){
+            alert('Pesanan Minimal 4 KG');
+            return;
+        }
+
+        // let qty = document.getElementById('kuantitiInput').value;
         let namaProduk = "{{ $produk->nama_produk }}"; // Mengambil nama dari blade
         
         let pesan = `Halo admin! Saya ingin memesan produk berikut (Pesanan via Website):\n\n` +
-                    `- *${namaProduk}* (${selectedVarian} | Qty: ${qty})\n\n` +
+                    `- *${namaProduk}* (${selectedVarian}KG) \n\n` +
                     `Mohon dicek ketersediaannya ya. Terima kasih!`;
 
-        window.open(`https://wa.me/62895428171038?text=${encodeURIComponent(pesan)}`, '_blank');
+        window.open(`https://wa.me/6289612821257?text=${encodeURIComponent(pesan)}`, '_blank');
     }
 
     function updateKuantiti(change) {

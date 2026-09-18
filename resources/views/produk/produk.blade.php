@@ -9,7 +9,7 @@
                 <span class="text-2xl">📦</span>
                 <div>
                     <h1 class="text-md md:text-lg font-bold uppercase tracking-wide">Katalog Kelola Produk</h1>
-                    <p class="text-xs text-white/80 font-medium">Atur varian bumbu tabur dan bubuk minuman premium GAFI</p>
+                    <p class="text-xs text-white/80 font-medium">Atur varian bumbu tabur dan bubuk minuman premium GAFIKU</p>
                 </div>
             </div>
             
@@ -33,7 +33,7 @@
                     <thead>
                         <tr class="bg-gray-50 text-gray-500 font-bold uppercase tracking-wider border-b border-gray-200">
                             <th class="py-3.5 px-4 w-1/3">Produk & Kategori</th>
-                            <th class="py-3.5 px-4">Spesifikasi (JSON)</th>
+                            <th class="py-3.5 px-4">Spesifikasi</th>
                             <th class="py-3.5 px-4 text-center">Aksi</th>
                         </tr>
                     </thead>
@@ -95,6 +95,8 @@
                     <div>
                         <label class="block font-bold mb-1">Upload Gambar Produk (Bisa Multi File)</label>
                         <input type="file" name="images[]" multiple accept="image/*" class="w-full px-2 py-1.5 border rounded bg-white">
+                        <!-- Keterangan Tambahan -->
+                        <p class="text-[11px] text-gray-500 mt-1 italic">Disarankan ukuran gambar 500 x 500 px</p>
                     </div>
                     <div>
                         <label class="block font-bold mb-1">Status Produk</label>
@@ -104,7 +106,6 @@
                         </select>
                     </div>
                 </div>
-
 
                 <div>
                     <label class="block font-bold mb-1">Detail Deskripsi Produk *</label>
@@ -126,6 +127,7 @@
     let currentEditId = null;
 
     function showToast(message, type = 'success') {
+        console.log(message);
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
         toast.className = `pointer-events-auto px-4 py-3 rounded shadow-lg text-white font-semibold text-xs flex items-center space-x-2 ${type === 'success' ? 'bg-green-600' : 'bg-red-600'}`;
@@ -172,17 +174,16 @@
         specContainer.innerHTML = '';
 
         if (data) {
+            console.log(data);
             currentEditId = data.id;
             methodInput.value = "PUT";
-            document.getElementById('modal-title-text').innerText = "Ubah Detail Produk GAFI";
+            document.getElementById('modal-title-text').innerText = "Ubah Detail Produk GAFIKU";
             
             document.getElementById('input-nama_produk').value = data.nama_produk;
             document.getElementById('input-id_kategori').value = data.id_kategori;
-            document.getElementById('input-harga').value = data.harga;
             document.getElementById('input-tipe').value = data.tipe;
             document.getElementById('input-detail_produk').value = data.detail_produk;
-            document.getElementById('input-status_produk').value = data.detail_produk;
-
+            document.getElementById('input-status_produk').value = data.status_produk ? 'ada' : 'habis';
             if (data.spec_produk) {
                 Object.entries(data.spec_produk).forEach(([k, v]) => addSpecRow(k, v));
             }
@@ -219,6 +220,8 @@
 
         // Sisipkan data spesifikasi sebagai string JSON ter-enkapsulasi
         formData.append('spec_produk', getSpecsAsJson());
+
+        console.log(url);
 
         fetch(url, {
             method: 'POST', // Menggunakan POST + _method spoofing untuk multipart form aman

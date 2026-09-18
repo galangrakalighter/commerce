@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Article;
 use App\Models\Banner;
 use App\Models\ArticleCategory;
+use App\Models\ArticleGenerateKeyword;
+use App\Models\ArticleGenerateKeywordPlan;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 class ArticleController extends Controller
@@ -28,6 +30,10 @@ class ArticleController extends Controller
 
         $articles = $query->latest()->get();
         $categories = ArticleCategory::all();
+        $generateKeyword = ArticleGenerateKeyword::query()->first();
+        $generateKeywordPlans = ArticleGenerateKeywordPlan::query()
+            ->orderBy('planned_date')
+            ->get();
 
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
@@ -35,33 +41,71 @@ class ArticleController extends Controller
             ]);
         }
 
-        return view('articles.articles', compact('articles', 'categories'));
+        return view('articles.articles', compact(
+            'articles',
+            'categories',
+            'generateKeyword',
+            'generateKeywordPlans'
+        ));
     }
 
-    public function indexArtikel(){
+    public function indexArtikel(Request $request)
+    {
+        $selectedCategory = $request->integer('category') ?: null;
+
         $featured = Article::with('category')
-                ->where('status', 'published')
-                ->latest()
-                ->first();
+            ->where('status', 'published')
+            ->latest()
+            ->first();
 
         $articles = Article::with('category')
-                    ->where('status', 'published')
-                    ->latest()
-                    ->skip(1)
-                    ->take(5)
-                    ->get();
+            ->where('status', 'published')
+            ->when($selectedCategory, function ($query) use ($selectedCategory) {
+                $query->where('category_id', $selectedCategory);
+            })
+            ->when($featured, function ($query) use ($featured) {
+                $query->where('id', '!=', $featured->id);
+            })
+            ->latest()
+            ->paginate(5)
+            ->withQueryString();
 
-        $categories = ArticleCategory::withCount('articles')->get();
+        // AJAX hanya mengembalikan daftar artikel.
+        if ($request->ajax()) {
+            return view('articles.partials.article-list', compact('articles'));
+        }
+
+        $categories = ArticleCategory::withCount([
+            'articles' => function ($query) {
+                $query->where('status', 'published');
+            }
+        ])->get();
 
         $popular = Article::with('category')
-                    ->where('status', 'published')
-                    ->limit(3)
-                    ->get();
+            ->where('status', 'published')
+            ->latest()
+            ->take(3)
+            ->get();
 
-        $banner_artikel = Banner::where('is_active', true)->where('tipe', 'artikel')->orderBy('urutan', 'asc')->get();
-        $banners = Banner::where('is_active', true)->where('tipe', 'keduanya')->orderBy('urutan', 'asc')->get();
+        $banner_artikel = Banner::where('is_active', true)
+            ->where('tipe', 'artikel')
+            ->orderBy('urutan')
+            ->get();
 
-        return view('articles.list', compact('featured', 'articles', 'categories', 'popular', 'banners', 'banner_artikel'));
+        $banners = Banner::where('is_active', true)
+            ->where('tipe', 'keduanya')
+            ->orderBy('urutan')
+            ->get();
+
+        return view('articles.list', compact(
+            'featured',
+            'articles',
+            'categories',
+            'popular',
+            'banners',
+            'banner_artikel',
+            'selectedCategory'
+        ));
     }
 
     /**
@@ -79,10 +123,10 @@ class ArticleController extends Controller
     {
         try {
             $validated = $request->validate([
-                'title' => 'required|max:255',
-                'category_id' => 'required|exists:articles_categories,id',
+                'title' => 'nullable|max:255',
+                'category_id' => 'nullable|exists:articles_categories,id',
                 'content' => 'required',
-                'status' => 'required|in:draft,published',
+                'status' => 'nullable|in:draft,published',
                 'image' => 'nullable|image'
             ]);
 
@@ -117,6 +161,29 @@ class ArticleController extends Controller
 
         // 3. Kembalikan respons JSON
         return response()->json(['message' => 'Kategori berhasil ditambahkan!'], 200);
+    }
+
+    public function editCategory(Request $request, $id){
+       $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        // 2. Simpan data
+        ArticleCategory::where('id', $id)->update([
+            'name' => $request->name,
+            'slug' => Str::slug($request->name),
+        ]);
+
+        // 3. Kembalikan respons JSON
+        return response()->json(['message' => 'Kategori berhasil diperbaharui!'], 200);
+    }
+
+    public function deleteCategory($id){
+        $data = ArticleCategory::find($id);
+        $data->delete();
+
+        // 3. Kembalikan respons JSON
+        return response()->json(['message' => 'Kategori berhasil Dihapus!'], 200);
     }
 
     public function detailArtikel($slug){
@@ -216,13 +283,14 @@ class ArticleController extends Controller
         }
         
         $article->delete();
-        return redirect()->back();
+        return response()->json(['message' => 'Artikel berhasil Dihapus!']);
     }
 
-    public function fetch()
-    {
-        $articles = \App\Models\Article::latest()->get();
-        // Mengembalikan view khusus baris tabel
-        return view('articles.table_rows', compact('articles'))->render();
-    }
+    // public function fetch()
+    // {
+    //     $articles = \App\Models\Article::latest()->get();
+    //     // dd($articles);
+    //     // Mengembalikan view khusus baris tabel
+    //     return view('articles.table_rows', compact('articles'))->render();
+    // }
 }

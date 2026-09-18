@@ -8,7 +8,7 @@ class Produk extends Model
 {
     protected $table = "produk";
 
-    protected $fillable = ['id_kategori', 'nama_produk', 'tipe', 'harga', 'gambar', 'spec_produk', 'detail_produk', 'status_produk'];
+    protected $fillable = ['id_kategori', 'nama_produk', 'tipe', 'gambar', 'spec_produk', 'detail_produk', 'status_produk'];
 
     // Casting JSON ke Array otomatis
     protected $casts = [
