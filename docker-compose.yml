@@ -16,8 +16,10 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-commerce_lfd}
       POSTGRES_USER: ${POSTGRES_USER:-commerce}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD harus diisi di file .env}
-      POSTGRES_HOST: ${POSTGRES_HOST:?POSTGRES_HOST harus diisi dengan nama container PostgreSQL}
+      POSTGRES_HOST: ${POSTGRES_HOST:?POSTGRES_HOST Supabase harus diisi di file .env}
       POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      POSTGRES_SSLMODE: ${POSTGRES_SSLMODE:-require}
+      POSTGRES_CONN_MAX_AGE: ${POSTGRES_CONN_MAX_AGE:-60}
     command: >
       sh -c "python manage.py migrate --noinput &&
              python manage.py collectstatic --noinput &&
@@ -28,13 +30,5 @@ services:
     volumes:
       - ./media:/app/media
       - static_data:/app/staticfiles
-    networks:
-      - database_network
-
 volumes:
   static_data:
-
-networks:
-  database_network:
-    external: true
-    name: ${DOCKER_NETWORK:?DOCKER_NETWORK harus diisi dengan network PostgreSQL}
