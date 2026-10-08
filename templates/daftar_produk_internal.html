@@ -124,7 +124,7 @@
                     {% empty %}
                     <tr>
                         <td colspan="8" class="p-16 text-center text-stone-400 italic">
-                            Belum ada produk terdaftar di database LauraDerma.<br>
+                            Belum ada produk terdaftar di database La-Flyderm.<br>
                             <span class="text-[11px] not-italic text-stone-400 block mt-1">Silakan klik tombol di kanan atas untuk memasok produk perdana Anda.</span>
                         </td>
                     </tr>
@@ -141,7 +141,7 @@
         
         <div class="mb-6">
             <h2 class="serif-font text-2xl text-[#8C7454] tracking-wide">Form Pasok Produk Baru</h2>
-            <p class="text-xs text-stone-500 mt-1">Isi rincian data spesifikasi produk kecantikan LauraDerma</p>
+            <p class="text-xs text-stone-500 mt-1">Isi rincian data spesifikasi produk kecantikan La-Flyderm</p>
         </div>
         
         <form action="{% url 'tambah_produk' %}" method="POST" enctype="multipart/form-data" class="space-y-4">
@@ -252,7 +252,7 @@
         
         <div class="mb-6">
             <h2 class="serif-font text-2xl text-[#8C7454] tracking-wide">Form Perbarui Data Produk</h2>
-            <p class="text-xs text-stone-500 mt-1">Ubah rincian spesifikasi data kosmetik LauraDerma terpilih</p>
+            <p class="text-xs text-stone-500 mt-1">Ubah rincian spesifikasi data kosmetik La-Flyderm terpilih</p>
         </div>
         
         <form id="editForm" action="" method="POST" enctype="multipart/form-data" class="space-y-4">
@@ -430,7 +430,7 @@
                 if (duration > 15) {
                     errorMsg.classList.remove('hidden');
                     input.value = ''; // Mengosongkan kembali input file yang tidak valid
-                    alert('Gagal memilih video! Durasi video Anda adalah ' + duration.toFixed(1) + ' detik. LauraDerma hanya mengizinkan video promosi produk maksimal sepanjang 15 detik.');
+                    alert('Gagal memilih video! Durasi video Anda adalah ' + duration.toFixed(1) + ' detik. La-Flyderm hanya mengizinkan video promosi produk maksimal sepanjang 15 detik.');
                 } else {
                     errorMsg.classList.add('hidden');
                 }
