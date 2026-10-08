@@ -379,10 +379,10 @@
                     window.URL.revokeObjectURL(tempVideo.src);
                     const duration = tempVideo.duration;
 
-                    if (duration > 10) {
+                    if (duration > 15) {
                         errorMsg.classList.remove('hidden');
                         resetVideoInput(); // Reset view dan inputan karena tidak valid
-                        alert('Gagal memuat video! Durasi video Anda adalah ' + duration.toFixed(1) + ' detik. LauraDerma hanya mengizinkan durasi video produk maksimal sepanjang 10 detik.');
+                        alert('Gagal memuat video! Durasi video Anda adalah ' + duration.toFixed(1) + ' detik. LauraDerma hanya mengizinkan durasi video produk maksimal sepanjang 15 detik.');
                     } else {
                         // Validasi lolos, tampilkan element preview video ke user
                         errorMsg.classList.add('hidden');
