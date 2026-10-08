@@ -236,6 +236,12 @@
         function changeImage(url, element) {
             const mainImage = document.getElementById('main-image');
             const mainVideo = document.getElementById('main-video');
+            const mediaContainer = document.getElementById('product-media-container');
+
+            if (mediaContainer) {
+                mediaContainer.classList.remove('aspect-[9/16]', 'max-w-sm');
+                mediaContainer.classList.add('aspect-square', 'max-w-full');
+            }
 
             // 1. Ganti source gambar utama dan munculkan gambarnya
             if (mainImage) {
@@ -302,6 +308,12 @@
         function showVideo(element) {
             const mainImage = document.getElementById('main-image');
             const mainVideo = document.getElementById('main-video');
+            const mediaContainer = document.getElementById('product-media-container');
+
+            if (mediaContainer) {
+                mediaContainer.classList.remove('aspect-square', 'max-w-full');
+                mediaContainer.classList.add('aspect-[9/16]', 'max-w-sm');
+            }
 
             // 1. Munculkan video dan putar kembali
             if (mainVideo) {

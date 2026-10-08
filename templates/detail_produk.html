@@ -12,7 +12,7 @@
         <div class="flex flex-col lg:flex-row gap-12">
             <div class="lg:w-1/2">
                 <div class="sticky top-24">
-                    <div class="aspect-square rounded-3xl overflow-hidden bg-[#F4F1EA] mb-4 border border-stone-100 flex items-center justify-center relative">
+                    <div id="product-media-container" class="{% if produk.video_produk %}aspect-[9/16] max-w-sm{% else %}aspect-square max-w-full{% endif %} w-full mx-auto rounded-3xl overflow-hidden bg-[#F4F1EA] mb-4 border border-stone-100 flex items-center justify-center relative">
                         
                         {% if produk.video_produk %}
                             <video id="main-video" src="{{ produk.video_produk.url }}" autoplay loop muted playsinline controls 
