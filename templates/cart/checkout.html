@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load currency %}
 {% block content %}
 <div class="bg-[#FAF8F5] min-h-screen py-12"><div class="container mx-auto px-4 max-w-3xl"><div class="bg-white p-6 md:p-8 rounded-3xl border border-stone-100 shadow-sm">
 <h2 class="text-2xl font-serif text-stone-900 mb-2">Informasi Pengiriman</h2>
@@ -6,7 +7,7 @@
 {% if error_api %}<div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-xs font-medium mb-4">{{ error_api }}</div>{% endif %}
 {% if not google_maps_api_key %}<div class="bg-amber-50 border border-amber-200 text-amber-800 px-4 py-3 rounded-xl text-xs font-medium mb-4">Pencarian alamat belum aktif. Isi GOOGLE_MAPS_API_KEY pada file .env server.</div>{% endif %}
 <form method="POST" class="space-y-5" id="checkout-form">{% csrf_token %}
-<div class="rounded-2xl border border-stone-200 divide-y divide-stone-100">{% for item in checkout_items %}<div class="flex justify-between gap-4 p-3 text-xs"><div><strong class="block text-stone-800">{{ item.nama }} × {{ item.jumlah }}</strong><span class="text-stone-400">{{ item.berat_gram }} g/item · {{ item.panjang_cm }}×{{ item.lebar_cm }}×{{ item.tinggi_cm }} cm</span></div><strong class="text-[#8C7454]">Rp {{ item.subtotal }}</strong></div>{% endfor %}</div>
+<div class="rounded-2xl border border-stone-200 divide-y divide-stone-100">{% for item in checkout_items %}<div class="flex justify-between gap-4 p-3 text-xs"><div><strong class="block text-stone-800">{{ item.nama }} × {{ item.jumlah }}</strong><span class="text-stone-400">{{ item.berat_gram }} g/item · {{ item.panjang_cm }}×{{ item.lebar_cm }}×{{ item.tinggi_cm }} cm</span></div><strong class="text-[#8C7454]">{{ item.subtotal|rupiah }}</strong></div>{% endfor %}</div>
 <div class="grid md:grid-cols-2 gap-4">
 <div><label class="block text-xs font-medium text-stone-700 mb-1">Nama Penerima</label><input type="text" name="nama_penerima" value="{{ form_data.nama_penerima|default:'' }}" required autocomplete="name" class="field"></div>
 <div><label class="block text-xs font-medium text-stone-700 mb-1">Nomor Telepon/WhatsApp</label><input type="tel" name="telepon" value="{{ form_data.telepon|default:'' }}" required autocomplete="tel" class="field"></div>

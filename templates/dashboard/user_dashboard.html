@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load currency %}
 
 {% block content %}
 <div class="bg-[#FAF8F5] min-h-screen py-12">
@@ -133,7 +134,7 @@
 
                                 <div class="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 pt-3 sm:pt-0 border-t sm:border-t-0 border-stone-100">
                                     <div class="text-sm font-semibold text-[#8C7454]">
-                                        Rp {{ pesanan.total_harga }}
+                                        {{ pesanan.total_harga|rupiah }}
                                     </div>
                                     
                                     <div class="flex gap-2">
@@ -193,10 +194,10 @@
                                             <div class="py-2.5 flex items-center justify-between text-sm {% if forloop.first %}pt-0{% endif %}">
                                                 <div>
                                                     <span class="font-serif text-stone-800 block font-medium">{{ item.produk.nama|default:"Produk Dihapus" }}</span>
-                                                    <span class="text-xs text-stone-400 font-mono">{{ item.jumlah }}x Rp {{ item.harga_saat_beli }}</span>
+                                                    <span class="text-xs text-stone-400 font-mono">{{ item.jumlah }}x {{ item.harga_saat_beli|rupiah }}</span>
                                                     {% if item.produk %}<span class="block text-[10px] text-stone-400">{{ item.produk.berat_gram }} g/item · {{ item.produk.panjang_cm }}×{{ item.produk.lebar_cm }}×{{ item.produk.tinggi_cm }} cm</span>{% endif %}
                                                 </div>
-                                                <span class="font-mono font-semibold text-stone-800">Rp {{ item.subtotal }}</span>
+                                                <span class="font-mono font-semibold text-stone-800">{{ item.subtotal|rupiah }}</span>
                                             </div>
                                             {% endfor %}
                                         </div>
@@ -209,11 +210,11 @@
                                             <span class="italic">"{{ pesanan.catatan }}"</span>
                                         </div>
                                         {% endif %}
-                                        <div class="flex justify-between text-xs text-stone-500"><span>Subtotal produk</span><span>Rp {{ pesanan.subtotal_harga }}</span></div>
-                                        <div class="flex justify-between text-xs text-stone-500"><span>Ongkir JNE {{ pesanan.kurir_layanan|upper }}</span><span>Rp {{ pesanan.biaya_ongkir }}</span></div>
+                                        <div class="flex justify-between text-xs text-stone-500"><span>Subtotal produk</span><span>{{ pesanan.subtotal_harga|rupiah }}</span></div>
+                                        <div class="flex justify-between text-xs text-stone-500"><span>Ongkir JNE {{ pesanan.kurir_layanan|upper }}</span><span>{{ pesanan.biaya_ongkir|rupiah }}</span></div>
                                         <div class="flex justify-between items-center pt-2 mb-4 border-t border-stone-100">
                                             <span class="text-sm font-serif font-medium text-stone-900">Total Pembayaran</span>
-                                            <span class="text-base font-bold text-[#8C7454] font-mono">Rp {{ pesanan.total_harga }}</span>
+                                            <span class="text-base font-bold text-[#8C7454] font-mono">{{ pesanan.total_harga|rupiah }}</span>
                                         </div>
 
                                         {% if pesanan.status != 'SELESAI' and pesanan.status != 'BATAL' and pesanan.status != 'PROSES' and pesanan.status != 'KIRIM' %}

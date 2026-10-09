@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load currency %}
 {% load static %}
 
 {% block content %}
@@ -52,7 +53,7 @@
                                 </a>
                             </h3>
                             <div class="flex justify-between items-center">
-                                <p class="text-[#8C7454] font-bold text-sm">Rp {{ item.produk.harga }}</p>
+                                <p class="text-[#8C7454] font-bold text-sm">{{ item.produk.harga|rupiah }}</p>
                                 
                                 <a href="{% url 'detail_produk' item.produk.id %}" class="text-[11px] font-bold text-stone-600 hover:text-[#8C7454] uppercase tracking-tight after:absolute after:inset-0 after:z-10">
                                     Lihat Detail

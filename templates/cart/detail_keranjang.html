@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load currency %}
 
 {% block content %}
 <div class="bg-[#FAF8F5] min-h-screen py-12">
@@ -31,7 +32,7 @@
                                 
                                 <div class="flex-1">
                                     <h3 class="font-medium text-stone-900 text-sm">{{ item.produk.nama }}</h3>
-                                    <p class="text-xs text-stone-400 mt-0.5">Rp {{ item.produk.harga }}</p>
+                                    <p class="text-xs text-stone-400 mt-0.5">{{ item.produk.harga|rupiah }}</p>
                                     <p class="text-[10px] text-stone-400 mt-1">{{ item.produk.berat_gram }} g/item · {{ item.produk.panjang_cm }}×{{ item.produk.lebar_cm }}×{{ item.produk.tinggi_cm }} cm</p>
                                     
                                     <div class="flex items-center mt-3 bg-[#FAF8F5] border border-[#EAE3D2] rounded-xl p-0.5 w-max">
@@ -44,7 +45,7 @@
                             
                             <div class="flex items-center gap-6">
                                 <div class="text-right">
-                                    <p class="font-bold text-[#8C7454]">Rp {{ item.subtotal }}</p>
+                                    <p class="font-bold text-[#8C7454]">{{ item.subtotal|rupiah }}</p>
                                 </div>
                                 
                                 <a href="{% url 'hapus_dari_keranjang' item.produk.id %}" class="text-stone-300 hover:text-red-500 transition-colors p-2 rounded-xl hover:bg-red-50" title="Hapus dari keranjang">
@@ -62,7 +63,7 @@
                         <h2 class="text-lg font-serif text-stone-900 mb-4">Ringkasan Order</h2>
                         <div class="flex justify-between border-b border-stone-100 pb-4 mb-4 text-sm text-stone-600">
                             <span>Total Harga</span>
-                            <span class="font-bold text-stone-900" id="total-belanja-display">Rp {{ total_belanja }}</span>
+                            <span class="font-bold text-stone-900" id="total-belanja-display">{{ total_belanja|rupiah }}</span>
                         </div>
                         
                         <button type="submit" id="btn-submit-checkout" class="block text-center w-full bg-[#8C7454] text-white py-4 rounded-full text-sm font-medium hover:bg-[#735F43] transition-colors shadow-md disabled:bg-stone-300 disabled:cursor-not-allowed">

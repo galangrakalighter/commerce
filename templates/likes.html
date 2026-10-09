@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load currency %}
 
 {% block content %}
 <section class="py-12 bg-[#FAF8F5] min-h-screen">
@@ -33,7 +34,7 @@
                         <div class="p-4">
                             <span class="text-[10px] uppercase tracking-widest text-stone-400 font-semibold">{{ item.produk.kategori.nama }}</span>
                             <h3 class="text-sm font-medium text-stone-800 mt-1 mb-2">{{ item.produk.nama }}</h3>
-                            <p class="text-[#8C7454] font-bold text-sm">Rp {{ item.produk.harga }}</p>
+                            <p class="text-[#8C7454] font-bold text-sm">{{ item.produk.harga|rupiah }}</p>
                         </div>
                     </div>
                     {% endfor %}
