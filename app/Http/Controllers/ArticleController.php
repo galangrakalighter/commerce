@@ -9,6 +9,8 @@ use App\Models\ArticleCategory;
 use App\Models\ArticleGenerateKeyword;
 use App\Models\ArticleGenerateKeywordPlan;
 use Illuminate\Support\Str;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 class ArticleController extends Controller
 {
@@ -135,7 +137,7 @@ class ArticleController extends Controller
             $data['excerpt'] = \Illuminate\Support\Str::limit(strip_tags($request->content), 150);
 
             if ($request->hasFile('image')) {
-                $data['image'] = $request->file('image')->store('articles', 'public');
+                $data['image'] = $this->storeArticleImage($request->file('image'));
             }
 
             Article::create($data);
@@ -198,11 +200,12 @@ class ArticleController extends Controller
 
     public function uploadImage(Request $request)
     {
+        $request->validate([
+            'upload' => ['required', 'image', 'max:10240'],
+        ]);
+
         if ($request->hasFile('upload')) {
-            $file = $request->file('upload');
-            
-            // Simpan file
-            $path = $file->store('articles', 'public');
+            $path = $this->storeArticleImage($request->file('upload'));
             
             // FORMAT JSON INI WAJIB SESUAI DOKUMENTASI CKEDITOR
             return response()->json([
@@ -255,10 +258,13 @@ class ArticleController extends Controller
 
             // Jika ada gambar baru, hapus gambar lama dan simpan yang baru
             if ($request->hasFile('image')) {
+                $newImagePath = $this->storeArticleImage($request->file('image'));
+
                 if ($article->image) {
-                    \Illuminate\Support\Facades\Storage::disk('public')->delete($article->image);
+                    $this->deleteArticleImage($article->image);
                 }
-                $data['image'] = $request->file('image')->store('articles', 'public');
+
+                $data['image'] = $newImagePath;
             }
 
             $article->update($data);
@@ -279,18 +285,62 @@ class ArticleController extends Controller
         $article = Article::findOrFail($id);
         
         if ($article->image) {
-            Storage::disk('public')->delete($article->image);
+            $this->deleteArticleImage($article->image);
         }
         
         $article->delete();
         return response()->json(['message' => 'Artikel berhasil Dihapus!']);
     }
 
-    // public function fetch()
-    // {
-    //     $articles = \App\Models\Article::latest()->get();
-    //     // dd($articles);
-    //     // Mengembalikan view khusus baris tabel
-    //     return view('articles.table_rows', compact('articles'))->render();
-    // }
+    /**
+     * Simpan gambar langsung ke public/storage/articles agar tetap berfungsi
+     * pada shared hosting yang tidak menyediakan symbolic link storage.
+     */
+    private function storeArticleImage(UploadedFile $file): string
+    {
+        $directory = $this->publicStoragePath('articles');
+        File::ensureDirectoryExists($directory, 0755, true);
+
+        $extension = strtolower($file->extension() ?: $file->getClientOriginalExtension());
+        $filename = Str::uuid() . ($extension ? ".{$extension}" : '');
+        $file->move($directory, $filename);
+
+        return 'articles/' . $filename;
+    }
+
+    private function deleteArticleImage(string $path): void
+    {
+        $normalizedPath = ltrim(str_replace('\\', '/', $path), '/');
+
+        if (str_starts_with($normalizedPath, 'articles/')) {
+            File::delete($this->publicStoragePath($normalizedPath));
+        }
+
+        // Tetap hapus file lama yang dahulu disimpan melalui disk public.
+        Storage::disk('public')->delete($normalizedPath);
+    }
+
+    private function publicStoragePath(string $path = ''): string
+    {
+        $documentRoot = request()->server('DOCUMENT_ROOT');
+        $publicRoot = is_string($documentRoot) && $documentRoot !== ''
+            ? rtrim($documentRoot, '/\\')
+            : public_path();
+
+        return $publicRoot . DIRECTORY_SEPARATOR . 'storage'
+            . ($path !== '' ? DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path) : '');
+    }
+
+    public function fetch(Request $request)
+    {
+        $articles = Article::with('category')
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = strtolower($request->string('search')->toString());
+                $query->whereRaw('LOWER(title) LIKE ?', ["%{$search}%"]);
+            })
+            ->latest()
+            ->get();
+
+        return view('articles.table_rows', compact('articles'))->render();
+    }
 }
